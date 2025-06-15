@@ -17,6 +17,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .board_widget import BoardWidget
+
 from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
 from src.utils.helpers import log_evento, set_log_callback
@@ -32,12 +34,18 @@ class PlayerTab(QWidget):
 
         self.info_label = QLabel()
 
+        self.board = BoardWidget(jugador.tablero)
+
+
         self.tienda_layout = QVBoxLayout()
         self.reroll_btn = QPushButton("Reroll")
         self.reroll_btn.clicked.connect(self.hacer_reroll)
 
         v = QVBoxLayout(self)
         v.addWidget(self.info_label)
+
+        v.addWidget(self.board)
+
         v.addLayout(self.tienda_layout)
         v.addWidget(self.reroll_btn)
 
@@ -48,6 +56,9 @@ class PlayerTab(QWidget):
         self.info_label.setText(
             f"Vida: {self.jugador.vida}  Oro: {self.jugador.oro}  Nivel: {self.jugador.nivel}"
         )
+
+        self.board.actualizar()
+
 
         # Actualizar tienda si estamos en fase de preparación
         if self.motor.fase_actual == "preparacion":
