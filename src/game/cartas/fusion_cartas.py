@@ -27,8 +27,8 @@ def aplicar_fusiones(tablero, banco: list) -> list[str]:
                 cartas_por_nombre[carta.nombre].append(("banco", idx, carta))
 
         for nombre, grupo in cartas_por_nombre.items():
-            if len(group) >= 3:
-                fuentes, ubicaciones, cartas = zip(*group[:3])
+            if len(grupo) >= 3:
+                fuentes, ubicaciones, cartas = zip(*grupo[:3])
                 carta_fusionada = cartas[0]
                 carta_fusionada.tier += 1
                 carta_fusionada.vida_maxima += 50
