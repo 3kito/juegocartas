@@ -28,6 +28,7 @@ class AutoBattlerGUI:
         self.coordenada_origen = None
         self._ultima_fase_mapa = None
         self._ultimo_estado_mapa = None
+        self._panel_coords = []
 
         self.crear_interfaz_principal()
 
@@ -216,9 +217,28 @@ class AutoBattlerGUI:
 
         from src.interfas.interfaz_mapa_global import InterfazMapaGlobal
 
-        self.mapa_global = MapaGlobal()
-        self.interfaz_mapa = InterfazMapaGlobal(frame, self.mapa_global)
-        self.interfaz_mapa.pack(fill="both", expand=True)
+        self.mapa_global = None
+        self.interfaz_mapa = InterfazMapaGlobal(frame, None)
+        self.interfaz_mapa.pack(side="left", fill="both", expand=True)
+
+        panel = ttk.Frame(frame)
+        panel.pack(side="right", fill="y", padx=5)
+        ttk.Label(panel, text="Cartas del Jugador Actual:").pack(anchor="w")
+        self.listbox_enfrentamiento = tk.Listbox(panel, height=15)
+        self.listbox_enfrentamiento.pack(fill="both", expand=True, pady=2)
+        btns = ttk.Frame(panel)
+        btns.pack(fill="x", pady=2)
+        ttk.Button(btns, text="Centrar en Carta", command=self.centrar_en_carta).pack(fill="x")
+        self.frame_mover_test = ttk.LabelFrame(panel, text="Mover (Test)")
+        self.frame_mover_test.pack(fill="x", pady=5)
+        self.frame_mover_test.pack_forget()
+        ttk.Label(self.frame_mover_test, text="Q:").grid(row=0, column=0)
+        self.entry_q = ttk.Entry(self.frame_mover_test, width=4)
+        self.entry_q.grid(row=0, column=1)
+        ttk.Label(self.frame_mover_test, text="R:").grid(row=0, column=2)
+        self.entry_r = ttk.Entry(self.frame_mover_test, width=4)
+        self.entry_r.grid(row=0, column=3)
+        ttk.Button(self.frame_mover_test, text="Mover Aquí", command=self.mover_carta_test).grid(row=1, column=0, columnspan=4, pady=2)
 
         info_frame = ttk.LabelFrame(frame, text="Estado Combate")
         info_frame.pack(fill="x")
@@ -300,24 +320,29 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.actualizar_tablero()
 
         if hasattr(self, "interfaz_mapa"):
-            if self.motor.fase_actual != "preparacion":
-                estado_actual = tuple(
-                    (c.q, c.r, id(card) if card else None)
-                    for c, card in sorted(
-                        self.mapa_global.tablero.celdas.items(),
-                        key=lambda i: (i[0].q, i[0].r),
-                    )
-                )
+            if hasattr(self.motor, "mapa_global") and self.motor.mapa_global:
+                if self.interfaz_mapa.mapa is not self.motor.mapa_global:
+                    self.interfaz_mapa.set_mapa(self.motor.mapa_global)
+                    self.mapa_global = self.motor.mapa_global
 
-                if (
-                    estado_actual != self._ultimo_estado_mapa
-                    or self.motor.fase_actual != self._ultima_fase_mapa
-                ):
-                    self.interfaz_mapa.actualizar()
-                    self._ultimo_estado_mapa = estado_actual
+                if self.motor.fase_actual != "preparacion":
+                    estado_actual = tuple(
+                        (c.q, c.r, id(card) if card else None)
+                        for c, card in sorted(
+                            self.mapa_global.tablero.celdas.items(),
+                            key=lambda i: (i[0].q, i[0].r),
+                        )
+                    )
+
+                    if (
+                        estado_actual != self._ultimo_estado_mapa
+                        or self.motor.fase_actual != self._ultima_fase_mapa
+                    ):
+                        self.interfaz_mapa.actualizar()
+                        self._ultimo_estado_mapa = estado_actual
+                        self._ultima_fase_mapa = self.motor.fase_actual
+                else:
                     self._ultima_fase_mapa = self.motor.fase_actual
-            else:
-                self._ultima_fase_mapa = self.motor.fase_actual
 
         if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
             turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
@@ -329,7 +354,9 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
         if self.motor.modo_testeo:
             self.actualizar_controles_testeo()
-
+            if self.frame_mover_test.winfo_ismapped() == 0:
+                self.frame_mover_test.pack(fill="x", pady=5)
+        
         # Habilitar/deshabilitar controles según fase
         if self.motor.fase_actual == "preparacion":
             for i in range(1, 4):
@@ -339,6 +366,10 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             for i in range(1, 4):
                 self.notebook.tab(i, state="disabled")
             self.canvas_tablero.unbind("<Button-1>")
+        if not self.motor.modo_testeo and self.frame_mover_test.winfo_ismapped() == 1:
+            self.frame_mover_test.pack_forget()
+
+        self.actualizar_panel_enfrentamiento()
 
     def actualizar_banco(self):
         self.listbox_banco.delete(0, tk.END)
@@ -394,6 +425,20 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         cartas_tablero = [par for par in self.jugador_actual.obtener_cartas_tablero() if par[1] is not None]
         for coord, carta in cartas_tablero:
             self.listbox_tablero.insert(tk.END, f"{carta.nombre} en {coord}")
+
+    def actualizar_panel_enfrentamiento(self):
+        if not hasattr(self, "listbox_enfrentamiento"):
+            return
+        self.listbox_enfrentamiento.delete(0, tk.END)
+        self._panel_coords = []
+        if not (self.motor and self.motor.mapa_global and self.jugador_actual):
+            return
+        for coord, carta in self.motor.mapa_global.tablero.celdas.items():
+            if carta is not None and carta.duenio == self.jugador_actual:
+                self.listbox_enfrentamiento.insert(
+                    tk.END, f"{carta.nombre} - Pos: ({coord.q}, {coord.r})"
+                )
+                self._panel_coords.append(coord)
 
     def dibujar_tablero_hexagonal(self):
         # Dibujar una representación simple del tablero hexagonal
@@ -611,6 +656,36 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         else:
             messagebox.showwarning("Error", "No se pudo quitar la carta")
         self.actualizar_interfaz()
+
+    def centrar_en_carta(self):
+        if not self.motor or not self.motor.mapa_global:
+            return
+        sel = self.listbox_enfrentamiento.curselection()
+        if not sel or sel[0] >= len(self._panel_coords):
+            return
+        coord = self._panel_coords[sel[0]]
+        self.interfaz_mapa.resaltar_coordenada(coord)
+
+    def mover_carta_test(self):
+        if not (self.motor and self.motor.mapa_global):
+            return
+        try:
+            q = int(self.entry_q.get())
+            r = int(self.entry_r.get())
+        except ValueError:
+            messagebox.showerror("Error", "Coordenadas inválidas")
+            return
+        sel = self.listbox_enfrentamiento.curselection()
+        if not sel or sel[0] >= len(self._panel_coords):
+            return
+        origen = self._panel_coords[sel[0]]
+        from src.game.tablero.coordenada import CoordenadaHexagonal
+        destino = CoordenadaHexagonal(q, r)
+        tablero = self.motor.mapa_global.tablero
+        if tablero.mover_carta(origen, destino):
+            self.actualizar_interfaz()
+        else:
+            messagebox.showwarning("Error", "No se pudo mover la carta")
 
     def ordenar_ataque(self):
         if self.motor.fase_actual != "combate":

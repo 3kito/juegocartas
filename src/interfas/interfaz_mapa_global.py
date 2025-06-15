@@ -7,9 +7,10 @@ from src.utils.helpers import log_evento
 class InterfazMapaGlobal(ttk.Frame):
     """Widget para visualizar el mapa global"""
 
-    def __init__(self, master, mapa: MapaGlobal, hex_size: int = 20):
+    def __init__(self, master, mapa: MapaGlobal | None = None, hex_size: int = 20):
         super().__init__(master)
         self.mapa = mapa
+        self._ultimo_estado = None
         self.hex_size = hex_size
 
         self.canvas = tk.Canvas(self, width=600, height=400, bg="white")
@@ -23,11 +24,30 @@ class InterfazMapaGlobal(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self._dibujar_mapa()
+        if self.mapa:
+            self._dibujar_mapa()
+
+    def set_mapa(self, mapa: MapaGlobal):
+        """Asigna un nuevo mapa y lo dibuja"""
+        self.mapa = mapa
+        self._ultimo_estado = None
+        self.actualizar()
 
     def actualizar(self):
-        """Redibuja el mapa completo."""
+        """Redibuja el mapa completo si hay cambios"""
+        if not self.mapa:
+            return
+        estado_actual = tuple(
+            (c.q, c.r, id(card) if card else None)
+            for c, card in sorted(
+                self.mapa.tablero.celdas.items(), key=lambda i: (i[0].q, i[0].r)
+            )
+        )
+        if estado_actual == self._ultimo_estado:
+            return
+        self._ultimo_estado = estado_actual
         self._dibujar_mapa()
+        log_evento("Mapa global dibujado")
 
     def _hex_points(self, x, y, size):
         import math
@@ -44,6 +64,42 @@ class InterfazMapaGlobal(ttk.Frame):
         x = self.hex_size * (3 / 2 * coord.q)
         y = self.hex_size * (math.sqrt(3) / 2 * coord.q + math.sqrt(3) * coord.r)
         return x, y
+
+    def centrar_en_coordenada(self, coord):
+        """Centra la vista en una coordenada"""
+        if not coord:
+            return
+        x, y = self._coord_to_pixel(coord)
+        cx, cy = x + 200, y + 200
+        self._centrar_en_pixel(cx, cy)
+
+    def _centrar_en_pixel(self, x, y):
+        bbox = self.canvas.bbox("all")
+        if not bbox:
+            return
+        ancho = self.canvas.winfo_width()
+        alto = self.canvas.winfo_height()
+        total_ancho = bbox[2]
+        total_alto = bbox[3]
+        self.canvas.xview_moveto(max(0, x - ancho / 2) / total_ancho)
+        self.canvas.yview_moveto(max(0, y - alto / 2) / total_alto)
+
+    def resaltar_coordenada(self, coord, duracion=1000):
+        """Resalta una coordenada temporalmente"""
+        x, y = self._coord_to_pixel(coord)
+        cx, cy = x + 200, y + 200
+        radio = self.hex_size * 0.6
+        highlight = self.canvas.create_oval(
+            cx - radio,
+            cy - radio,
+            cx + radio,
+            cy + radio,
+            outline="yellow",
+            width=2,
+            tags="highlight",
+        )
+        self._centrar_en_pixel(cx, cy)
+        self.canvas.after(duracion, lambda: self.canvas.delete(highlight))
 
     def _dibujar_mapa(self):
         self.canvas.delete("all")
@@ -92,5 +148,4 @@ class InterfazMapaGlobal(ttk.Frame):
             )
 
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        log_evento("Mapa global dibujado")
 

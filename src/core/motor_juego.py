@@ -24,6 +24,7 @@ class MotorJuego:
         self.modo_testeo = self.config.modo_testeo
 
         self.controlador_enfrentamiento = None
+        self.mapa_global = None
 
         # Controlador especializado para la fase de preparación
         self.controlador_preparacion = ControladorFasePreparacion(
@@ -55,6 +56,7 @@ class MotorJuego:
 
         # 1. Crear mapa global
         mapa = MapaGlobal()
+        self.mapa_global = mapa
 
         # 2. Asignar jugadores a zonas
         jugadores_por_color = {"rojo": [], "azul": []}
