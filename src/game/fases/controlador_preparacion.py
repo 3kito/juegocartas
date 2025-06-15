@@ -1,16 +1,15 @@
-from src.game.cartas.fusion_cartas import aplicar_fusiones
 from src.game.tienda.tienda_individual import TiendaIndividual
 from src.game.tienda.sistema_subastas import SistemaSubastas
 from src.utils.helpers import log_evento
+from src.game.cartas.manager_cartas import manager_cartas
 from src.data.config.game_config import GameConfig
 
 
 class ControladorFasePreparacion:
-    def __init__(self, jugadores: list, motor=None, config=None, modo_testeo: bool = False):
+    def __init__(self, jugadores: list, motor=None, config=None):
         self.jugadores = jugadores
         self.motor = motor
         self.config = config or GameConfig()
-        self.modo_testeo = modo_testeo
         self.tiendas_individuales = {}
         self.subastas = None
         self.finalizada = False
@@ -18,13 +17,10 @@ class ControladorFasePreparacion:
     def iniciar_fase(self, ronda: int):
         log_evento(f"📦 Fase de preparación iniciada (Ronda {ronda})")
 
-        if not self.modo_testeo:
-            self.entregar_oro()
-            self.generar_tiendas()
-            self.generar_subasta_publica()
-            self.aplicar_fusiones_automaticas()
+        if not manager_cartas.cartas_cargadas:
+            manager_cartas.cargar_cartas()
 
-    def entregar_oro(self):
+        # 1. Entregar oro
         for jugador in self.jugadores:
             jugador.oro += self.config.oro_por_ronda
             log_evento(f"💰 {jugador.nombre} recibe {self.config.oro_por_ronda} de oro (Total: {jugador.oro})")
@@ -40,15 +36,7 @@ class ControladorFasePreparacion:
         self.subastas = SistemaSubastas(self.jugadores, modo_testeo=self.modo_testeo)
         self.subastas.generar_subasta(cartas_subasta)
 
-    def pausar_para_ofertas(self):
-        """Pausa el flujo para permitir a los jugadores ofertar manualmente"""
-        log_evento("⏸️ Pausa para ofertas - esperando ofertas de jugadores")
-
-    def aplicar_fusiones_automaticas(self):
-        for jugador in self.jugadores:
-            eventos = aplicar_fusiones(jugador.tablero, jugador.cartas_banco)
-            for evento in eventos:
-                log_evento(f"🔧 {jugador.nombre}: {evento}")
+        # 4. Las fusiones ahora se realizan al momento de agregar cartas al banco
 
     def obtener_tienda(self, jugador_id: int):
         """Retorna la tienda individual de un jugador específico"""

@@ -74,6 +74,8 @@ class ControladorFaseEnfrentamiento:
         log_evento("🏁 Fase de enfrentamiento finalizada")
 
         for jugador in self.jugadores:
+            if not hasattr(jugador, 'tablero'):
+                continue
             cartas = jugador.tablero.obtener_cartas()
             vida_max = sum(c.vida_maxima for c in cartas)
             vida_actual = sum(c.vida_actual for c in cartas if c.esta_viva())
