@@ -4,6 +4,7 @@ TiendaIndividual - Sistema de tienda privada por jugador durante la fases de pre
 
 from typing import List, Optional
 from src.game.cartas.manager_cartas import manager_cartas
+from src.game.cartas.fusion_cartas import aplicar_fusiones
 from src.utils.helpers import log_evento
 
 
@@ -51,7 +52,15 @@ class TiendaIndividual:
         self.jugador.gastar_oro(carta.costo, f"compra {carta.nombre}")
         self.jugador.agregar_carta_al_banco(carta)
         self.cartas_disponibles.pop(indice)
-        return f"✅ {carta.nombre} comprada"
+
+        eventos = aplicar_fusiones(self.jugador.tablero, self.jugador.cartas_banco)
+        for ev in eventos:
+            log_evento(f"🔧 {ev}")
+
+        mensaje = f"✅ {carta.nombre} comprada"
+        if eventos:
+            mensaje += " | " + " | ".join(eventos)
+        return mensaje
 
     def hacer_reroll(self) -> Optional[str]:
         """Usa un token para refrescar los espacios vacíos de la tienda"""

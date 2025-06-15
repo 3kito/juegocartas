@@ -127,6 +127,10 @@ class Jugador:
 
         self.experiencia += cantidad
         log_evento(f"{self.nombre} gana {cantidad} experiencia (Total: {self.experiencia})")
+        niveles = self._verificar_subida_nivel()
+        log_evento(
+            f"DEBUG verificación subida: {niveles} niveles", "DEBUG"
+        )
 
     def comprar_experiencia_con_oro(self, cantidad_oro):
         """Convierte oro en experiencia"""
@@ -166,12 +170,29 @@ class Jugador:
         log_evento(f"🔥 {self.nombre} sube a nivel {self.nivel}! (Slots tablero: {self.obtener_max_cartas_tablero()})")
         return True
 
-    def intentar_subir_nivel_automatico(self):
-        """Intenta subir de nivel automáticamente si es posible"""
+    def _verificar_subida_nivel(self):
+        """Sube niveles de forma automática al acumular experiencia."""
         niveles_subidos = 0
-        while self.puede_subir_nivel():
-            self.subir_nivel()
-            niveles_subidos += 1
+        while self.puede_subir_nivel() and niveles_subidos < 10:
+            exp_antes = self.experiencia
+            costo = self.calcular_costo_siguiente_nivel()
+            log_evento(
+                f"DEBUG subida? exp={exp_antes} costo={costo} nivel={self.nivel}",
+                "DEBUG",
+            )
+            if self.subir_nivel():
+                niveles_subidos += 1
+            else:
+                break
+        if niveles_subidos:
+            log_evento(
+                f"AUTO nivel: {self.nombre} subió {niveles_subidos} nivel(es)",
+                "DEBUG",
+            )
+        if niveles_subidos >= 10 and self.puede_subir_nivel():
+            log_evento(
+                "⚠️ Se alcanzó el límite de subidas automáticas", "WARNING"
+            )
         return niveles_subidos
 
     # === MÉTODOS DE TABLERO HEXAGONAL (NUEVOS) ===

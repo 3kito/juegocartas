@@ -150,7 +150,6 @@ class MotorJuego:
             ("Generar cartas para subasta pública", self.controlador_preparacion.generar_subasta_publica),
             ("Pausa para ofertas", self.controlador_preparacion.pausar_para_ofertas),
             ("Cerrar subasta y resolver ofertas", self.controlador_preparacion.cerrar_subasta),
-            ("Aplicar fusiones automáticas", self.controlador_preparacion.aplicar_fusiones_automaticas),
             ("Finalizar preparación → Iniciar combate", self.controlador_preparacion.finalizar_fase),
         ]
         self._indice_paso = 0

@@ -563,15 +563,20 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             messagebox.showwarning("Advertencia", "Selecciona una carta del tablero")
             return
 
+        log_evento(f"GUI: selección para quitar índice {seleccion[0]}", "DEBUG")
+
         cartas = [p for p in self.jugador_actual.obtener_cartas_tablero() if p[1] is not None]
         indice = seleccion[0]
         if indice >= len(cartas):
             messagebox.showwarning("Error", "Selección inválida")
             return
         coord, _ = cartas[indice]
+        log_evento(f"GUI: quitando carta en {coord}", "DEBUG")
         carta = self.jugador_actual.quitar_carta_del_tablero(coord)
+        log_evento(f"GUI: resultado quitar {carta}", "DEBUG")
         if carta:
             self.jugador_actual.agregar_carta_al_banco(carta)
+            log_evento("GUI: carta agregada al banco", "DEBUG")
             messagebox.showinfo("Éxito", f"{carta.nombre} removida de {coord}")
         else:
             messagebox.showwarning("Error", "No se pudo quitar la carta")
