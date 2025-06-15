@@ -22,9 +22,12 @@ class EstadoCarta:
         # Stats relevantes
         self.dano_base: int = carta.dano_fisico_actual
         self.defensa: int = carta.defensa_fisica_actual
+        self.defensa_fisica_actual: int = carta.defensa_fisica_actual
+        self.defensa_magica_actual: int = getattr(carta, 'defensa_magica_actual', 0)
 
     def recibir_dano(self, cantidad: int):
-        dano_real = max(0, cantidad - self.defensa)
+        """Aplica daño ya calculado al estado de la carta"""
+        dano_real = max(0, cantidad)
         self.vida_actual -= dano_real
         log_evento(f"💥 {self.nombre} recibe {dano_real} de daño")
 

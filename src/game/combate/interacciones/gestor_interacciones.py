@@ -29,7 +29,15 @@ class GestorInteracciones:
         # 🔁 Generar interacciones automáticas de cartas activas
         for estado in self.estados_cartas.values():
             carta = estado.carta
-            if self.tablero and carta.puede_actuar and not carta.tiene_orden_manual():
+            puede_actuar = getattr(carta, "puede_actuar", True)
+            if callable(puede_actuar):
+                puede_actuar = puede_actuar()
+            if hasattr(carta, "esta_viva"):
+                esta_viva = carta.esta_viva()
+            else:
+                esta_viva = True
+            puede_orden = getattr(carta, "tiene_orden_manual", lambda: False)
+            if self.tablero and esta_viva and puede_actuar and not puede_orden():
                 nuevas = generar_interacciones_para(carta, self.tablero)
                 self.interacciones_pendientes.extend(nuevas)
 

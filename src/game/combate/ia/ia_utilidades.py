@@ -13,8 +13,9 @@ def obtener_info_entorno(carta, tablero):
     coord = tablero.obtener_coordenada_de(carta)
     enemigos = []
 
+    rango = getattr(carta, "rango_ataque_actual", 1)
     if coord:
-        for otra_coord, otra_carta in tablero.obtener_cartas_en_rango(coord, carta.rango_ataque_actual):
+        for otra_coord, otra_carta in tablero.obtener_cartas_en_rango(coord, rango):
             if otra_carta and not carta.es_aliado_de(otra_carta):
                 enemigos.append(otra_carta)
 

@@ -6,7 +6,7 @@ from collections import defaultdict
 from src.utils.helpers import log_evento
 
 
-def aplicar_fusiones(tablero, banco: list) -> list[str]:
+def aplicar_fusiones(tablero, banco: list, limite: int = 10) -> list[str]:
     """
     Detecta tríos de cartas iguales (por nombre) entre el tablero y el banco,
     y realiza la fusión dejando la carta mejorada en la posición original de alguna del tablero o en el banco si no hay.
@@ -25,11 +25,13 @@ def aplicar_fusiones(tablero, banco: list) -> list[str]:
             cartas_por_nombre[carta.nombre].append(("banco", idx, carta))
 
     # Procesar fusiones
-    for nombre, grupo in cartas_por_nombre.items():
-        while len(group := grupo) >= 3:
-            seleccionadas = group[:3]
-            grupo = group[3:]
+    for nombre, grupo in list(cartas_por_nombre.items()):
+        fusiones_realizadas = 0
+        while len(grupo) >= 3 and fusiones_realizadas < limite:
+            seleccionadas = grupo[:3]
+            grupo = grupo[3:]
             cartas_por_nombre[nombre] = grupo
+            fusiones_realizadas += 1
 
             fuentes, ubicaciones, cartas = zip(*seleccionadas)
             carta_fusionada = cartas[0]

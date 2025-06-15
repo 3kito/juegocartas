@@ -2,5 +2,6 @@
   "fase_preparacion_segundos": 30,
   "subasta_ratio": 0.5,
   "oro_por_ronda": 10,
-  "cartas_por_tienda": 5
+  "cartas_por_tienda": 5,
+  "costos_nivel": [0, 2, 6, 12, 20, 30, 42, 56, 72, 90]
 }

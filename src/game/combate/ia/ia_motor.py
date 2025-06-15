@@ -9,7 +9,8 @@ def generar_interacciones_para(carta, tablero):
     Punto de entrada principal para la IA.
     Decide y construye las interacciones que la carta debe ejecutar en este tick.
     """
-    if not carta.esta_viva():
+    esta_viva = getattr(carta, "esta_viva", lambda: True)()
+    if not esta_viva:
         return []
 
     info_entorno = obtener_info_entorno(carta, tablero)
