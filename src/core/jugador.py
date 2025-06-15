@@ -199,7 +199,7 @@ class Jugador:
             coordenada = coordenadas_libres[0]  # Tomar la primera disponible
 
         # Intentar colocar la carta
-        if self.tablero.colocar_carta(carta, coordenada):
+        if self.tablero.colocar_carta(coordenada, carta):
             log_evento(f"✅ {self.nombre} coloca carta en {coordenada}")
             return True
         return False
