@@ -28,3 +28,6 @@ class GameConfig:
 
         # Lista de IDs de cartas permitidas (vacío = todas)
         self.cartas_activas = data.get("cartas_activas", [])
+
+        # Modo testeo manual
+        self.modo_testeo = data.get("modo_testeo", False)

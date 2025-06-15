@@ -11,7 +11,8 @@ class ControladorFaseEnfrentamiento:
         motor,
         jugadores_por_color: dict,
         secuencia_turnos: list,
-        al_terminar_fase: Optional[Callable] = None
+        al_terminar_fase: Optional[Callable] = None,
+        modo_testeo: bool = False
     ):
         """
         motor: instancia de MotorTiempoReal
@@ -24,13 +25,19 @@ class ControladorFaseEnfrentamiento:
         self.motor = motor
         self.turnos = GestorTurnos(jugadores_por_color, secuencia_turnos)
         self.al_terminar_fase = al_terminar_fase
+        self.modo_testeo = modo_testeo
+        self.turno_activo = None
         self.jugadores = [
             jugador for lista in jugadores_por_color.values() for jugador in lista
         ]
         
     def iniciar_fase(self):
         log_evento("🎬 Iniciando fases de enfrentamiento")
-        self._iniciar_turno_actual()
+        if self.modo_testeo:
+            self.turno_activo = self.turnos.turno_actual_info()["color"]
+            log_evento(f"🕒 Turno manual inicial: {self.turno_activo.upper()}")
+        else:
+            self._iniciar_turno_actual()
 
     def _iniciar_turno_actual(self):
         turno = self.turnos.turno_actual_info()
@@ -50,6 +57,14 @@ class ControladorFaseEnfrentamiento:
         else:
             print("quedan turnos")
             self._iniciar_turno_actual()
+
+    def cambiar_turno_manual(self):
+        self.turnos.avanzar_turno()
+        if self.turnos.termino_fase():
+            self.finalizar_fase()
+        else:
+            self.turno_activo = self.turnos.turno_actual_info()["color"]
+            log_evento(f"🔄 Cambio de turno manual: {self.turno_activo.upper()}")
 
     def finalizar_fase(self):
         if self.finalizada:
@@ -78,6 +93,11 @@ class ControladorFaseEnfrentamiento:
 
         if self.al_terminar_fase:
             self.al_terminar_fase()
+
+    def obtener_turno_activo(self):
+        if self.modo_testeo:
+            return self.turno_activo
+        return self.turnos.turno_actual_info()["color"]
 
     def obtener_jugadores_activos(self):
         return self.turnos.jugadores_activos()

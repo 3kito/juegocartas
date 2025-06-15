@@ -55,6 +55,16 @@ class AutoBattlerGUI:
         self.crear_tab_tablero()
         self.crear_tab_combate()
 
+        # Controles de Testeo (ocultos por defecto)
+        self.frame_testeo = ttk.LabelFrame(self.root, text="Controles de Testeo")
+        self.lbl_proximo_paso = ttk.Label(self.frame_testeo, text="Próximo Paso: -")
+        self.lbl_proximo_paso.pack(side="left", padx=5)
+        ttk.Button(self.frame_testeo, text="Ejecutar Siguiente Paso", command=self.ejecutar_paso_testeo).pack(side="left", padx=5)
+        self.lbl_estado_actual = ttk.Label(self.frame_testeo, text="Estado: -")
+        self.lbl_estado_actual.pack(side="left", padx=5)
+        self.lbl_turno_activo = ttk.Label(self.frame_testeo, text="Turno: -")
+        self.lbl_turno_activo.pack(side="left", padx=5)
+
     def crear_tab_estado(self):
         # Tab de estado general del jugador
         frame = ttk.Frame(self.notebook)
@@ -188,6 +198,10 @@ class AutoBattlerGUI:
         self.motor = MotorJuego(self.jugadores)
         self.motor.iniciar()
 
+        if self.motor.modo_testeo:
+            self.frame_testeo.pack(fill="x", padx=10, pady=5)
+            self.actualizar_controles_testeo()
+
         # Configurar combo
         self.combo_jugador['values'] = [f"{j.nombre} (ID: {j.id})" for j in self.jugadores]
         self.combo_jugador.current(0)
@@ -234,6 +248,9 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.actualizar_tienda()
         self.actualizar_subasta()
         self.actualizar_tablero()
+
+        if self.motor.modo_testeo:
+            self.actualizar_controles_testeo()
 
     def actualizar_banco(self):
         self.listbox_banco.delete(0, tk.END)
@@ -387,6 +404,23 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
     def usar_habilidad(self):
         messagebox.showinfo("Info", "Uso de habilidades en desarrollo")
+
+    # === CONTROLES DE TESTEO ===
+    def ejecutar_paso_testeo(self):
+        if self.motor:
+            self.motor.ejecutar_siguiente_paso()
+            self.actualizar_controles_testeo()
+
+    def actualizar_controles_testeo(self):
+        if not self.motor:
+            return
+        self.lbl_proximo_paso.config(text=f"Próximo Paso: {self.motor.describir_proximo_paso()}")
+        estado = f"{self.motor.fase_actual}"
+        self.lbl_estado_actual.config(text=f"Estado: {estado}")
+        turno = "-"
+        if hasattr(self.motor, 'controlador_enfrentamiento') and self.motor.controlador_enfrentamiento:
+            turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
+        self.lbl_turno_activo.config(text=f"Turno: {turno if turno else '-'}")
 
     def ejecutar(self):
         self.root.mainloop()
