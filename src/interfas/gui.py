@@ -23,6 +23,8 @@ class AutoBattlerGUI:
         self.hex_size = 30
         self.board_center = (300, 250)
         self.hover_hex = None
+        self.modo_mover_carta = False
+        self.coordenada_origen = None
 
         self.crear_interfaz_principal()
 
@@ -71,6 +73,18 @@ class AutoBattlerGUI:
         self.lbl_estado_actual.pack(side="left", padx=5)
         self.lbl_turno_activo = ttk.Label(self.frame_testeo, text="Turno: -")
         self.lbl_turno_activo.pack(side="left", padx=5)
+        self.btn_oro_infinito = ttk.Button(
+            self.frame_testeo,
+            text="Oro Infinito",
+            command=self.asignar_oro_infinito,
+        )
+        self.btn_oro_infinito.pack(side="left", padx=5)
+        self.btn_tokens_infinitos = ttk.Button(
+            self.frame_testeo,
+            text="Tokens Infinitos",
+            command=self.asignar_tokens_infinitos,
+        )
+        self.btn_tokens_infinitos.pack(side="left", padx=5)
 
     def crear_tab_estado(self):
         # Tab de estado general del jugador
@@ -90,6 +104,22 @@ class AutoBattlerGUI:
 
         self.listbox_banco = tk.Listbox(banco_frame)
         self.listbox_banco.pack(fill="both", expand=True, padx=5, pady=5)
+
+        # Controles de experiencia
+        exp_frame = ttk.LabelFrame(frame, text="Experiencia")
+        exp_frame.pack(fill="x", padx=10, pady=5)
+        ttk.Label(exp_frame, text="Oro a convertir:").pack(side="left")
+        self.entry_oro_experiencia = ttk.Entry(exp_frame, width=10)
+        self.entry_oro_experiencia.pack(side="left", padx=(5, 0))
+        ttk.Button(
+            exp_frame,
+            text="Comprar Experiencia",
+            command=self.comprar_experiencia,
+        ).pack(side="left", padx=5)
+        self.lbl_costo_experiencia = ttk.Label(exp_frame, text="Costo actual: -")
+        self.lbl_costo_experiencia.pack(side="left", padx=5)
+        self.lbl_exp_disponible = ttk.Label(exp_frame, text="Exp: 0")
+        self.lbl_exp_disponible.pack(side="left", padx=5)
 
         # (Botón mover al tablero eliminado)
 
@@ -155,6 +185,7 @@ class AutoBattlerGUI:
         ttk.Label(control_frame, text="Cartas en Tablero:").pack()
         self.listbox_tablero = tk.Listbox(control_frame, width=25)
         self.listbox_tablero.pack(fill="both", expand=True, pady=(5, 10))
+        self.listbox_tablero.bind('<<ListboxSelect>>', self.preparar_mover_carta)
 
         ttk.Button(control_frame, text="Quitar del Tablero",
                    command=self.quitar_carta_tablero).pack(fill="x")
@@ -173,6 +204,8 @@ class AutoBattlerGUI:
         ttk.Label(control_frame, text="Selecciona carta → Clic en tablero").pack(pady=(5, 0))
         self.lbl_coord_actual = ttk.Label(control_frame, text="Coordenada: -")
         self.lbl_coord_actual.pack()
+        self.lbl_modo_mover = ttk.Label(control_frame, text="")
+        self.lbl_modo_mover.pack()
 
     def crear_tab_combate(self):
         frame = ttk.Frame(self.notebook)
@@ -262,6 +295,12 @@ Experiencia: {self.jugador_actual.experiencia}
 Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.lbl_jugador_info.config(text=info)
 
+        costo = self.jugador_actual.calcular_costo_siguiente_nivel()
+        self.lbl_costo_experiencia.config(text=f"Costo actual: {costo} exp")
+        self.lbl_exp_disponible.config(
+            text=f"Exp: {self.jugador_actual.experiencia}"
+        )
+
         # Actualizar banco
         self.actualizar_banco()
         self.actualizar_tienda()
@@ -317,6 +356,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
         # Dibujar hexágonos del tablero
         self.dibujar_tablero_hexagonal()
+
+        self.lbl_modo_mover.config(text="" if not self.modo_mover_carta else self.lbl_modo_mover.cget("text"))
 
         # Actualizar lista
         self.listbox_tablero.delete(0, tk.END)
@@ -384,16 +425,43 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         from src.game.tablero.coordenada import CoordenadaHexagonal
         return CoordenadaHexagonal(int(rx), int(rz))
 
+    def preparar_mover_carta(self, event):
+        if not self.jugador_actual:
+            return
+        seleccion = self.listbox_tablero.curselection()
+        if not seleccion:
+            return
+        cartas = [p for p in self.jugador_actual.obtener_cartas_tablero() if p[1] is not None]
+        if seleccion[0] >= len(cartas):
+            return
+        self.modo_mover_carta = True
+        self.coordenada_origen = cartas[seleccion[0]][0]
+        carta = cartas[seleccion[0]][1]
+        self.lbl_modo_mover.config(text=f"Mover {carta.nombre}: elige destino")
+        self.listbox_banco_tablero.selection_clear(0, tk.END)
+
     def on_canvas_click(self, event):
         if not self.jugador_actual:
             return
-        if not self.listbox_banco_tablero.curselection():
-            messagebox.showwarning("Advertencia", "Selecciona una carta del banco")
-            return
-
         coord = self.pixel_a_hex(event.x, event.y)
         if coord not in self.jugador_actual.tablero.celdas:
             messagebox.showwarning("Advertencia", "Coordenada fuera del tablero")
+            return
+
+        if self.modo_mover_carta and self.coordenada_origen:
+            if self.jugador_actual.mover_carta_en_tablero(self.coordenada_origen, coord):
+                messagebox.showinfo("Éxito", f"Carta movida a {coord}")
+            else:
+                messagebox.showwarning("Error", "No se pudo mover la carta")
+            self.modo_mover_carta = False
+            self.coordenada_origen = None
+            self.lbl_modo_mover.config(text="")
+            self.listbox_tablero.selection_clear(0, tk.END)
+            self.actualizar_interfaz()
+            return
+
+        if not self.listbox_banco_tablero.curselection():
+            messagebox.showwarning("Advertencia", "Selecciona una carta del banco")
             return
 
         indice = self.listbox_banco_tablero.curselection()[0]
@@ -452,6 +520,25 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         messagebox.showinfo("Oferta", resultado)
         self.actualizar_interfaz()
 
+    def comprar_experiencia(self):
+        if not self.jugador_actual:
+            return
+        try:
+            cantidad = int(self.entry_oro_experiencia.get())
+        except ValueError:
+            messagebox.showerror("Error", "Ingresa un número válido")
+            return
+        if cantidad <= 0:
+            messagebox.showwarning(
+                "Advertencia", "La cantidad debe ser mayor a 0"
+            )
+            return
+        if self.jugador_actual.comprar_experiencia_con_oro(cantidad):
+            messagebox.showinfo("Éxito", "Experiencia comprada")
+        else:
+            messagebox.showwarning("Error", "No se pudo comprar experiencia")
+        self.actualizar_interfaz()
+
     def mover_carta_a_tablero(self):
         seleccion = self.listbox_banco.curselection()
         if not seleccion:
@@ -476,8 +563,19 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             messagebox.showwarning("Advertencia", "Selecciona una carta del tablero")
             return
 
-        # Implementar lógica para quitar carta
-        messagebox.showinfo("Info", "Función en desarrollo")
+        cartas = [p for p in self.jugador_actual.obtener_cartas_tablero() if p[1] is not None]
+        indice = seleccion[0]
+        if indice >= len(cartas):
+            messagebox.showwarning("Error", "Selección inválida")
+            return
+        coord, _ = cartas[indice]
+        carta = self.jugador_actual.quitar_carta_del_tablero(coord)
+        if carta:
+            self.jugador_actual.agregar_carta_al_banco(carta)
+            messagebox.showinfo("Éxito", f"{carta.nombre} removida de {coord}")
+        else:
+            messagebox.showwarning("Error", "No se pudo quitar la carta")
+        self.actualizar_interfaz()
 
     def ordenar_ataque(self):
         if self.motor.fase_actual != "combate":
@@ -490,6 +588,16 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
     def usar_habilidad(self):
         messagebox.showinfo("Info", "Uso de habilidades en desarrollo")
+
+    def asignar_oro_infinito(self):
+        if self.jugador_actual:
+            self.jugador_actual.oro = 999999
+            self.actualizar_interfaz()
+
+    def asignar_tokens_infinitos(self):
+        if self.jugador_actual:
+            self.jugador_actual.tokens_reroll = 999
+            self.actualizar_interfaz()
 
     # === CONTROLES DE TESTEO ===
     def ejecutar_paso_testeo(self):
