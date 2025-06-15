@@ -5,9 +5,9 @@ def aplicar_defensas(dano_base: int, objetivo, tipo_dano: str = "fisico") -> flo
     Resta defensa al daño base según el tipo (físico o mágico).
     """
     if tipo_dano == "fisico":
-        defensa = objetivo.defensa_fisica_actual
+        defensa = getattr(objetivo, "defensa_fisica_actual", getattr(objetivo, "defensa", 0))
     elif tipo_dano == "magico":
-        defensa = objetivo.defensa_magica_actual
+        defensa = getattr(objetivo, "defensa_magica_actual", getattr(objetivo, "defensa", 0))
     else:
         defensa = 0
 

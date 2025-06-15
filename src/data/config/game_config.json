@@ -2,5 +2,8 @@
   "fase_preparacion_segundos": 30,
   "subasta_ratio": 0.5,
   "oro_por_ronda": 10,
-  "cartas_por_tienda": 5
+  "cartas_por_tienda": 5,
+  "copias_por_tier": {"1": 5, "2": 3, "3": 2},
+  "max_cartas_por_tier": {"1": 0, "2": 0, "3": 0},
+  "cartas_activas": []
 }

@@ -5,6 +5,8 @@ Manager para cargar y gestionar la base de datos de cartas con sistema de copias
 import random
 from typing import List, Dict, Optional, Any
 
+from src.data.config.game_config import GameConfig
+
 from src.game.cartas.carta_base import CartaBase
 from src.utils.helpers import cargar_json, log_evento
 
@@ -12,19 +14,14 @@ from src.utils.helpers import cargar_json, log_evento
 class ManagerCartas:
     """Gestiona la carga, creación y distribución de cartas con sistema de copias múltiples"""
 
-    def __init__(self):
+    def __init__(self, config: GameConfig | None = None):
         # Base de datos de cartas
         self.datos_cartas: Dict[int, Dict[str, Any]] = {}
         self.cartas_por_tier: Dict[int, List[int]] = {1: [], 2: [], 3: []}
         self.cartas_por_categoria: Dict[str, List[int]] = {}
         self.cartas_por_rol: Dict[str, List[int]] = {}
 
-        # NUEVO: Sistema de copias múltiples
-        self.copias_por_tier = {
-            1: 5,  # 5 copias de cada carta tier 1
-            2: 3,  # 3 copias de cada carta tier 2
-            3: 2  # 2 copias de cada carta tier 3
-        }
+        # NUEVO: Sistema de copias múltiples (configurable)
 
         # NUEVO: Pool mejorado con instancias únicas
         self.pool_instancias: Dict[int, List[CartaBase]] = {}  # carta_id: [instancia1, instancia2, ...]
@@ -34,6 +31,15 @@ class ManagerCartas:
         self.pool_global: Dict[int, int] = {}  # {carta_id: cantidad_disponible}
 
         # Configuración
+        self.config = config or GameConfig()
+        self.copias_por_tier = {
+            1: self.config.copias_por_tier.get(1, 5),
+            2: self.config.copias_por_tier.get(2, 3),
+            3: self.config.copias_por_tier.get(3, 2),
+        }
+        self.max_cartas_por_tier = self.config.max_cartas_por_tier
+        self.cartas_activas = set(self.config.cartas_activas)
+
         self.archivo_cartas = "src/data/cartas/personajes_historicos.json"
 
         # Estado de carga
@@ -46,6 +52,22 @@ class ManagerCartas:
             if not datos:
                 log_evento("❌ No se pudieron cargar los datos de cartas", "ERROR")
                 return False
+
+            # Filtrar cartas activas si se especifica
+            if self.cartas_activas:
+                datos = [d for d in datos if d.get('id') in self.cartas_activas]
+
+            # Limitar cantidad de tipos por tier
+            if any(v > 0 for v in self.max_cartas_por_tier.values()):
+                cuenta_tier = {1: 0, 2: 0, 3: 0}
+                filtradas = []
+                for d in datos:
+                    tier = d.get('tier', 1)
+                    limite = self.max_cartas_por_tier.get(tier, 0)
+                    if limite == 0 or cuenta_tier[tier] < limite:
+                        filtradas.append(d)
+                        cuenta_tier[tier] += 1
+                datos = filtradas
 
             # Limpiar datos anteriores
             self.datos_cartas.clear()
