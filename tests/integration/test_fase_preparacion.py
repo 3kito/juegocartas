@@ -37,7 +37,7 @@ def jugador_preparado():
     coords = jugador.tablero.coordenadas_libres()[:2]
     jugador.tablero.colocar_carta(coords[0], carta1)
     jugador.tablero.colocar_carta(coords[1], carta2)
-    jugador.cartas_banco.append(carta3)
+    jugador.agregar_carta_al_banco(carta3)
 
     return jugador
 

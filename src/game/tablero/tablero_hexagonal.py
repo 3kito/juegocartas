@@ -23,6 +23,10 @@ class TableroHexagonal:
         return self.celdas.get(coordenada)
 
     def colocar_carta(self, coordenada: CoordenadaHexagonal, carta):
+        # Permitir argumentos en orden inverso para compatibilidad
+        if not isinstance(coordenada, CoordenadaHexagonal) and isinstance(carta, CoordenadaHexagonal):
+            coordenada, carta = carta, coordenada
+
         if coordenada in self.celdas:
             self.celdas[coordenada] = carta
             log_evento(f"✅ Carta colocada en {coordenada}")
@@ -72,8 +76,14 @@ class TableroHexagonal:
         for coord in self.celdas:
             self.celdas[coord] = None
     def quitar_carta(self, coordenada):
+        """Remueve y retorna la carta en la coordenada dada"""
         if coordenada in self.celdas:
+            carta = self.celdas[coordenada]
             self.celdas[coordenada] = None
+            if carta:
+                log_evento(f"🗑️ Carta removida de {coordenada}")
+            return carta
+        return None
 
     def contar_cartas(self) -> int:
         """Cuenta el número total de cartas en el tablero"""

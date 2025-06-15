@@ -44,7 +44,7 @@ def test_activa_sin_orden_usa_ia(monkeypatch):
 
 def test_activa_con_orden_no_usa_ia(monkeypatch):
     tablero = TableroHexagonal(radio=2)
-    gestor = GestorInteracciones(tablero=tablero)
+    gestor = gestor_mod.GestorInteracciones(tablero=tablero)
 
     carta = crear_carta(2, 1, "activo")
     carta.marcar_orden_manual()

@@ -4,6 +4,7 @@ Clase Jugador - Representa a un jugador en el auto-battler
 
 from src.utils.helpers import log_evento, validar_rango
 from src.game.tablero.tablero_hexagonal import TableroHexagonal
+from src.data.config.game_config import GameConfig
 
 
 class Jugador:
@@ -11,6 +12,9 @@ class Jugador:
         # Identificación
         self.id = id_jugador
         self.nombre = nombre
+
+        # Configuración del juego
+        self.config = GameConfig()
 
         # Stats básicos
         self.vida_maxima = 100
@@ -124,6 +128,9 @@ class Jugador:
 
         self.experiencia += cantidad
         log_evento(f"{self.nombre} gana {cantidad} experiencia (Total: {self.experiencia})")
+        subidas = self._verificar_subida_nivel()
+        if subidas:
+            log_evento(f"{self.nombre} sube automaticamente {subidas} nivel(es)")
 
     def comprar_experiencia_con_oro(self, cantidad_oro):
         """Convierte oro en experiencia"""
@@ -146,10 +153,10 @@ class Jugador:
 
     def calcular_costo_siguiente_nivel(self):
         """Calcula el costo en experiencia para subir al siguiente nivel"""
-        costos = [0, 2, 6, 12, 20, 30, 42, 56, 72, 90]
+        costos = getattr(self.config, 'costos_nivel', [0, 2, 6, 12, 20, 30, 42, 56, 72, 90])
         if self.nivel < len(costos):
             return costos[self.nivel]
-        return 999
+        return costos[-1] if costos else 999
 
     def subir_nivel(self):
         """Sube el nivel del jugador si es posible"""
@@ -163,13 +170,18 @@ class Jugador:
         log_evento(f"🔥 {self.nombre} sube a nivel {self.nivel}! (Slots tablero: {self.obtener_max_cartas_tablero()})")
         return True
 
-    def intentar_subir_nivel_automatico(self):
-        """Intenta subir de nivel automáticamente si es posible"""
+    def _verificar_subida_nivel(self):
+        """Verifica y aplica todas las subidas de nivel posibles"""
         niveles_subidos = 0
         while self.puede_subir_nivel():
-            self.subir_nivel()
+            if not self.subir_nivel():
+                break
             niveles_subidos += 1
         return niveles_subidos
+
+    def intentar_subir_nivel_automatico(self):
+        """Intenta subir de nivel automáticamente si es posible"""
+        return self._verificar_subida_nivel()
 
     # === MÉTODOS DE TABLERO HEXAGONAL (NUEVOS) ===
 
@@ -196,7 +208,7 @@ class Jugador:
             coordenada = coordenadas_libres[0]  # Tomar la primera disponible
 
         # Intentar colocar la carta
-        if self.tablero.colocar_carta(carta, coordenada):
+        if self.tablero.colocar_carta(coordenada, carta):
             log_evento(f"✅ {self.nombre} coloca carta en {coordenada}")
             return True
         return False
@@ -212,7 +224,10 @@ class Jugador:
         """Quita una carta del tablero"""
         carta = self.tablero.quitar_carta(coordenada)
         if carta:
-            log_evento(f"🗑️ {self.nombre} retira carta de {coordenada}")
+            log_evento(f"🗑️ {self.nombre} retira '{carta.nombre}' de {coordenada}")
+            self.agregar_carta_al_banco(carta)
+        else:
+            log_evento(f"⚠️ {self.nombre} intenta retirar carta inexistente en {coordenada}")
         return carta
 
     def obtener_cartas_tablero(self):
@@ -261,6 +276,12 @@ class Jugador:
         if len(self.cartas_banco) <= 5:  # Solo mostrar si tiene pocas cartas
             cartas_nombres = [c.nombre for c in self.cartas_banco if c is not None]
             log_evento(f"   Banco actual: {cartas_nombres}")
+
+        # Fusionar automáticamente si es posible
+        from src.game.cartas.fusion_cartas import aplicar_fusiones
+        eventos = aplicar_fusiones(self.tablero, self.cartas_banco)
+        for evento in eventos:
+            log_evento(f"🔧 {self.nombre}: {evento}")
 
         return True
 

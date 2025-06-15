@@ -12,3 +12,4 @@ class GameConfig:
         self.subasta_ratio = data.get("subasta_ratio", 0.5)
         self.oro_por_ronda = data.get("oro_por_ronda", 10)
         self.cartas_por_tienda = data.get("cartas_por_tienda", 5)
+        self.costos_nivel = data.get("costos_nivel", [0, 2, 6, 12, 20, 30, 42, 56, 72, 90])
