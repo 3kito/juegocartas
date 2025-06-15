@@ -1,5 +1,6 @@
 from typing import Set, Optional
 from src.game.tablero.coordenada import CoordenadaHexagonal
+from src.utils.helpers import log_evento
 
 
 class ZonaMapa:
@@ -24,5 +25,12 @@ class ZonaMapa:
 
     def convertir_a_global(self, coord_local: CoordenadaHexagonal) -> CoordenadaHexagonal:
         """Convierte una coordenada local (tablero individual) a coord. global en esta zona."""
-        return CoordenadaHexagonal(self.centro.q + coord_local.q, self.centro.r + coord_local.r)
+        coord_global = CoordenadaHexagonal(
+            self.centro.q + coord_local.q, self.centro.r + coord_local.r
+        )
+        log_evento(
+            f"ZONA {self.color.upper()} centro: {self.centro} | local {coord_local} → global {coord_global}",
+            "DEBUG",
+        )
+        return coord_global
 

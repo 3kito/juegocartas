@@ -40,7 +40,10 @@ class MapaGlobal:
     # En src/game/combate/mapa/mapa_global.py - método ubicar_jugador_en_zona()
     def ubicar_jugador_en_zona(self, jugador, color: str):
         zonas = self.zonas_rojas if color == "rojo" else self.zonas_azules
-        log_evento(f"🗺️ Ubicando {jugador.nombre} en zona {color.upper()}")
+        log_evento(
+            f"🗺️ Ubicando {jugador.nombre} en zona {color.upper()} ({len(zonas)} disponibles)",
+            "DEBUG",
+        )
 
         cartas_pendientes = [
             (coord, carta)
@@ -50,12 +53,26 @@ class MapaGlobal:
 
         cartas_colocadas = 0
         for zona in zonas:
+            log_evento(
+                f"🔍 ZONA {zona.color.upper()} centro: {zona.centro}",
+                "DEBUG",
+            )
             if not cartas_pendientes:
                 break
             nuevas_pendientes = []
             for coord_local, carta in cartas_pendientes:
                 coord_global = zona.convertir_a_global(coord_local)
-                if coord_global in zona.coordenadas and self.tablero.esta_vacia(coord_global):
+                dentro_tablero = self.tablero.esta_dentro_del_tablero(coord_global)
+                vacia = self.tablero.esta_vacia(coord_global)
+                log_evento(
+                    f"🔍 Coord local: {coord_local} → Global: {coord_global} | Dentro tablero? {dentro_tablero} | Vacía? {vacia}",
+                    "DEBUG",
+                )
+                if (
+                    dentro_tablero
+                    and coord_global in zona.coordenadas
+                    and vacia
+                ):
                     carta.coordenada = coord_global
                     self.tablero.colocar_carta(coord_global, carta)
                     log_evento(f"   📍 {carta.nombre} colocada en {coord_global}")

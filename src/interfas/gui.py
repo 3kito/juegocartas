@@ -26,6 +26,7 @@ class AutoBattlerGUI:
         self.hover_hex = None
         self.modo_mover_carta = False
         self.coordenada_origen = None
+        self._ultimo_turno_mapa = None
 
         self.crear_interfaz_principal()
 
@@ -290,13 +291,21 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             text=f"Exp: {self.jugador_actual.experiencia}"
         )
 
-        # Actualizar banco
+        # Actualizar banco y tablero siempre
         self.actualizar_banco()
-        self.actualizar_tienda()
-        self.actualizar_subasta()
+        if self.motor.fase_actual == "preparacion":
+            self.actualizar_tienda()
+            self.actualizar_subasta()
         self.actualizar_tablero()
+
         if hasattr(self, "interfaz_mapa"):
-            self.interfaz_mapa.actualizar()
+            if self.motor.fase_actual != "preparacion":
+                turno = None
+                if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
+                    turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
+                if turno != self._ultimo_turno_mapa:
+                    self.interfaz_mapa.actualizar()
+                    self._ultimo_turno_mapa = turno
 
         if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
             turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
