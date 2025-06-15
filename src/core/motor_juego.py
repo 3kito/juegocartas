@@ -1,4 +1,3 @@
-import random
 import time
 
 from src.core.jugador import Jugador
@@ -59,8 +58,10 @@ class MotorJuego:
 
         # 2. Asignar jugadores a zonas
         jugadores_por_color = {"rojo": [], "azul": []}
-        for jugador in self.jugadores_vivos:
-            color = random.choice(["rojo", "azul"])
+        colores = ["rojo", "azul"]
+        jugadores_ordenados = sorted(self.jugadores_vivos, key=lambda j: j.id)
+        for idx, jugador in enumerate(jugadores_ordenados):
+            color = colores[idx % len(colores)]
             jugador.color_fase_actual = color
             jugadores_por_color[color].append(jugador)
             mapa.ubicar_jugador_en_zona(jugador, color)
