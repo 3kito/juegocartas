@@ -7,7 +7,7 @@ import time
 
 from src.core.motor_juego import MotorJuego
 from src.core.jugador import Jugador
-from src.utils.helpers import log_evento
+from src.gui import ejecutar_gui
 
 
 def main():
@@ -117,8 +117,4 @@ def juego_manual():
 
 
 if __name__ == "__main__":
-    # Usar main() para ejecución automática o juego_manual() para interactivo
-    main()
-
-    # Descomentar la siguiente línea si quieres versión interactiva:
-    # juego_manual()
+    ejecutar_gui()
