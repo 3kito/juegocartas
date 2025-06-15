@@ -66,3 +66,8 @@ class GestorInteracciones:
 
     def obtener_id_componente(self) -> str:
         return "interacciones"
+
+
+# Exponer la clase en builtins para compatibilidad con algunos tests
+import builtins
+builtins.GestorInteracciones = GestorInteracciones

@@ -348,5 +348,352 @@
       }
     ],
     "descripcion": "Filósofo griego, discípulo de Platón y maestro de Alejandro Magno"
+  },
+  {
+    "id": 11,
+    "nombre": "Galileo Galilei 11",
+    "tier": 2,
+    "costo": 3,
+    "rol": "visionario",
+    "categoria": "cientificos",
+    "stats": {
+      "vida": 65,
+      "dano_fisico": 12,
+      "dano_magico": 35,
+      "defensa_fisica": 8,
+      "defensa_magica": 22,
+      "rango_movimiento": 2,
+      "rango_ataque": 3
+    },
+    "habilidades": [
+      {
+        "nombre": "Telescopio",
+        "tipo": "activa",
+        "descripcion": "Revela la ubicación de todos los enemigos por 2 turnos",
+        "costo_mana": 30,
+        "cooldown": 3,
+        "rango": "global"
+      },
+      {
+        "nombre": "Padre de la Astronomía",
+        "tipo": "pasiva",
+        "descripcion": "Otorga +5 rango de visión a los aliados adyacentes",
+        "trigger": "permanente",
+        "area": "adyacentes"
+      }
+    ],
+    "descripcion": "Astrónomo y físico italiano, pionero del método científico"
+  },
+  {
+    "id": 12,
+    "nombre": "Ada Lovelace 12",
+    "tier": 3,
+    "costo": 5,
+    "rol": "programadora",
+    "categoria": "cientificos",
+    "stats": {
+      "vida": 70,
+      "dano_fisico": 10,
+      "dano_magico": 40,
+      "defensa_fisica": 10,
+      "defensa_magica": 20,
+      "rango_movimiento": 2,
+      "rango_ataque": 3
+    },
+    "habilidades": [
+      {
+        "nombre": "Algoritmo Visionario",
+        "tipo": "activa",
+        "descripcion": "Duplica la siguiente habilidad aliada usada",
+        "costo_mana": 50,
+        "cooldown": 5,
+        "rango": 3
+      },
+      {
+        "nombre": "Programadora Pionera",
+        "tipo": "pasiva",
+        "descripcion": "Los aliados ganan +10% de velocidad de ataque",
+        "trigger": "permanente"
+      }
+    ],
+    "descripcion": "Considerada la primera programadora de la historia"
+  },
+  {
+    "id": 13,
+    "nombre": "Platón 13",
+    "tier": 1,
+    "costo": 2,
+    "rol": "filosofo",
+    "categoria": "filosofos",
+    "stats": {
+      "vida": 60,
+      "dano_fisico": 15,
+      "dano_magico": 25,
+      "defensa_fisica": 8,
+      "defensa_magica": 15,
+      "rango_movimiento": 1,
+      "rango_ataque": 2
+    },
+    "habilidades": [
+      {
+        "nombre": "Mundo de las Ideas",
+        "tipo": "activa",
+        "descripcion": "Genera un escudo que bloquea el siguiente ataque",
+        "costo_mana": 20,
+        "cooldown": 2,
+        "rango": 1,
+        "duracion": 1
+      },
+      {
+        "nombre": "Academia",
+        "tipo": "pasiva",
+        "descripcion": "Al inicio de cada ronda, gana +1 de mana",
+        "trigger": "inicio_ronda"
+      }
+    ],
+    "descripcion": "Filósofo griego, fundador de la Academia de Atenas"
+  },
+  {
+    "id": 14,
+    "nombre": "Sun Tzu 14",
+    "tier": 2,
+    "costo": 4,
+    "rol": "estratega",
+    "categoria": "militares",
+    "stats": {
+      "vida": 80,
+      "dano_fisico": 25,
+      "dano_magico": 15,
+      "defensa_fisica": 18,
+      "defensa_magica": 12,
+      "rango_movimiento": 2,
+      "rango_ataque": 2
+    },
+    "habilidades": [
+      {
+        "nombre": "Arte de la Guerra",
+        "tipo": "activa",
+        "descripcion": "Todos los aliados infligen +20% de daño este turno",
+        "costo_mana": 45,
+        "cooldown": 4,
+        "rango": "global",
+        "duracion": 1
+      },
+      {
+        "nombre": "Maestro Estratega",
+        "tipo": "pasiva",
+        "descripcion": "Gana +1 oro por cada victoria",
+        "trigger": "victoria_combate"
+      }
+    ],
+    "descripcion": "Autor del arte de la guerra, estratega militar chino"
+  },
+  {
+    "id": 15,
+    "nombre": "Genghis Khan 15",
+    "tier": 3,
+    "costo": 5,
+    "rol": "conquistador",
+    "categoria": "militares",
+    "stats": {
+      "vida": 120,
+      "dano_fisico": 40,
+      "dano_magico": 10,
+      "defensa_fisica": 25,
+      "defensa_magica": 15,
+      "rango_movimiento": 3,
+      "rango_ataque": 1
+    },
+    "habilidades": [
+      {
+        "nombre": "Horda Imparable",
+        "tipo": "activa",
+        "descripcion": "Invoca dos aliados temporales con 50% de sus stats",
+        "costo_mana": 60,
+        "cooldown": 6,
+        "duracion": 2
+      },
+      {
+        "nombre": "Dominio Total",
+        "tipo": "pasiva",
+        "descripcion": "Cada enemigo eliminado otorga +2 daño permanente",
+        "trigger": "enemigo_eliminado"
+      }
+    ],
+    "descripcion": "Fundador del imperio Mongol, famoso conquistador"
+  },
+  {
+    "id": 16,
+    "nombre": "Alexander the Great 16",
+    "tier": 3,
+    "costo": 5,
+    "rol": "lider",
+    "categoria": "militares",
+    "stats": {
+      "vida": 100,
+      "dano_fisico": 35,
+      "dano_magico": 20,
+      "defensa_fisica": 18,
+      "defensa_magica": 18,
+      "rango_movimiento": 3,
+      "rango_ataque": 1
+    },
+    "habilidades": [
+      {
+        "nombre": "Conquista Relámpago",
+        "tipo": "activa",
+        "descripcion": "Avanza dos casillas y ataca causando daño doble",
+        "costo_mana": 55,
+        "cooldown": 5,
+        "rango": 2
+      },
+      {
+        "nombre": "Inspiración Macedónica",
+        "tipo": "pasiva",
+        "descripcion": "Los aliados cercanos ganan +5 de daño",
+        "trigger": "permanente",
+        "area": "cercanos"
+      }
+    ],
+    "descripcion": "Rey de Macedonia que creó uno de los mayores imperios"
+  },
+  {
+    "id": 17,
+    "nombre": "Albert Einstein 17",
+    "tier": 2,
+    "costo": 4,
+    "rol": "cientifico",
+    "categoria": "cientificos",
+    "stats": {
+      "vida": 75,
+      "dano_fisico": 10,
+      "dano_magico": 45,
+      "defensa_fisica": 12,
+      "defensa_magica": 25,
+      "rango_movimiento": 2,
+      "rango_ataque": 3
+    },
+    "habilidades": [
+      {
+        "nombre": "Relatividad",
+        "tipo": "activa",
+        "descripcion": "Reduce la velocidad de los enemigos a la mitad",
+        "costo_mana": 40,
+        "cooldown": 4,
+        "rango": 2,
+        "duracion": 1
+      },
+      {
+        "nombre": "Genio Teórico",
+        "tipo": "pasiva",
+        "descripcion": "Gana +5 de maná por cada hechizo lanzado",
+        "trigger": "habilidad_usada"
+      }
+    ],
+    "descripcion": "Físico teórico alemán creador de la relatividad"
+  },
+  {
+    "id": 18,
+    "nombre": "Miguel de Cervantes 18",
+    "tier": 1,
+    "costo": 2,
+    "rol": "escritor",
+    "categoria": "artistas",
+    "stats": {
+      "vida": 55,
+      "dano_fisico": 20,
+      "dano_magico": 15,
+      "defensa_fisica": 10,
+      "defensa_magica": 12,
+      "rango_movimiento": 1,
+      "rango_ataque": 2
+    },
+    "habilidades": [
+      {
+        "nombre": "Ingenio Literario",
+        "tipo": "activa",
+        "descripcion": "Confunde a un enemigo disminuyendo su defensa",
+        "costo_mana": 25,
+        "cooldown": 3,
+        "rango": 2,
+        "duracion": 1
+      },
+      {
+        "nombre": "Quijotesco",
+        "tipo": "pasiva",
+        "descripcion": "Al recibir daño físico, gana +2 ataque",
+        "trigger": "al_recibir_dano"
+      }
+    ],
+    "descripcion": "Autor de Don Quijote, uno de los grandes escritores españoles"
+  },
+  {
+    "id": 19,
+    "nombre": "Marco Polo 19",
+    "tier": 2,
+    "costo": 3,
+    "rol": "explorador",
+    "categoria": "aventureros",
+    "stats": {
+      "vida": 65,
+      "dano_fisico": 18,
+      "dano_magico": 15,
+      "defensa_fisica": 14,
+      "defensa_magica": 10,
+      "rango_movimiento": 3,
+      "rango_ataque": 1
+    },
+    "habilidades": [
+      {
+        "nombre": "Ruta de la Seda",
+        "tipo": "activa",
+        "descripcion": "Genera 1 oro extra por cada casilla recorrida este turno",
+        "costo_mana": 30,
+        "cooldown": 3,
+        "duracion": 1
+      },
+      {
+        "nombre": "Comerciante Experto",
+        "tipo": "pasiva",
+        "descripcion": "Los costos de la tienda se reducen en 1",
+        "trigger": "permanente"
+      }
+    ],
+    "descripcion": "Famoso explorador veneciano y mercader"
+  },
+  {
+    "id": 20,
+    "nombre": "Rosalind Franklin 20",
+    "tier": 2,
+    "costo": 3,
+    "rol": "investigadora",
+    "categoria": "cientificos",
+    "stats": {
+      "vida": 70,
+      "dano_fisico": 12,
+      "dano_magico": 35,
+      "defensa_fisica": 9,
+      "defensa_magica": 20,
+      "rango_movimiento": 2,
+      "rango_ataque": 2
+    },
+    "habilidades": [
+      {
+        "nombre": "Difracción de Rayos X",
+        "tipo": "activa",
+        "descripcion": "Reduce la defensa mágica de todos los enemigos",
+        "costo_mana": 40,
+        "cooldown": 4,
+        "rango": 3,
+        "duracion": 2
+      },
+      {
+        "nombre": "Pionera del ADN",
+        "tipo": "pasiva",
+        "descripcion": "Los aliados científicos ganan +5 de daño mágico",
+        "trigger": "permanente"
+      }
+    ],
+    "descripcion": "Científica clave en el descubrimiento de la estructura del ADN"
   }
 ]
