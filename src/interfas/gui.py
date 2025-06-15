@@ -6,6 +6,7 @@ from src.utils.helpers import log_evento
 
 from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
+from src.game.combate.mapa.mapa_global import MapaGlobal
 
 
 class AutoBattlerGUI:
@@ -62,7 +63,7 @@ class AutoBattlerGUI:
         self.crear_tab_tienda()
         self.crear_tab_subasta()
         self.crear_tab_tablero()
-        self.crear_tab_combate()
+        self.crear_tab_enfrentamiento()
 
         # Controles de Testeo (ocultos por defecto)
         self.frame_testeo = ttk.LabelFrame(self.root, text="Controles de Testeo")
@@ -207,36 +208,20 @@ class AutoBattlerGUI:
         self.lbl_modo_mover = ttk.Label(control_frame, text="")
         self.lbl_modo_mover.pack()
 
-    def crear_tab_combate(self):
+    def crear_tab_enfrentamiento(self):
         frame = ttk.Frame(self.notebook)
-        self.notebook.add(frame, text="Combate")
+        self.notebook.add(frame, text="Enfrentamiento")
 
-        # Info de turno
-        turno_frame = ttk.LabelFrame(frame, text="Estado del Combate")
-        turno_frame.pack(fill="x", padx=10, pady=5)
+        from src.interfas.interfaz_mapa_global import InterfazMapaGlobal
 
-        self.lbl_turno_actual = ttk.Label(turno_frame, text="Turno: -", font=("Arial", 14))
-        self.lbl_turno_actual.pack(pady=10)
+        self.mapa_global = MapaGlobal()
+        self.interfaz_mapa = InterfazMapaGlobal(frame, self.mapa_global)
+        self.interfaz_mapa.pack(fill="both", expand=True)
 
-        # Lista de cartas en combate
-        cartas_frame = ttk.LabelFrame(frame, text="Tus Cartas en Combate")
-        cartas_frame.pack(fill="both", expand=True, padx=10, pady=5)
-
-        self.tree_combate = ttk.Treeview(cartas_frame, columns=("nombre", "vida", "coordenada", "estado"))
-        self.tree_combate.heading("#0", text="ID")
-        self.tree_combate.heading("nombre", text="Nombre")
-        self.tree_combate.heading("vida", text="Vida")
-        self.tree_combate.heading("coordenada", text="Posición")
-        self.tree_combate.heading("estado", text="Estado")
-        self.tree_combate.pack(fill="both", expand=True, padx=5, pady=5)
-
-        # Botones de órdenes
-        ordenes_frame = ttk.Frame(cartas_frame)
-        ordenes_frame.pack(fill="x", padx=5, pady=5)
-
-        ttk.Button(ordenes_frame, text="Atacar", command=self.ordenar_ataque).pack(side="left")
-        ttk.Button(ordenes_frame, text="Mover", command=self.ordenar_movimiento).pack(side="left", padx=(5, 0))
-        ttk.Button(ordenes_frame, text="Usar Habilidad", command=self.usar_habilidad).pack(side="left", padx=(5, 0))
+        info_frame = ttk.LabelFrame(frame, text="Turno Actual")
+        info_frame.pack(fill="x")
+        self.lbl_turno_actual = ttk.Label(info_frame, text="Turno: -")
+        self.lbl_turno_actual.pack(side="left", padx=5)
 
     # === MÉTODOS DE CONTROL ===
 
@@ -309,6 +294,16 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
         if self.motor.modo_testeo:
             self.actualizar_controles_testeo()
+
+        # Habilitar/deshabilitar controles según fase
+        if self.motor.fase_actual == "preparacion":
+            for i in range(1, 4):
+                self.notebook.tab(i, state="normal")
+            self.canvas_tablero.bind("<Button-1>", self.on_canvas_click)
+        else:
+            for i in range(1, 4):
+                self.notebook.tab(i, state="disabled")
+            self.canvas_tablero.unbind("<Button-1>")
 
     def actualizar_banco(self):
         self.listbox_banco.delete(0, tk.END)
