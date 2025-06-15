@@ -42,18 +42,28 @@ class MapaGlobal:
         zonas = self.zonas_rojas if color == "rojo" else self.zonas_azules
         log_evento(f"🗺️ Ubicando {jugador.nombre} en zona {color.upper()}")
 
+        cartas_pendientes = [
+            (coord, carta)
+            for coord, carta in jugador.tablero.celdas.items()
+            if carta is not None
+        ]
+
         cartas_colocadas = 0
         for zona in zonas:
-            cartas_restantes = [c for c in jugador.cartas_banco if c is not None and c.coordenada is None]
-            for carta in cartas_restantes:
-                coord = zona.obtener_coordenada_libre(self.tablero)
-                if coord:
-                    carta.coordenada = coord
-                    self.tablero.colocar_carta(coord, carta)
-                    log_evento(f"   📍 {carta.nombre} colocada en {coord}")
+            if not cartas_pendientes:
+                break
+            nuevas_pendientes = []
+            for coord_local, carta in cartas_pendientes:
+                coord_global = zona.convertir_a_global(coord_local)
+                if coord_global in zona.coordenadas and self.tablero.esta_vacia(coord_global):
+                    carta.coordenada = coord_global
+                    self.tablero.colocar_carta(coord_global, carta)
+                    log_evento(f"   📍 {carta.nombre} colocada en {coord_global}")
                     cartas_colocadas += 1
                 else:
-                    break
+                    nuevas_pendientes.append((coord_local, carta))
+
+            cartas_pendientes = nuevas_pendientes
 
         if cartas_colocadas == 0:
             log_evento(f"   ⚠️ {jugador.nombre} no tiene cartas para colocar")
