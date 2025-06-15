@@ -6,59 +6,67 @@ from collections import defaultdict
 from src.utils.helpers import log_evento
 
 
-def aplicar_fusiones(tablero, banco: list) -> list[str]:
-    """
-    Detecta tríos de cartas iguales (por nombre) entre el tablero y el banco,
-    y realiza la fusión dejando la carta mejorada en la posición original de alguna del tablero o en el banco si no hay.
+def aplicar_fusiones(tablero, banco: list, limite: int = 10) -> list[str]:
+    """Realiza fusiones de cartas entre tablero y banco.
+
+    Ejecuta una sola fusión por iteración y vuelve a escanear el estado, lo que
+    evita bucles infinitos cuando las colecciones cambian durante el proceso.
     """
     eventos = []
-    cartas_por_nombre = defaultdict(list)  # nombre -> lista de (fuente, ubicacion, carta)
+    iteraciones = 0
 
-    # Agrupar cartas del tablero
-    for coord, carta in tablero.celdas.items():
-        if carta:
-            cartas_por_nombre[carta.nombre].append(("tablero", coord, carta))
+    while iteraciones < limite:
+        iteraciones += 1
 
-    # Agrupar cartas del banco
-    for idx, carta in enumerate(banco):
-        if carta:
-            cartas_por_nombre[carta.nombre].append(("banco", idx, carta))
+        # Recalcular agrupaciones en cada iteración
+        cartas_por_nombre = defaultdict(list)
+        for coord, carta in tablero.celdas.items():
+            if carta:
+                cartas_por_nombre[carta.nombre].append(("tablero", coord, carta))
+        for idx, carta in enumerate(banco):
+            if carta:
+                cartas_por_nombre[carta.nombre].append(("banco", idx, carta))
 
-    indices_eliminar = set()
-    fusiones_en_banco = {}
+        fusion_realizada = False
+        for nombre, grupo in cartas_por_nombre.items():
+            if len(grupo) >= 3:
+                seleccionadas = grupo[:3]
+                fuentes, ubicaciones, cartas = zip(*seleccionadas)
 
-    # Procesar fusiones
-    for nombre, grupo in cartas_por_nombre.items():
-        while len(group := grupo) >= 3:
-            seleccionadas = group[:3]
-            group = group[3:]
-            cartas_por_nombre[nombre] = group
+                carta_fusionada = cartas[0]
+                carta_fusionada.tier += 1
+                carta_fusionada.vida_maxima += 50
+                carta_fusionada.vida_actual += 50
+                carta_fusionada.dano_fisico_actual += 5
+                carta_fusionada.dano_magico_actual += 5
 
-            fuentes, ubicaciones, cartas = zip(*seleccionadas)
-            carta_fusionada = cartas[0]
-            carta_fusionada.tier += 1
-            carta_fusionada.vida_maxima += 50
-            carta_fusionada.vida_actual += 50
-            carta_fusionada.dano_fisico_actual += 5
-            carta_fusionada.dano_magico_actual += 5
+                for fuente, ubicacion in list(zip(fuentes, ubicaciones))[1:]:
+                    if fuente == "tablero":
+                        tablero.quitar_carta(ubicacion)
+                    else:
+                        banco[ubicacion] = None
 
-            # Remover otras dos
-            restantes = list(zip(fuentes, ubicaciones))[1:]
-            for fuente, ubicacion in restantes:
-                if fuente == "tablero":
-                    tablero.quitar_carta(ubicacion)
+                ubicacion_final = (fuentes[0], ubicaciones[0])
+                if ubicacion_final[0] == "tablero":
+                    tablero.celdas[ubicacion_final[1]] = carta_fusionada
                 else:
-                    indices_eliminar.add(ubicacion)
+                    banco[ubicacion_final[1]] = carta_fusionada
 
-            # Colocar la fusionada
-            ubicacion_final = (fuentes[0], ubicaciones[0])
-            if ubicacion_final[0] == "tablero":
-                tablero.celdas[ubicacion_final[1]] = carta_fusionada
-            else:
-                fusiones_en_banco[ubicacion_final[1]] = carta_fusionada
+                log_evento(
+                    f"✨ Fusión realizada: {nombre} → Estrella {carta_fusionada.tier}"
+                )
+                eventos.append(
+                    f"{nombre} fusionado en {ubicacion_final} → tier {carta_fusionada.tier}"
+                )
 
-            log_evento(f"✨ Fusión realizada: {nombre} → Estrella {carta_fusionada.tier}")
-            eventos.append(f"{nombre} fusionado en {ubicacion_final} → tier {carta_fusionada.tier}")
+                fusion_realizada = True
+                break
+
+        if not fusion_realizada:
+            break
+
+    if iteraciones >= limite and fusion_realizada:
+        log_evento("⚠️ Límite de iteraciones de fusión alcanzado")
 
     # Reconstruir banco sin huecos
     if indices_eliminar or fusiones_en_banco:

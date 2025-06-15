@@ -12,22 +12,4 @@ class GameConfig:
         self.subasta_ratio = data.get("subasta_ratio", 0.5)
         self.oro_por_ronda = data.get("oro_por_ronda", 10)
         self.cartas_por_tienda = data.get("cartas_por_tienda", 5)
-        # Cantidad de copias de cada carta por tier
-        self.copias_por_tier = {
-            1: data.get("copias_por_tier", {}).get("1", 5),
-            2: data.get("copias_por_tier", {}).get("2", 3),
-            3: data.get("copias_por_tier", {}).get("3", 2),
-        }
-
-        # Limitar cantidad de tipos de carta por tier (0 = sin límite)
-        self.max_cartas_por_tier = {
-            1: data.get("max_cartas_por_tier", {}).get("1", 0),
-            2: data.get("max_cartas_por_tier", {}).get("2", 0),
-            3: data.get("max_cartas_por_tier", {}).get("3", 0),
-        }
-
-        # Lista de IDs de cartas permitidas (vacío = todas)
-        self.cartas_activas = data.get("cartas_activas", [])
-
-        # Modo testeo manual
-        self.modo_testeo = data.get("modo_testeo", False)
+        self.costos_nivel = data.get("costos_nivel", [0, 2, 6, 12, 20, 30, 42, 56, 72, 90])
