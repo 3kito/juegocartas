@@ -2,6 +2,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
+from src.utils.helpers import log_evento
+
 from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
 
@@ -16,6 +18,11 @@ class AutoBattlerGUI:
         self.root = tk.Tk()
         self.root.title("Auto-Battler Test Interface")
         self.root.geometry("1200x800")
+
+        # Configuración de tablero
+        self.hex_size = 30
+        self.board_center = (300, 250)
+        self.hover_hex = None
 
         self.crear_interfaz_principal()
 
@@ -84,12 +91,7 @@ class AutoBattlerGUI:
         self.listbox_banco = tk.Listbox(banco_frame)
         self.listbox_banco.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Botones para mover cartas
-        btn_frame = ttk.Frame(banco_frame)
-        btn_frame.pack(fill="x", padx=5, pady=5)
-
-        ttk.Button(btn_frame, text="Mover al Tablero",
-                   command=self.mover_carta_a_tablero).pack(side="left")
+        # (Botón mover al tablero eliminado)
 
     def crear_tab_tienda(self):
         frame = ttk.Frame(self.notebook)
@@ -143,6 +145,8 @@ class AutoBattlerGUI:
         # Canvas para dibujar el tablero hexagonal
         self.canvas_tablero = tk.Canvas(frame, bg="lightgray", width=600, height=500)
         self.canvas_tablero.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        self.canvas_tablero.bind("<Button-1>", self.on_canvas_click)
+        self.canvas_tablero.bind("<Motion>", self.on_canvas_motion)
 
         # Panel lateral con controles
         control_frame = ttk.Frame(frame)
@@ -154,6 +158,21 @@ class AutoBattlerGUI:
 
         ttk.Button(control_frame, text="Quitar del Tablero",
                    command=self.quitar_carta_tablero).pack(fill="x")
+
+        ttk.Separator(control_frame, orient="horizontal").pack(fill="x", pady=10)
+        ttk.Label(control_frame, text="Cartas en Banco:").pack()
+
+        banco_list_frame = ttk.Frame(control_frame)
+        banco_list_frame.pack(fill="both", expand=True)
+        self.listbox_banco_tablero = tk.Listbox(banco_list_frame, width=25)
+        scrollbar = ttk.Scrollbar(banco_list_frame, orient="vertical", command=self.listbox_banco_tablero.yview)
+        self.listbox_banco_tablero.config(yscrollcommand=scrollbar.set)
+        self.listbox_banco_tablero.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        ttk.Label(control_frame, text="Selecciona carta → Clic en tablero").pack(pady=(5, 0))
+        self.lbl_coord_actual = ttk.Label(control_frame, text="Coordenada: -")
+        self.lbl_coord_actual.pack()
 
     def crear_tab_combate(self):
         frame = ttk.Frame(self.notebook)
@@ -254,9 +273,14 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
     def actualizar_banco(self):
         self.listbox_banco.delete(0, tk.END)
+        if hasattr(self, 'listbox_banco_tablero'):
+            self.listbox_banco_tablero.delete(0, tk.END)
         cartas_validas = [c for c in self.jugador_actual.cartas_banco if c is not None]
         for i, carta in enumerate(cartas_validas):
-            self.listbox_banco.insert(tk.END, f"[{i}] {carta.nombre} (Tier {carta.tier})")
+            texto = f"[{i}] {carta.nombre} (Tier {carta.tier})"
+            self.listbox_banco.insert(tk.END, texto)
+            if hasattr(self, 'listbox_banco_tablero'):
+                self.listbox_banco_tablero.insert(tk.END, texto)
 
     def actualizar_tienda(self):
         self.listbox_tienda.delete(0, tk.END)
@@ -302,8 +326,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
     def dibujar_tablero_hexagonal(self):
         # Dibujar una representación simple del tablero hexagonal
-        center_x, center_y = 300, 250
-        hex_size = 30
+        center_x, center_y = self.board_center
+        hex_size = self.hex_size
 
         # Dibujar hexágonos para cada coordenada
         for coord in self.jugador_actual.tablero.celdas.keys():
@@ -330,6 +354,63 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             points.extend([px, py])
 
         self.canvas_tablero.create_polygon(points, fill=color, outline="black")
+
+    def pixel_a_hex(self, x, y):
+        import math
+        cx, cy = self.board_center
+        size = self.hex_size
+        x = x - cx
+        y = y - cy
+        q = (2/3 * x) / size
+        r = (-1/3 * x + math.sqrt(3)/3 * y) / size
+        return self.hex_round(q, r)
+
+    def hex_round(self, q, r):
+        x = q
+        z = r
+        y = -x - z
+        rx = round(x)
+        ry = round(y)
+        rz = round(z)
+        x_diff = abs(rx - x)
+        y_diff = abs(ry - y)
+        z_diff = abs(rz - z)
+        if x_diff > y_diff and x_diff > z_diff:
+            rx = -ry - rz
+        elif y_diff > z_diff:
+            ry = -rx - rz
+        else:
+            rz = -rx - ry
+        from src.game.tablero.coordenada import CoordenadaHexagonal
+        return CoordenadaHexagonal(int(rx), int(rz))
+
+    def on_canvas_click(self, event):
+        if not self.jugador_actual:
+            return
+        if not self.listbox_banco_tablero.curselection():
+            messagebox.showwarning("Advertencia", "Selecciona una carta del banco")
+            return
+
+        coord = self.pixel_a_hex(event.x, event.y)
+        if coord not in self.jugador_actual.tablero.celdas:
+            messagebox.showwarning("Advertencia", "Coordenada fuera del tablero")
+            return
+
+        indice = self.listbox_banco_tablero.curselection()[0]
+        if self.jugador_actual.colocar_carta_en_coordenada(indice, coord):
+            messagebox.showinfo("Éxito", f"Carta colocada en {coord}")
+        else:
+            messagebox.showwarning("Error", "No se pudo colocar en tablero")
+        self.actualizar_interfaz()
+
+    def on_canvas_motion(self, event):
+        if not self.jugador_actual:
+            return
+        coord = self.pixel_a_hex(event.x, event.y)
+        if coord in self.jugador_actual.tablero.celdas:
+            self.lbl_coord_actual.config(text=f"Coordenada: {coord}")
+        else:
+            self.lbl_coord_actual.config(text="Coordenada: -")
 
     # === MÉTODOS DE ACCIÓN ===
 
@@ -363,7 +444,9 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             messagebox.showerror("Error", "Ingresa un monto válido")
             return
 
-        carta_id = int(seleccion[0])
+        carta_id = seleccion[0]
+        log_evento(
+            f"🎯 Intentando ofertar: jugador={self.jugador_actual.nombre}, carta_id={carta_id}, monto={oferta}")
         subasta = self.motor.get_subasta()
         resultado = subasta.ofertar(self.jugador_actual, carta_id, oferta)
         messagebox.showinfo("Oferta", resultado)

@@ -28,8 +28,13 @@ class SistemaSubastas:
             else:
                 log_evento(f"   ⚠️ No se pudo generar carta {i + 1} para subasta")
 
-    def ofertar(self, jugador, carta_id: int, monto: int) -> str:
+    def ofertar(self, jugador, carta_id: int | str, monto: int) -> str:
+        carta_id = str(carta_id)
+        log_evento(f"📨 Oferta recibida: carta_id={carta_id} (tipo: {type(carta_id)})")
+        log_evento(f"📋 Cartas disponibles: {list(self.cartas_subastadas.keys())}")
+
         if carta_id not in self.cartas_subastadas:
+            log_evento(f"❌ Carta {carta_id} no encontrada. Disponibles: {list(self.cartas_subastadas.keys())}")
             return "❌ Carta no disponible en subasta"
 
         entrada = self.cartas_subastadas[carta_id]

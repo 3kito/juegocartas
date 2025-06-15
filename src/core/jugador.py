@@ -204,6 +204,30 @@ class Jugador:
             return True
         return False
 
+    def colocar_carta_en_coordenada(self, indice_banco: int, coordenada_hex) -> bool:
+        """Coloca una carta del banco en una coordenada específica del tablero"""
+        if not (0 <= indice_banco < len(self.cartas_banco)):
+            log_evento(f"❌ Índice de banco inválido: {indice_banco}")
+            return False
+
+        if not self.tablero.esta_dentro_del_tablero(coordenada_hex):
+            log_evento(f"❌ Coordenada {coordenada_hex} fuera del tablero")
+            return False
+
+        if not self.tablero.esta_vacia(coordenada_hex):
+            log_evento(f"❌ La celda {coordenada_hex} ya está ocupada")
+            return False
+
+        if not self.puede_colocar_carta_en_tablero():
+            log_evento(
+                f"❌ {self.nombre} no puede colocar más cartas (límite: {self.obtener_max_cartas_tablero()})")
+            return False
+
+        carta = self.cartas_banco.pop(indice_banco)
+        self.tablero.colocar_carta(coordenada_hex, carta)
+        log_evento(f"✅ {self.nombre} coloca '{carta.nombre}' en {coordenada_hex}")
+        return True
+
     def mover_carta_en_tablero(self, desde, hacia):
         """Mueve una carta dentro del tablero"""
         if self.tablero.mover_carta(desde, hacia):
