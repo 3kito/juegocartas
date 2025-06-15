@@ -40,6 +40,10 @@ class ControladorFasePreparacion:
         self.subastas = SistemaSubastas(self.jugadores, modo_testeo=self.modo_testeo)
         self.subastas.generar_subasta(cartas_subasta)
 
+    def pausar_para_ofertas(self):
+        """Pausa el flujo para permitir a los jugadores ofertar manualmente"""
+        log_evento("⏸️ Pausa para ofertas - esperando ofertas de jugadores")
+
     def aplicar_fusiones_automaticas(self):
         for jugador in self.jugadores:
             eventos = aplicar_fusiones(jugador.tablero, jugador.cartas_banco)

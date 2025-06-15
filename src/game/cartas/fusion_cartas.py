@@ -24,12 +24,15 @@ def aplicar_fusiones(tablero, banco: list) -> list[str]:
         if carta:
             cartas_por_nombre[carta.nombre].append(("banco", idx, carta))
 
+    indices_eliminar = set()
+    fusiones_en_banco = {}
+
     # Procesar fusiones
     for nombre, grupo in cartas_por_nombre.items():
         while len(group := grupo) >= 3:
             seleccionadas = group[:3]
-            grupo = group[3:]
-            cartas_por_nombre[nombre] = grupo
+            group = group[3:]
+            cartas_por_nombre[nombre] = group
 
             fuentes, ubicaciones, cartas = zip(*seleccionadas)
             carta_fusionada = cartas[0]
@@ -45,16 +48,28 @@ def aplicar_fusiones(tablero, banco: list) -> list[str]:
                 if fuente == "tablero":
                     tablero.quitar_carta(ubicacion)
                 else:
-                    banco[ubicacion] = None
+                    indices_eliminar.add(ubicacion)
 
             # Colocar la fusionada
             ubicacion_final = (fuentes[0], ubicaciones[0])
             if ubicacion_final[0] == "tablero":
                 tablero.celdas[ubicacion_final[1]] = carta_fusionada
             else:
-                banco[ubicacion_final[1]] = carta_fusionada
+                fusiones_en_banco[ubicacion_final[1]] = carta_fusionada
 
             log_evento(f"✨ Fusión realizada: {nombre} → Estrella {carta_fusionada.tier}")
             eventos.append(f"{nombre} fusionado en {ubicacion_final} → tier {carta_fusionada.tier}")
+
+    # Reconstruir banco sin huecos
+    if indices_eliminar or fusiones_en_banco:
+        nuevo_banco = []
+        for idx, carta in enumerate(banco):
+            if idx in indices_eliminar:
+                continue
+            if idx in fusiones_en_banco:
+                nuevo_banco.append(fusiones_en_banco[idx])
+            else:
+                nuevo_banco.append(carta)
+        banco[:] = nuevo_banco
 
     return eventos

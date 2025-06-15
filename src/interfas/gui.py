@@ -254,7 +254,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
     def actualizar_banco(self):
         self.listbox_banco.delete(0, tk.END)
-        for i, carta in enumerate(self.jugador_actual.cartas_banco):
+        cartas_validas = [c for c in self.jugador_actual.cartas_banco if c is not None]
+        for i, carta in enumerate(cartas_validas):
             self.listbox_banco.insert(tk.END, f"[{i}] {carta.nombre} (Tier {carta.tier})")
 
     def actualizar_tienda(self):
@@ -295,7 +296,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
         # Actualizar lista
         self.listbox_tablero.delete(0, tk.END)
-        cartas_tablero = self.jugador_actual.obtener_cartas_tablero()
+        cartas_tablero = [par for par in self.jugador_actual.obtener_cartas_tablero() if par[1] is not None]
         for coord, carta in cartas_tablero:
             self.listbox_tablero.insert(tk.END, f"{carta.nombre} en {coord}")
 
@@ -376,11 +377,13 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
         indice = seleccion[0]
         carta = self.jugador_actual.sacar_carta_del_banco(indice)
-        if carta:
-            if self.jugador_actual.colocar_carta_en_tablero(carta):
+        if carta is None:
+            messagebox.showwarning("Error", "Esa posición del banco está vacía")
+        else:
+            if self.jugador_actual.colocar_carta_en_tablero(carta, coordenada=None):
                 messagebox.showinfo("Éxito", f"{carta.nombre} colocada en tablero")
             else:
-                self.jugador_actual.agregar_carta_al_banco(carta)  # Devolver si no se pudo
+                self.jugador_actual.agregar_carta_al_banco(carta)
                 messagebox.showwarning("Error", "No se pudo colocar en tablero")
         self.actualizar_interfaz()
 
