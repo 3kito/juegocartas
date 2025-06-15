@@ -118,8 +118,9 @@ class CartaBase:
             'habilidades_usadas': 0,
             'enemigos_eliminados': 0
         }
-        self.modo_control = "pasivo"  # 'activo' o 'pasivo'
+        self.modo_control = "pasivo"  # 'activo', 'pasivo' u 'orden_manual'
         self.orden_manual_pendiente = False
+        self.orden_actual = None
 
     @classmethod
     def crear_basica(cls, id, nombre="Carta", tier=1):
@@ -326,13 +327,28 @@ class CartaBase:
     # === MÉTODOS DE INFORMACIÓN ===
 
     def tiene_orden_manual(self) -> bool:
-        return self.orden_manual_pendiente
+        """Indica si la carta tiene una orden manual en curso"""
+        return (
+            self.orden_actual is not None
+            and self.orden_actual.get("progreso") in {"pendiente", "ejecutando"}
+        )
 
-    def marcar_orden_manual(self):
+    def marcar_orden_manual(self, tipo: str, objetivo=None, datos_adicionales=None):
+        """Registra una nueva orden manual para la carta"""
+        self.orden_actual = {
+            "tipo": tipo,
+            "objetivo": objetivo,
+            "progreso": "pendiente",
+            "datos_adicionales": datos_adicionales or {},
+        }
+        self.modo_control = "orden_manual"
         self.orden_manual_pendiente = True
 
     def limpiar_orden_manual(self):
         self.orden_manual_pendiente = False
+        self.orden_actual = None
+        if self.modo_control == "orden_manual":
+            self.modo_control = "pasivo"
     def obtener_habilidades_disponibles(self) -> List[Habilidad]:
         """Retorna lista de habilidades que pueden ser usadas"""
         return [hab for i, hab in enumerate(self.habilidades)

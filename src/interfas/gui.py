@@ -1,6 +1,6 @@
 # interfaces/main_gui.py
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 
 from src.utils.helpers import log_evento
 
@@ -29,6 +29,7 @@ class AutoBattlerGUI:
         self._ultima_fase_mapa = None
         self._ultimo_estado_mapa = None
         self._panel_coords = []
+        self.carta_seleccionada = None
 
         self.crear_interfaz_principal()
 
@@ -226,6 +227,7 @@ class AutoBattlerGUI:
         ttk.Label(panel, text="Cartas del Jugador Actual:").pack(anchor="w")
         self.listbox_enfrentamiento = tk.Listbox(panel, height=15)
         self.listbox_enfrentamiento.pack(fill="both", expand=True, pady=2)
+        self.listbox_enfrentamiento.bind('<<ListboxSelect>>', self.on_seleccionar_carta_enfrentamiento)
         btns = ttk.Frame(panel)
         btns.pack(fill="x", pady=2)
         ttk.Button(btns, text="Centrar en Carta", command=self.centrar_en_carta).pack(fill="x")
@@ -239,6 +241,21 @@ class AutoBattlerGUI:
         self.entry_r = ttk.Entry(self.frame_mover_test, width=4)
         self.entry_r.grid(row=0, column=3)
         ttk.Button(self.frame_mover_test, text="Mover Aquí", command=self.mover_carta_test).grid(row=1, column=0, columnspan=4, pady=2)
+
+        # Panel de órdenes manuales
+        self.frame_ordenes = ttk.LabelFrame(panel, text="Órdenes")
+        self.frame_ordenes.pack(fill="x", pady=5)
+        self.lbl_orden_carta = ttk.Label(self.frame_ordenes, text="🎮 ÓRDENES PARA: -")
+        self.lbl_orden_carta.pack(anchor="w")
+        orden_btns = ttk.Frame(self.frame_ordenes)
+        orden_btns.pack(fill="x", pady=2)
+        ttk.Button(orden_btns, text="Mover a Posición", command=self.ordenar_movimiento).pack(fill="x")
+        ttk.Button(orden_btns, text="Atacar Enemigo", command=self.ordenar_ataque).pack(fill="x")
+        ttk.Button(orden_btns, text="Cambiar Comportamiento", command=self.cambiar_comportamiento_carta).pack(fill="x")
+        self.lbl_estado_orden = ttk.Label(self.frame_ordenes, text="Estado: -")
+        self.lbl_estado_orden.pack(anchor="w")
+        self.lbl_turno_req = ttk.Label(self.frame_ordenes, text="Turno requerido: -")
+        self.lbl_turno_req.pack(anchor="w")
 
         info_frame = ttk.LabelFrame(frame, text="Estado Combate")
         info_frame.pack(fill="x")
@@ -439,6 +456,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                     tk.END, f"{carta.nombre} - Pos: ({coord.q}, {coord.r})"
                 )
                 self._panel_coords.append(coord)
+
+        self.actualizar_panel_ordenes()
 
     def dibujar_tablero_hexagonal(self):
         # Dibujar una representación simple del tablero hexagonal
@@ -687,14 +706,101 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         else:
             messagebox.showwarning("Error", "No se pudo mover la carta")
 
+    def on_seleccionar_carta_enfrentamiento(self, event):
+        if not (self.motor and self.motor.mapa_global):
+            return
+        sel = self.listbox_enfrentamiento.curselection()
+        if not sel or sel[0] >= len(self._panel_coords):
+            self.carta_seleccionada = None
+        else:
+            coord = self._panel_coords[sel[0]]
+            self.carta_seleccionada = self.motor.mapa_global.tablero.obtener_carta_en(coord)
+        self.actualizar_panel_ordenes()
+
     def ordenar_ataque(self):
+        if not self.carta_seleccionada:
+            return
         if self.motor.fase_actual != "combate":
             messagebox.showwarning("Advertencia", "No estás en fase de combate")
             return
-        messagebox.showinfo("Info", "Órdenes de combate en desarrollo")
+        turno = None
+        if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
+            turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
+        color = getattr(self.carta_seleccionada.duenio, "color_fase_actual", None)
+        if turno != color:
+            messagebox.showwarning("Advertencia", "NO ES SU TURNO")
+            return
+        q = simpledialog.askinteger("Atacar", "Coordenada q del objetivo:")
+        r = simpledialog.askinteger("Atacar", "Coordenada r del objetivo:")
+        if q is None or r is None:
+            return
+        from src.game.tablero.coordenada import CoordenadaHexagonal
+        coord = CoordenadaHexagonal(q, r)
+        objetivo = self.motor.mapa_global.tablero.obtener_carta_en(coord)
+        if objetivo is None or self.carta_seleccionada.es_aliado_de(objetivo):
+            messagebox.showwarning("Error", "Objetivo inválido")
+            return
+        self.carta_seleccionada.marcar_orden_manual("atacar", objetivo)
+        self.actualizar_panel_ordenes()
 
     def ordenar_movimiento(self):
-        messagebox.showinfo("Info", "Órdenes de movimiento en desarrollo")
+        if not self.carta_seleccionada:
+            return
+        turno = None
+        if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
+            turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
+        color = getattr(self.carta_seleccionada.duenio, "color_fase_actual", None)
+        if turno != color:
+            messagebox.showwarning("Advertencia", "NO ES SU TURNO")
+            return
+        q = simpledialog.askinteger("Mover", "Coordenada q destino:")
+        r = simpledialog.askinteger("Mover", "Coordenada r destino:")
+        if q is None or r is None:
+            return
+        from src.game.tablero.coordenada import CoordenadaHexagonal
+        destino = CoordenadaHexagonal(q, r)
+        tablero = self.motor.mapa_global.tablero
+        if not tablero.esta_dentro_del_tablero(destino) or not tablero.esta_vacia(destino):
+            messagebox.showwarning("Error", "Destino inválido")
+            return
+        self.carta_seleccionada.marcar_orden_manual("mover", destino)
+        self.actualizar_panel_ordenes()
+
+    def cambiar_comportamiento_carta(self):
+        if not self.carta_seleccionada:
+            return
+        turno = None
+        if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
+            turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
+        color = getattr(self.carta_seleccionada.duenio, "color_fase_actual", None)
+        if turno != color:
+            messagebox.showwarning("Advertencia", "NO ES SU TURNO")
+            return
+        nuevo = simpledialog.askstring("Comportamiento", "Nuevo comportamiento:", initialvalue="agresivo")
+        if not nuevo:
+            return
+        self.carta_seleccionada.marcar_orden_manual("cambiar_comportamiento", datos_adicionales={"nuevo_comportamiento": nuevo})
+        self.actualizar_panel_ordenes()
+
+    def actualizar_panel_ordenes(self):
+        if not hasattr(self, "lbl_orden_carta"):
+            return
+        if not self.carta_seleccionada:
+            self.lbl_orden_carta.config(text="🎮 ÓRDENES PARA: -")
+            self.lbl_estado_orden.config(text="Estado: -")
+            self.lbl_turno_req.config(text="Turno requerido: -")
+            return
+
+        self.lbl_orden_carta.config(text=f"🎮 ÓRDENES PARA: {self.carta_seleccionada.nombre}")
+        orden = self.carta_seleccionada.orden_actual
+        estado = orden.get("progreso") if orden else "-"
+        self.lbl_estado_orden.config(text=f"Estado: {estado}")
+        turno = None
+        if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
+            turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
+        rojo = "✅" if turno == "rojo" else "❌"
+        azul = "✅" if turno == "azul" else "❌"
+        self.lbl_turno_req.config(text=f"Turno requerido: ROJO {rojo} / AZUL {azul}")
 
     def usar_habilidad(self):
         messagebox.showinfo("Info", "Uso de habilidades en desarrollo")
