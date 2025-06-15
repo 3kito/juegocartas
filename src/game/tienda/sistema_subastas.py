@@ -8,11 +8,11 @@ from src.utils.helpers import log_evento
 
 
 class SistemaSubastas:
-    def __init__(self, jugadores: List, duracion_segundos: int = 15):
+    def __init__(self, jugadores: List, duracion_segundos: int = 15, modo_testeo: bool = False):
         self.jugadores = jugadores
-        self.cartas_subastadas: Dict[int, dict] = {}  # carta_id: {"carta": Carta, "mejor_oferta": int, "jugador": Jugador}
-        self.ofertas_por_jugador: Dict[int, List[int]] = {}  # jugador_id: [ids de cartas ofertadas]
-        self.tiempo_restante = duracion_segundos
+        self.cartas_subastadas: Dict[int, dict] = {}
+        self.ofertas_por_jugador: Dict[int, List[int]] = {}
+        self.tiempo_restante = None if modo_testeo else duracion_segundos
 
     # En src/game/tienda/sistema_subastas.py - método generar_subasta()
     def generar_subasta(self, cantidad: int = 3):

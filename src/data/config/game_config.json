@@ -5,5 +5,6 @@
   "cartas_por_tienda": 5,
   "copias_por_tier": {"1": 5, "2": 3, "3": 2},
   "max_cartas_por_tier": {"1": 0, "2": 0, "3": 0},
-  "cartas_activas": []
+  "cartas_activas": [],
+  "modo_testeo": false
 }

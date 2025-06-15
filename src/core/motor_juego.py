@@ -21,9 +21,22 @@ class MotorJuego:
         self.jugadores_vivos = list(jugadores)
         self.fase_actual = "preparacion"
         self.ronda = 1
-        # Controlador especializado para la fase de preparación
         self.config = GameConfig()
-        self.controlador_preparacion = ControladorFasePreparacion(self.jugadores_vivos, motor=self, config=self.config)
+        self.modo_testeo = self.config.modo_testeo
+
+        self.controlador_enfrentamiento = None
+
+        # Controlador especializado para la fase de preparación
+        self.controlador_preparacion = ControladorFasePreparacion(
+            self.jugadores_vivos,
+            motor=self,
+            config=self.config,
+            modo_testeo=self.modo_testeo
+        )
+
+        # Manejo de pasos manuales
+        self._pasos = []
+        self._indice_paso = 0
 
     def iniciar(self):
         log_evento("🎮 Iniciando juego...")
@@ -32,8 +45,10 @@ class MotorJuego:
         if not manager_cartas.cartas_cargadas:
             manager_cartas.cargar_cartas()
 
-
         self.controlador_preparacion.iniciar_fase(self.ronda)
+
+        if self.modo_testeo:
+            self._configurar_pasos_preparacion()
 
     def _ejecutar_fase_combate(self):
         self.fase_actual = "combate"
@@ -61,16 +76,20 @@ class MotorJuego:
             motor=self.motor,
             jugadores_por_color=jugadores_por_color,
             secuencia_turnos=secuencia,
-            al_terminar_fase=self.transicionar_a_fase_preparacion
+            al_terminar_fase=self.transicionar_a_fase_preparacion,
+            modo_testeo=self.modo_testeo
         )
 
         self.motor.agregar_componente(controlador)
-        controlador.iniciar_fase()
-
-        # 5. Ejecutar motor de tiempo real
-        self.motor.iniciar()
-        while not controlador.finalizada and self.motor.estado.value == "ejecutando":
-            time.sleep(0.1)
+        if self.modo_testeo:
+            self.controlador_enfrentamiento = controlador
+            self._configurar_pasos_combate()
+        else:
+            controlador.iniciar_fase()
+            # 5. Ejecutar motor de tiempo real
+            self.motor.iniciar()
+            while not controlador.finalizada and self.motor.estado.value == "ejecutando":
+                time.sleep(0.1)
     def transicionar_a_fase_preparacion(self):
         log_evento("🔄 Transición a fase de preparación...")
 
@@ -94,8 +113,15 @@ class MotorJuego:
         # Continuar con nueva ronda
         self.fase_actual = "preparacion"
         self.ronda += 1
-        self.controlador_preparacion = ControladorFasePreparacion(self.jugadores_vivos, motor=self, config=self.config)
+        self.controlador_preparacion = ControladorFasePreparacion(
+            self.jugadores_vivos,
+            motor=self,
+            config=self.config,
+            modo_testeo=self.modo_testeo
+        )
         self.controlador_preparacion.iniciar_fase(self.ronda)
+        if self.modo_testeo:
+            self._configurar_pasos_preparacion()
 
     def get_tienda_para(self, jugador_id: int):
         """Devuelve la tienda individual de un jugador"""
@@ -115,4 +141,39 @@ class MotorJuego:
 
     def iniciar_fase_enfrentamiento(self):
         self._ejecutar_fase_combate()
+
+    # === MODO TESTEO ===
+    def _configurar_pasos_preparacion(self):
+        self._pasos = [
+            ("Entregar oro base a jugadores", self.controlador_preparacion.entregar_oro),
+            ("Generar tiendas individuales", self.controlador_preparacion.generar_tiendas),
+            ("Generar cartas para subasta pública", self.controlador_preparacion.generar_subasta_publica),
+            ("Cerrar subasta y resolver ofertas", self.controlador_preparacion.cerrar_subasta),
+            ("Aplicar fusiones automáticas", self.controlador_preparacion.aplicar_fusiones_automaticas),
+            ("Finalizar preparación → Iniciar combate", self.controlador_preparacion.finalizar_fase),
+        ]
+        self._indice_paso = 0
+
+    def _configurar_pasos_combate(self):
+        self._pasos = [
+            ("Iniciar combate (generar mapa y ubicar cartas)", self.controlador_enfrentamiento.iniciar_fase),
+            ("Cambiar turno", self.controlador_enfrentamiento.cambiar_turno_manual),
+            ("Finalizar combate → Calcular daño → Nueva ronda", self.controlador_enfrentamiento.finalizar_fase),
+        ]
+        self._indice_paso = 0
+
+    def describir_proximo_paso(self) -> str:
+        if self._indice_paso < len(self._pasos):
+            return self._pasos[self._indice_paso][0]
+        return "Sin acciones pendientes"
+
+    def ejecutar_siguiente_paso(self):
+        if self._indice_paso >= len(self._pasos):
+            return
+        accion = self._pasos[self._indice_paso][1]
+        accion()
+        if self.fase_actual == "combate" and self._indice_paso == 1 and self.controlador_enfrentamiento and not self.controlador_enfrentamiento.finalizada:
+            pass
+        else:
+            self._indice_paso += 1
 

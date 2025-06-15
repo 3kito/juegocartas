@@ -2,13 +2,15 @@ from src.game.cartas.fusion_cartas import aplicar_fusiones
 from src.game.tienda.tienda_individual import TiendaIndividual
 from src.game.tienda.sistema_subastas import SistemaSubastas
 from src.utils.helpers import log_evento
+from src.data.config.game_config import GameConfig
 
 
 class ControladorFasePreparacion:
-    def __init__(self, jugadores: list, motor, config):
+    def __init__(self, jugadores: list, motor=None, config=None, modo_testeo: bool = False):
         self.jugadores = jugadores
         self.motor = motor
-        self.config = config
+        self.config = config or GameConfig()
+        self.modo_testeo = modo_testeo
         self.tiendas_individuales = {}
         self.subastas = None
         self.finalizada = False
@@ -16,23 +18,29 @@ class ControladorFasePreparacion:
     def iniciar_fase(self, ronda: int):
         log_evento(f"📦 Fase de preparación iniciada (Ronda {ronda})")
 
-        # 1. Entregar oro
+        if not self.modo_testeo:
+            self.entregar_oro()
+            self.generar_tiendas()
+            self.generar_subasta_publica()
+            self.aplicar_fusiones_automaticas()
+
+    def entregar_oro(self):
         for jugador in self.jugadores:
             jugador.oro += self.config.oro_por_ronda
             log_evento(f"💰 {jugador.nombre} recibe {self.config.oro_por_ronda} de oro (Total: {jugador.oro})")
 
-        # 2. Crear tiendas individuales
+    def generar_tiendas(self):
         for jugador in self.jugadores:
-            tienda = TiendaIndividual(jugador, cantidad_cartas=5)  # Forzar 5 cartas
+            tienda = TiendaIndividual(jugador, cantidad_cartas=5)
             self.tiendas_individuales[jugador.id] = tienda
             log_evento(f"🛒 Tienda creada para {jugador.nombre}")
 
-        # 3. Crear subasta pública - CORREGIDO
-        cartas_subasta = max(2, len(self.jugadores))  # Mínimo 2 cartas, o 1 por jugador
-        self.subastas = SistemaSubastas(self.jugadores)
+    def generar_subasta_publica(self):
+        cartas_subasta = max(2, len(self.jugadores))
+        self.subastas = SistemaSubastas(self.jugadores, modo_testeo=self.modo_testeo)
         self.subastas.generar_subasta(cartas_subasta)
 
-        # 4. Aplicar fusiones automáticas
+    def aplicar_fusiones_automaticas(self):
         for jugador in self.jugadores:
             eventos = aplicar_fusiones(jugador.tablero, jugador.cartas_banco)
             for evento in eventos:
