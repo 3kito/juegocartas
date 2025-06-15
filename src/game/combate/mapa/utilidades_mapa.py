@@ -19,3 +19,8 @@ def generar_hexagonos_contiguos(origen: CoordenadaHexagonal, cantidad: int, disp
             frontera.append(vecino)
 
     return seleccionadas
+
+
+def generar_hexagono_regular(centro: CoordenadaHexagonal, radio: int) -> Set[CoordenadaHexagonal]:
+    """Genera un conjunto de coordenadas que forman un hexágono regular."""
+    return set(centro.obtener_area(radio))

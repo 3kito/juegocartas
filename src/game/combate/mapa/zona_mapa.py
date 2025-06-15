@@ -3,10 +3,11 @@ from src.game.tablero.coordenada import CoordenadaHexagonal
 
 
 class ZonaMapa:
-    def __init__(self, color: str, coordenadas: set, pareja_id: int):
+    def __init__(self, color: str, coordenadas: set, pareja_id: int, centro: CoordenadaHexagonal):
         self.color = color
         self.coordenadas = coordenadas
         self.pareja_id = pareja_id
+        self.centro = centro
 
     def esta_cerca_de(self, otra: 'ZonaMapa', umbral: int = 4) -> bool:
         for coord1 in self.coordenadas:
@@ -20,4 +21,8 @@ class ZonaMapa:
             if tablero.esta_vacia(coord):
                 return coord
         return None
+
+    def convertir_a_global(self, coord_local: CoordenadaHexagonal) -> CoordenadaHexagonal:
+        """Convierte una coordenada local (tablero individual) a coord. global en esta zona."""
+        return CoordenadaHexagonal(self.centro.q + coord_local.q, self.centro.r + coord_local.r)
 

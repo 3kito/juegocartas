@@ -1,47 +1,61 @@
 from .zona_mapa import ZonaMapa
-from .utilidades_mapa import generar_hexagonos_contiguos
-from src.game.tablero.tablero_hexagonal import CoordenadaHexagonal
+from .utilidades_mapa import generar_hexagono_regular
+from src.game.tablero.coordenada import CoordenadaHexagonal
+from src.game.combate.configuracion_tiempo_real import configurador_tiempo_real
 import random
 
 class GeneradorMapa:
-    def __init__(self, tablero, celdas_por_zona: int = 19, cantidad_parejas: int = 3):
+    def __init__(self, tablero, celdas_por_zona: int = 19, cantidad_parejas: int = 3,
+                 separacion_parejas: int = 1, separacion_misma_pareja: int = 2):
         self.tablero = tablero
         self.celdas_por_zona = celdas_por_zona
         self.cantidad_parejas = cantidad_parejas
+        self.separacion_parejas = separacion_parejas
+        self.separacion_misma_pareja = separacion_misma_pareja
+        self.radio_zona = configurador_tiempo_real.mapas.radio_mapa_individual
         self.zonas_rojas = []
         self.zonas_azules = []
 
+    def _hex_cabe(self, centro: CoordenadaHexagonal) -> bool:
+        for c in centro.obtener_area(self.radio_zona):
+            if c not in self.tablero.celdas:
+                return False
+        return True
+
+    def _centro_valido(self, centro: CoordenadaHexagonal, zonas_existentes: list[ZonaMapa], separacion: int) -> bool:
+        if not self._hex_cabe(centro):
+            return False
+        for zona in zonas_existentes:
+            if centro.distancia_a(zona.centro) < (2 * self.radio_zona + separacion):
+                return False
+        return True
+
+    def _obtener_centro_random(self, zonas_existentes: list[ZonaMapa], separacion: int) -> CoordenadaHexagonal | None:
+        candidatos = list(self.tablero.celdas.keys())
+        random.shuffle(candidatos)
+        for cand in candidatos:
+            if self._centro_valido(cand, zonas_existentes, separacion):
+                return cand
+        return None
+
     def generar(self):
-        coordenadas_disponibles = set(self.tablero.celdas.keys())
-        usadas = set()
+        zonas_creadas: list[ZonaMapa] = []
 
         for pareja_id in range(self.cantidad_parejas):
-            origen = random.choice(list(coordenadas_disponibles - usadas))
-            zona_roja_coords = generar_hexagonos_contiguos(
-                origen, self.celdas_por_zona, disponibles=coordenadas_disponibles
-            )
+            centro_rojo = self._obtener_centro_random(zonas_creadas, self.separacion_parejas)
+            if centro_rojo is None:
+                break
 
-            usadas.update(zona_roja_coords)
-            self.zonas_rojas.append(ZonaMapa("rojo", zona_roja_coords, pareja_id=pareja_id))
+            coords_rojas = generar_hexagono_regular(centro_rojo, self.radio_zona)
+            zona_roja = ZonaMapa("rojo", coords_rojas, pareja_id=pareja_id, centro=centro_rojo)
+            self.zonas_rojas.append(zona_roja)
+            zonas_creadas.append(zona_roja)
 
-            # Buscar origen cercano a la zona roja
-            candidatos = list(zona_roja_coords)
-            random.shuffle(candidatos)
-            origen_azul = None
-            for c in candidatos:
-                vecinos = c.vecinos()
-                for vecino in vecinos:
-                    if vecino in coordenadas_disponibles and vecino not in usadas:
-                        origen_azul = vecino
-                        break
-                if origen_azul:
-                    break
+            centro_azul = self._obtener_centro_random(zonas_creadas, self.separacion_misma_pareja)
+            if centro_azul is None:
+                break
 
-            if not origen_azul:
-                origen_azul = random.choice(list(coordenadas_disponibles - usadas))
-
-            zona_azul_coords = generar_hexagonos_contiguos(
-                origen_azul, self.celdas_por_zona, disponibles=coordenadas_disponibles
-            )
-            usadas.update(zona_azul_coords)
-            self.zonas_azules.append(ZonaMapa("azul", zona_azul_coords, pareja_id=pareja_id))
+            coords_azules = generar_hexagono_regular(centro_azul, self.radio_zona)
+            zona_azul = ZonaMapa("azul", coords_azules, pareja_id=pareja_id, centro=centro_azul)
+            self.zonas_azules.append(zona_azul)
+            zonas_creadas.append(zona_azul)
