@@ -13,7 +13,10 @@
       "defensa_fisica": 8,
       "defensa_magica": 25,
       "rango_movimiento": 2,
-      "rango_ataque": 3
+      "rango_ataque": 3,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -47,7 +50,10 @@
       "defensa_fisica": 15,
       "defensa_magica": 15,
       "rango_movimiento": 3,
-      "rango_ataque": 2
+      "rango_ataque": 2,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -81,7 +87,10 @@
       "defensa_fisica": 5,
       "defensa_magica": 20,
       "rango_movimiento": 1,
-      "rango_ataque": 3
+      "rango_ataque": 3,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -117,7 +126,10 @@
       "defensa_fisica": 10,
       "defensa_magica": 15,
       "rango_movimiento": 2,
-      "rango_ataque": 4
+      "rango_ataque": 4,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -153,7 +165,10 @@
       "defensa_fisica": 20,
       "defensa_magica": 12,
       "rango_movimiento": 2,
-      "rango_ataque": 1
+      "rango_ataque": 1,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -188,7 +203,10 @@
       "defensa_fisica": 30,
       "defensa_magica": 35,
       "rango_movimiento": 1,
-      "rango_ataque": 1
+      "rango_ataque": 1,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -222,7 +240,10 @@
       "defensa_fisica": 12,
       "defensa_magica": 18,
       "rango_movimiento": 2,
-      "rango_ataque": 2
+      "rango_ataque": 2,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -257,7 +278,10 @@
       "defensa_fisica": 12,
       "defensa_magica": 15,
       "rango_movimiento": 1,
-      "rango_ataque": 2
+      "rango_ataque": 2,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -291,7 +315,10 @@
       "defensa_fisica": 20,
       "defensa_magica": 25,
       "rango_movimiento": 2,
-      "rango_ataque": 1
+      "rango_ataque": 1,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -327,7 +354,10 @@
       "defensa_fisica": 10,
       "defensa_magica": 20,
       "rango_movimiento": 1,
-      "rango_ataque": 2
+      "rango_ataque": 2,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -363,7 +393,10 @@
       "defensa_fisica": 8,
       "defensa_magica": 22,
       "rango_movimiento": 2,
-      "rango_ataque": 3
+      "rango_ataque": 3,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -398,7 +431,10 @@
       "defensa_fisica": 10,
       "defensa_magica": 20,
       "rango_movimiento": 2,
-      "rango_ataque": 3
+      "rango_ataque": 3,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -432,7 +468,10 @@
       "defensa_fisica": 8,
       "defensa_magica": 15,
       "rango_movimiento": 1,
-      "rango_ataque": 2
+      "rango_ataque": 2,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -467,7 +506,10 @@
       "defensa_fisica": 18,
       "defensa_magica": 12,
       "rango_movimiento": 2,
-      "rango_ataque": 2
+      "rango_ataque": 2,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -502,7 +544,10 @@
       "defensa_fisica": 25,
       "defensa_magica": 15,
       "rango_movimiento": 3,
-      "rango_ataque": 1
+      "rango_ataque": 1,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -536,7 +581,10 @@
       "defensa_fisica": 18,
       "defensa_magica": 18,
       "rango_movimiento": 3,
-      "rango_ataque": 1
+      "rango_ataque": 1,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -571,7 +619,10 @@
       "defensa_fisica": 12,
       "defensa_magica": 25,
       "rango_movimiento": 2,
-      "rango_ataque": 3
+      "rango_ataque": 3,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -606,7 +657,10 @@
       "defensa_fisica": 10,
       "defensa_magica": 12,
       "rango_movimiento": 1,
-      "rango_ataque": 2
+      "rango_ataque": 2,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -641,7 +695,10 @@
       "defensa_fisica": 14,
       "defensa_magica": 10,
       "rango_movimiento": 3,
-      "rango_ataque": 1
+      "rango_ataque": 1,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {
@@ -675,7 +732,10 @@
       "defensa_fisica": 9,
       "defensa_magica": 20,
       "rango_movimiento": 2,
-      "rango_ataque": 2
+      "rango_ataque": 2,
+      "velocidad_movimiento": 1.0,
+      "velocidad_ataque": 1.5,
+      "rango_vision": 2
     },
     "habilidades": [
       {

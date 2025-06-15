@@ -83,6 +83,9 @@ class CartaBase:
         self.defensa_magica_base = stats_data.get('defensa_magica', 0)
         self.rango_movimiento_base = stats_data.get('rango_movimiento', 1)
         self.rango_ataque_base = stats_data.get('rango_ataque', 1)
+        self.velocidad_movimiento = stats_data.get('velocidad_movimiento', 1.0)
+        self.velocidad_ataque = stats_data.get('velocidad_ataque', 1.5)
+        self.rango_vision = stats_data.get('rango_vision', 2)
 
         # Stats actuales (pueden ser modificados por efectos)
         self.dano_fisico_actual = self.dano_fisico_base
