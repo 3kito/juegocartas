@@ -36,7 +36,7 @@ class MapaGlobal:
 
         cartas_colocadas = 0
         for zona in zonas:
-            cartas_restantes = [c for c in jugador.cartas_banco if c.coordenada is None]
+            cartas_restantes = [c for c in jugador.cartas_banco if c is not None and c.coordenada is None]
             for carta in cartas_restantes:
                 coord = zona.obtener_coordenada_libre(self.tablero)
                 if coord:
