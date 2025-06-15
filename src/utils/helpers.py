@@ -6,6 +6,15 @@ import json
 import datetime
 import os
 
+# Callback opcional para enviar los logs a una interfaz externa
+log_callback = None
+
+
+def set_log_callback(callback):
+    """Define una función que recibirá cada mensaje de log."""
+    global log_callback
+    log_callback = callback
+
 
 def cargar_json(ruta_archivo):
     """Carga un archivo JSON y retorna su contenido"""
@@ -60,6 +69,13 @@ def log_evento(mensaje, nivel="INFO"):
 
     # Mostrar en consola
     print(mensaje_completo)
+
+    # Enviar a la interfaz si existe
+    if log_callback:
+        try:
+            log_callback(mensaje_completo, nivel)
+        except Exception:
+            pass
 
     # Opcionalmente guardar en archivo de log
     # (descomenta si quieres logs persistentes)
