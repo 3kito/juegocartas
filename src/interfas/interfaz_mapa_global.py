@@ -62,13 +62,32 @@ class InterfazMapaGlobal(ttk.Frame):
         for coord, carta in board.celdas.items():
             if carta is None:
                 continue
+
+            # Posición base en el canvas
             x, y = self._coord_to_pixel(coord)
-            color = "red" if getattr(carta.duenio, "color_fase_actual", "rojo") == "rojo" else "blue"
-            self.canvas.create_text(
-                x + 200,
-                y + 200,
-                text=carta.nombre[:8],
+            cx, cy = x + 200, y + 200
+
+            # Color según dueño de la carta
+            jugador_color = getattr(carta.duenio, "color_fase_actual", "rojo")
+            color = "red" if jugador_color == "rojo" else "blue"
+
+            # Dibujar círculo representando la carta
+            radio = self.hex_size * 0.4
+            self.canvas.create_oval(
+                cx - radio,
+                cy - radio,
+                cx + radio,
+                cy + radio,
                 fill=color,
+                outline="black",
+            )
+
+            # Texto con el nombre (abreviado)
+            self.canvas.create_text(
+                cx,
+                cy,
+                text=carta.nombre[:8],
+                fill="white",
                 font=("Arial", 8, "bold"),
             )
 
