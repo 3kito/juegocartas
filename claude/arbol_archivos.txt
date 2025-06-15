@@ -1,0 +1,79 @@
+archivos
+├── archivos/main.py
+├── archivos/main_simulacion.py
+└── archivos/src
+    ├── archivos/src/__init__.py
+    ├── archivos/src/core
+    │   ├── archivos/src/core/__init__.py
+    │   ├── archivos/src/core/jugador.py
+    │   └── archivos/src/core/motor_juego.py
+    ├── archivos/src/data
+    │   ├── archivos/src/data/__init__.py
+    │   ├── archivos/src/data/cartas
+    │   │   └── archivos/src/data/cartas/__init__.py
+    │   └── archivos/src/data/config
+    │       ├── archivos/src/data/config/__init__.py
+    │       └── archivos/src/data/config/game_config.py
+    ├── archivos/src/game
+    │   ├── archivos/src/game/__init__.py
+    │   ├── archivos/src/game/cartas
+    │   │   ├── archivos/src/game/cartas/__init__.py
+    │   │   ├── archivos/src/game/cartas/carta_base.py
+    │   │   ├── archivos/src/game/cartas/estado_carta.py
+    │   │   ├── archivos/src/game/cartas/fusion_cartas.py
+    │   │   └── archivos/src/game/cartas/manager_cartas.py
+    │   ├── archivos/src/game/combate
+    │   │   ├── archivos/src/game/combate/__init__.py
+    │   │   ├── archivos/src/game/combate/calcular_dano
+    │   │   │   ├── archivos/src/game/combate/calcular_dano/__init__.py
+    │   │   │   ├── archivos/src/game/combate/calcular_dano/calculadora_dano.py
+    │   │   │   ├── archivos/src/game/combate/calcular_dano/efectos_especiales.py
+    │   │   │   ├── archivos/src/game/combate/calcular_dano/modificadores_basicos.py
+    │   │   │   └── archivos/src/game/combate/calcular_dano/sinergias_dano.py
+    │   │   ├── archivos/src/game/combate/configuracion_tiempo_real.py
+    │   │   ├── archivos/src/game/combate/fase
+    │   │   │   ├── archivos/src/game/combate/fase/__init__.py
+    │   │   │   ├── archivos/src/game/combate/fase/controlador_fase_enfrentamiento.py
+    │   │   │   ├── archivos/src/game/combate/fase/gestor_turnos.py
+    │   │   │   └── archivos/src/game/combate/fase/secuencia_turnos.py
+    │   │   ├── archivos/src/game/combate/ia
+    │   │   │   ├── archivos/src/game/combate/ia/__init__.py
+    │   │   │   ├── archivos/src/game/combate/ia/ia_acciones.py
+    │   │   │   ├── archivos/src/game/combate/ia/ia_comportamiento.py
+    │   │   │   ├── archivos/src/game/combate/ia/ia_motor.py
+    │   │   │   └── archivos/src/game/combate/ia/ia_utilidades.py
+    │   │   ├── archivos/src/game/combate/interacciones
+    │   │   │   ├── archivos/src/game/combate/interacciones/__init__.py
+    │   │   │   ├── archivos/src/game/combate/interacciones/gestor_interacciones.py
+    │   │   │   └── archivos/src/game/combate/interacciones/interaccion_modelo.py
+    │   │   ├── archivos/src/game/combate/mapa
+    │   │   │   ├── archivos/src/game/combate/mapa/__init__.py
+    │   │   │   ├── archivos/src/game/combate/mapa/generador_mapa.py
+    │   │   │   ├── archivos/src/game/combate/mapa/mapa_global.py
+    │   │   │   ├── archivos/src/game/combate/mapa/utilidades_mapa.py
+    │   │   │   └── archivos/src/game/combate/mapa/zona_mapa.py
+    │   │   └── archivos/src/game/combate/motor
+    │   │       ├── archivos/src/game/combate/motor/__init__.py
+    │   │       └── archivos/src/game/combate/motor/motor_tiempo_real.py
+    │   ├── archivos/src/game/economia
+    │   │   ├── archivos/src/game/economia/__init__.py
+    │   │   └── archivos/src/game/economia/entregar_oro.py
+    │   ├── archivos/src/game/fases
+    │   │   ├── archivos/src/game/fases/__init__.py
+    │   │   └── archivos/src/game/fases/controlador_preparacion.py
+    │   ├── archivos/src/game/tablero
+    │   │   ├── archivos/src/game/tablero/__init__.py
+    │   │   ├── archivos/src/game/tablero/coordenada.py
+    │   │   └── archivos/src/game/tablero/tablero_hexagonal.py
+    │   └── archivos/src/game/tienda
+    │       ├── archivos/src/game/tienda/__init__.py
+    │       ├── archivos/src/game/tienda/sistema_subastas.py
+    │       └── archivos/src/game/tienda/tienda_individual.py
+    ├── archivos/src/interfas
+    │   ├── archivos/src/interfas/__init__.py
+    │   └── archivos/src/interfas/gui.py
+    └── archivos/src/utils
+        ├── archivos/src/utils/__init__.py
+        └── archivos/src/utils/helpers.py
+
+21 directories, 56 files
