@@ -72,8 +72,17 @@ class TableroHexagonal:
         for coord in self.celdas:
             self.celdas[coord] = None
     def quitar_carta(self, coordenada):
+        """Quita y devuelve la carta de la coordenada especificada"""
+        carta = None
         if coordenada in self.celdas:
+            carta = self.celdas[coordenada]
             self.celdas[coordenada] = None
+            if carta:
+                log_evento(
+                    f"🔸 Carta '{getattr(carta, 'nombre', 'desconocida')}' retirada de {coordenada}",
+                    "DEBUG",
+                )
+        return carta
 
     def contar_cartas(self) -> int:
         """Cuenta el número total de cartas en el tablero"""

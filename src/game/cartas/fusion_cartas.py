@@ -7,69 +7,60 @@ from src.utils.helpers import log_evento
 
 
 def aplicar_fusiones(tablero, banco: list) -> list[str]:
-    """
-    Detecta tríos de cartas iguales (por nombre) entre el tablero y el banco,
-    y realiza la fusión dejando la carta mejorada en la posición original de alguna del tablero o en el banco si no hay.
-    """
+    """Aplica fusiones de cartas entre tablero y banco de forma controlada."""
     eventos = []
-    cartas_por_nombre = defaultdict(list)  # nombre -> lista de (fuente, ubicacion, carta)
+    iteraciones = 0
+    fusion_realizada = True
+    while fusion_realizada and iteraciones < 10:
+        fusion_realizada = False
+        iteraciones += 1
+        log_evento(f"🔍 Búsqueda de fusiones (iteración {iteraciones})", "DEBUG")
 
-    # Agrupar cartas del tablero
-    for coord, carta in tablero.celdas.items():
-        if carta:
-            cartas_por_nombre[carta.nombre].append(("tablero", coord, carta))
+        cartas_por_nombre = defaultdict(list)
 
-    # Agrupar cartas del banco
-    for idx, carta in enumerate(banco):
-        if carta:
-            cartas_por_nombre[carta.nombre].append(("banco", idx, carta))
+        for coord, carta in tablero.celdas.items():
+            if carta:
+                cartas_por_nombre[carta.nombre].append(("tablero", coord, carta))
 
-    indices_eliminar = set()
-    fusiones_en_banco = {}
-
-    # Procesar fusiones
-    for nombre, grupo in cartas_por_nombre.items():
-        while len(group := grupo) >= 3:
-            seleccionadas = group[:3]
-            group = group[3:]
-            cartas_por_nombre[nombre] = group
-
-            fuentes, ubicaciones, cartas = zip(*seleccionadas)
-            carta_fusionada = cartas[0]
-            carta_fusionada.tier += 1
-            carta_fusionada.vida_maxima += 50
-            carta_fusionada.vida_actual += 50
-            carta_fusionada.dano_fisico_actual += 5
-            carta_fusionada.dano_magico_actual += 5
-
-            # Remover otras dos
-            restantes = list(zip(fuentes, ubicaciones))[1:]
-            for fuente, ubicacion in restantes:
-                if fuente == "tablero":
-                    tablero.quitar_carta(ubicacion)
-                else:
-                    indices_eliminar.add(ubicacion)
-
-            # Colocar la fusionada
-            ubicacion_final = (fuentes[0], ubicaciones[0])
-            if ubicacion_final[0] == "tablero":
-                tablero.celdas[ubicacion_final[1]] = carta_fusionada
-            else:
-                fusiones_en_banco[ubicacion_final[1]] = carta_fusionada
-
-            log_evento(f"✨ Fusión realizada: {nombre} → Estrella {carta_fusionada.tier}")
-            eventos.append(f"{nombre} fusionado en {ubicacion_final} → tier {carta_fusionada.tier}")
-
-    # Reconstruir banco sin huecos
-    if indices_eliminar or fusiones_en_banco:
-        nuevo_banco = []
         for idx, carta in enumerate(banco):
-            if idx in indices_eliminar:
-                continue
-            if idx in fusiones_en_banco:
-                nuevo_banco.append(fusiones_en_banco[idx])
-            else:
-                nuevo_banco.append(carta)
-        banco[:] = nuevo_banco
+            if carta:
+                cartas_por_nombre[carta.nombre].append(("banco", idx, carta))
+
+        for nombre, grupo in cartas_por_nombre.items():
+            if len(group) >= 3:
+                fuentes, ubicaciones, cartas = zip(*group[:3])
+                carta_fusionada = cartas[0]
+                carta_fusionada.tier += 1
+                carta_fusionada.vida_maxima += 50
+                carta_fusionada.vida_actual += 50
+                carta_fusionada.dano_fisico_actual += 5
+                carta_fusionada.dano_magico_actual += 5
+
+                log_evento(
+                    f"✨ Fusión realizada: {nombre} → Estrella {carta_fusionada.tier}",
+                    "INFO",
+                )
+                eventos.append(
+                    f"{nombre} fusionado → tier {carta_fusionada.tier}"
+                )
+
+                restantes = list(zip(fuentes, ubicaciones))[1:]
+                for fuente, ubicacion in restantes:
+                    if fuente == "tablero":
+                        tablero.quitar_carta(ubicacion)
+                    else:
+                        banco[ubicacion] = None
+
+                if fuentes[0] == "tablero":
+                    tablero.celdas[ubicaciones[0]] = carta_fusionada
+                else:
+                    banco[ubicaciones[0]] = carta_fusionada
+
+                banco[:] = [c for c in banco if c is not None]
+                fusion_realizada = True
+                break
+
+    if iteraciones == 10 and fusion_realizada:
+        log_evento("⚠️ Límite de iteraciones de fusión alcanzado", "WARNING")
 
     return eventos

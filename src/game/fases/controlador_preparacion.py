@@ -1,4 +1,3 @@
-from src.game.cartas.fusion_cartas import aplicar_fusiones
 from src.game.tienda.tienda_individual import TiendaIndividual
 from src.game.tienda.sistema_subastas import SistemaSubastas
 from src.utils.helpers import log_evento
@@ -22,7 +21,6 @@ class ControladorFasePreparacion:
             self.entregar_oro()
             self.generar_tiendas()
             self.generar_subasta_publica()
-            self.aplicar_fusiones_automaticas()
 
     def entregar_oro(self):
         for jugador in self.jugadores:
@@ -43,12 +41,6 @@ class ControladorFasePreparacion:
     def pausar_para_ofertas(self):
         """Pausa el flujo para permitir a los jugadores ofertar manualmente"""
         log_evento("⏸️ Pausa para ofertas - esperando ofertas de jugadores")
-
-    def aplicar_fusiones_automaticas(self):
-        for jugador in self.jugadores:
-            eventos = aplicar_fusiones(jugador.tablero, jugador.cartas_banco)
-            for evento in eventos:
-                log_evento(f"🔧 {jugador.nombre}: {evento}")
 
     def obtener_tienda(self, jugador_id: int):
         """Retorna la tienda individual de un jugador específico"""
