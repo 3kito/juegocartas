@@ -25,6 +25,10 @@ class InterfazMapaGlobal(ttk.Frame):
 
         self._dibujar_mapa()
 
+    def actualizar(self):
+        """Redibuja el mapa completo."""
+        self._dibujar_mapa()
+
     def _hex_points(self, x, y, size):
         import math
         points = []
@@ -54,6 +58,20 @@ class InterfazMapaGlobal(ttk.Frame):
                 color = "#bbbbff"
             points = self._hex_points(x + 200, y + 200, self.hex_size)
             self.canvas.create_polygon(points, fill=color, outline="black")
+        # Dibujar cartas en el tablero
+        for coord, carta in board.celdas.items():
+            if carta is None:
+                continue
+            x, y = self._coord_to_pixel(coord)
+            color = "red" if getattr(carta.duenio, "color_fase_actual", "rojo") == "rojo" else "blue"
+            self.canvas.create_text(
+                x + 200,
+                y + 200,
+                text=carta.nombre[:8],
+                fill=color,
+                font=("Arial", 8, "bold"),
+            )
+
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         log_evento("Mapa global dibujado")
 

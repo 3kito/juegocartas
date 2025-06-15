@@ -218,10 +218,14 @@ class AutoBattlerGUI:
         self.interfaz_mapa = InterfazMapaGlobal(frame, self.mapa_global)
         self.interfaz_mapa.pack(fill="both", expand=True)
 
-        info_frame = ttk.LabelFrame(frame, text="Turno Actual")
+        info_frame = ttk.LabelFrame(frame, text="Estado Combate")
         info_frame.pack(fill="x")
-        self.lbl_turno_actual = ttk.Label(info_frame, text="Turno: -")
-        self.lbl_turno_actual.pack(side="left", padx=5)
+        self.lbl_turno_actual = ttk.Label(info_frame, text="TURNO ACTIVO: -", font=("Arial", 12, "bold"))
+        self.lbl_turno_actual.pack(side="top", padx=5, pady=2, anchor="w")
+        self.lbl_equipo_rojo = ttk.Label(info_frame, text="🔴 EQUIPO ROJO: -")
+        self.lbl_equipo_rojo.pack(side="top", padx=5, anchor="w")
+        self.lbl_equipo_azul = ttk.Label(info_frame, text="🔵 EQUIPO AZUL: -")
+        self.lbl_equipo_azul.pack(side="top", padx=5, anchor="w")
 
     # === MÉTODOS DE CONTROL ===
 
@@ -291,6 +295,16 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.actualizar_tienda()
         self.actualizar_subasta()
         self.actualizar_tablero()
+        if hasattr(self, "interfaz_mapa"):
+            self.interfaz_mapa.actualizar()
+
+        if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
+            turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
+            self.lbl_turno_actual.config(text=f"TURNO ACTIVO: {turno.upper()}" if turno else "TURNO ACTIVO: -")
+            rojos = ", ".join(j.nombre for j in self.motor.controlador_enfrentamiento.turnos.jugadores_por_color.get("rojo", []))
+            azules = ", ".join(j.nombre for j in self.motor.controlador_enfrentamiento.turnos.jugadores_por_color.get("azul", []))
+            self.lbl_equipo_rojo.config(text=f"🔴 EQUIPO ROJO: {rojos or '-'}")
+            self.lbl_equipo_azul.config(text=f"🔵 EQUIPO AZUL: {azules or '-'}")
 
         if self.motor.modo_testeo:
             self.actualizar_controles_testeo()
@@ -603,6 +617,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
     def ejecutar_paso_testeo(self):
         if self.motor:
             self.motor.ejecutar_siguiente_paso()
+            self.actualizar_interfaz()
             self.actualizar_controles_testeo()
 
     def actualizar_controles_testeo(self):
