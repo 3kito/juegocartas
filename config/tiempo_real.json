@@ -19,5 +19,11 @@
     "max_turnos_por_partida": 50,
     "fps_durante_combate": 10,
     "fps_durante_transicion": 5
+  },
+  "mapas": {
+    "radio_mapa_global": 4,
+    "celdas_por_zona": 19,
+    "cantidad_parejas": 3,
+    "radio_mapa_individual": 2
   }
 }

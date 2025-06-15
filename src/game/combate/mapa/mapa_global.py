@@ -3,11 +3,19 @@ from src.game.tablero.coordenada import CoordenadaHexagonal
 from src.game.tablero.tablero_hexagonal import TableroHexagonal
 from src.game.combate.mapa.zona_mapa import ZonaMapa
 from src.game.combate.mapa.generador_mapa import GeneradorMapa
+from src.game.combate.configuracion_tiempo_real import configurador_tiempo_real
 from src.utils.helpers import log_evento
 
 
 class MapaGlobal:
-    def __init__(self, radio: int = 4, celdas_por_zona: int = 19, cantidad_parejas: int = 3):
+    def __init__(self, radio: int | None = None, celdas_por_zona: int | None = None, cantidad_parejas: int | None = None):
+        if radio is None:
+            radio = configurador_tiempo_real.mapas.radio_mapa_global
+        if celdas_por_zona is None:
+            celdas_por_zona = configurador_tiempo_real.mapas.celdas_por_zona
+        if cantidad_parejas is None:
+            cantidad_parejas = configurador_tiempo_real.mapas.cantidad_parejas
+
         self.tablero = TableroHexagonal(radio=radio)
         self.celdas: Dict[CoordenadaHexagonal, Optional[object]] = self.tablero.celdas
         self.zonas_rojas: list[ZonaMapa] = []
