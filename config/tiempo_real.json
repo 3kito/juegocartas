@@ -1,0 +1,23 @@
+{
+  "motor": {
+    "fps_objetivo": 10,
+    "max_componentes": 100,
+    "max_eventos_programados": 200,
+    "timeout_hilo_segundos": 2.0,
+    "intervalo_stats_segundos": 1.0,
+    "max_errores_por_componente": 5
+  },
+  "componentes": {
+    "intervalo_minimo_default": 0.0,
+    "max_ticks_default": -1,
+    "timeout_procesamiento_segundos": 0.1,
+    "auto_limpiar_terminados": true
+  },
+  "turnos": {
+    "duracion_turno_segundos": 30,
+    "tiempo_transicion_segundos": 2.0,
+    "max_turnos_por_partida": 50,
+    "fps_durante_combate": 10,
+    "fps_durante_transicion": 5
+  }
+}

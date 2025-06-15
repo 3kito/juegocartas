@@ -1,0 +1,6 @@
+{
+  "fase_preparacion_segundos": 30,
+  "subasta_ratio": 0.5,
+  "oro_por_ronda": 10,
+  "cartas_por_tienda": 5
+}

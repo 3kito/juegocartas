@@ -1,0 +1,352 @@
+[
+  {
+    "id": 1,
+    "nombre": "Isaac Newton 1",
+    "tier": 2,
+    "costo": 3,
+    "rol": "soporte",
+    "categoria": "cientificos",
+    "stats": {
+      "vida": 75,
+      "dano_fisico": 15,
+      "dano_magico": 30,
+      "defensa_fisica": 8,
+      "defensa_magica": 25,
+      "rango_movimiento": 2,
+      "rango_ataque": 3
+    },
+    "habilidades": [
+      {
+        "nombre": "Ley de Gravedad",
+        "tipo": "activa",
+        "descripcion": "Atrae a todos los enemigos 1 casilla hacia Newton",
+        "costo_mana": 40,
+        "cooldown": 3,
+        "rango": 2
+      },
+      {
+        "nombre": "Manzana de la Sabiduría",
+        "tipo": "pasiva",
+        "descripcion": "Al recibir daño, gana +5 daño mágico permanentemente",
+        "trigger": "al_recibir_dano"
+      }
+    ],
+    "descripcion": "Físico y matemático inglés, padre de la mecánica clásica"
+  },
+  {
+    "id": 2,
+    "nombre": "Leonardo da Vinci 2",
+    "tier": 3,
+    "costo": 5,
+    "rol": "versatil",
+    "categoria": "artistas",
+    "stats": {
+      "vida": 90,
+      "dano_fisico": 25,
+      "dano_magico": 25,
+      "defensa_fisica": 15,
+      "defensa_magica": 15,
+      "rango_movimiento": 3,
+      "rango_ataque": 2
+    },
+    "habilidades": [
+      {
+        "nombre": "Invención Genial",
+        "tipo": "activa",
+        "descripcion": "Despliega una máquina de guerra que ataca automáticamente",
+        "costo_mana": 60,
+        "cooldown": 4,
+        "duracion": 3
+      },
+      {
+        "nombre": "Polímata",
+        "tipo": "pasiva",
+        "descripcion": "Gana sinergias adicionales con TODAS las categorías",
+        "trigger": "permanente"
+      }
+    ],
+    "descripcion": "Genio renacentista: artista, inventor, científico e ingeniero"
+  },
+  {
+    "id": 3,
+    "nombre": "Marie Curie 3",
+    "tier": 2,
+    "costo": 3,
+    "rol": "especialista",
+    "categoria": "cientificos",
+    "stats": {
+      "vida": 60,
+      "dano_fisico": 10,
+      "dano_magico": 40,
+      "defensa_fisica": 5,
+      "defensa_magica": 20,
+      "rango_movimiento": 1,
+      "rango_ataque": 3
+    },
+    "habilidades": [
+      {
+        "nombre": "Radiación",
+        "tipo": "activa",
+        "descripcion": "Inflige daño continuo en área durante 3 turnos",
+        "costo_mana": 45,
+        "cooldown": 3,
+        "rango": 2,
+        "area": "circular"
+      },
+      {
+        "nombre": "Elemento Radiactivo",
+        "tipo": "pasiva",
+        "descripcion": "Los enemigos adyacentes pierden -2 vida por turno",
+        "trigger": "cada_turno",
+        "area": "adyacentes"
+      }
+    ],
+    "descripcion": "Física y química polaca, pionera en radioactividad"
+  },
+  {
+    "id": 4,
+    "nombre": "Nikola Tesla 4",
+    "tier": 2,
+    "costo": 4,
+    "rol": "especialista",
+    "categoria": "cientificos",
+    "stats": {
+      "vida": 70,
+      "dano_fisico": 8,
+      "dano_magico": 45,
+      "defensa_fisica": 10,
+      "defensa_magica": 15,
+      "rango_movimiento": 2,
+      "rango_ataque": 4
+    },
+    "habilidades": [
+      {
+        "nombre": "Descarga Eléctrica",
+        "tipo": "activa",
+        "descripcion": "Rayo que salta entre enemigos, daño reducido por salto",
+        "costo_mana": 35,
+        "cooldown": 2,
+        "max_saltos": 3
+      },
+      {
+        "nombre": "Bobina Tesla",
+        "tipo": "pasiva",
+        "descripcion": "Genera un arma eléctrica al recolectar 15 experiencia",
+        "trigger": "mision",
+        "objetivo": "experiencia_recolectada",
+        "cantidad": 15
+      }
+    ],
+    "descripcion": "Inventor serbio-estadounidense, genio de la electricidad"
+  },
+  {
+    "id": 5,
+    "nombre": "Napoleón Bonaparte 5",
+    "tier": 3,
+    "costo": 5,
+    "rol": "lider",
+    "categoria": "militares",
+    "stats": {
+      "vida": 110,
+      "dano_fisico": 35,
+      "dano_magico": 10,
+      "defensa_fisica": 20,
+      "defensa_magica": 12,
+      "rango_movimiento": 2,
+      "rango_ataque": 1
+    },
+    "habilidades": [
+      {
+        "nombre": "Carga Imperial",
+        "tipo": "activa",
+        "descripcion": "Todos los aliados avanzan 1 casilla y atacan simultáneamente",
+        "costo_mana": 50,
+        "cooldown": 4,
+        "rango": "global"
+      },
+      {
+        "nombre": "Estratega Supremo",
+        "tipo": "pasiva",
+        "descripcion": "Otorga +10 daño y +5 defensa a todos los aliados adyacentes",
+        "trigger": "permanente",
+        "area": "adyacentes"
+      }
+    ],
+    "descripcion": "Emperador francés y genio militar que conquistó gran parte de Europa"
+  },
+  {
+    "id": 6,
+    "nombre": "Mahatma Gandhi 6",
+    "tier": 2,
+    "costo": 3,
+    "rol": "pacifico",
+    "categoria": "filosofos",
+    "stats": {
+      "vida": 50,
+      "dano_fisico": 5,
+      "dano_magico": 20,
+      "defensa_fisica": 30,
+      "defensa_magica": 35,
+      "rango_movimiento": 1,
+      "rango_ataque": 1
+    },
+    "habilidades": [
+      {
+        "nombre": "Resistencia Pacífica",
+        "tipo": "activa",
+        "descripcion": "Se vuelve inmune al daño y cura a todos los aliados",
+        "costo_mana": 60,
+        "cooldown": 6,
+        "duracion": 2
+      },
+      {
+        "nombre": "No Violencia",
+        "tipo": "pasiva",
+        "descripcion": "Los enemigos que lo atacan reciben el mismo daño que infligen",
+        "trigger": "al_ser_atacado"
+      }
+    ],
+    "descripcion": "Líder independentista indio, promotor de la no violencia"
+  },
+  {
+    "id": 7,
+    "nombre": "Cleopatra VII 7",
+    "tier": 3,
+    "costo": 4,
+    "rol": "manipuladora",
+    "categoria": "gobernantes",
+    "stats": {
+      "vida": 85,
+      "dano_fisico": 20,
+      "dano_magico": 30,
+      "defensa_fisica": 12,
+      "defensa_magica": 18,
+      "rango_movimiento": 2,
+      "rango_ataque": 2
+    },
+    "habilidades": [
+      {
+        "nombre": "Seducción Real",
+        "tipo": "activa",
+        "descripcion": "Controla a un enemigo durante 2 turnos",
+        "costo_mana": 50,
+        "cooldown": 4,
+        "rango": 2,
+        "duracion": 2
+      },
+      {
+        "nombre": "Faraona Divina",
+        "tipo": "pasiva",
+        "descripcion": "Gana +1 oro por cada enemigo eliminado por aliados",
+        "trigger": "enemigo_eliminado_por_aliado"
+      }
+    ],
+    "descripcion": "Última faraona de Egipto, famosa por su inteligencia y carisma"
+  },
+  {
+    "id": 8,
+    "nombre": "Arquímedes 8",
+    "tier": 1,
+    "costo": 2,
+    "rol": "ingeniero",
+    "categoria": "cientificos",
+    "stats": {
+      "vida": 55,
+      "dano_fisico": 20,
+      "dano_magico": 25,
+      "defensa_fisica": 12,
+      "defensa_magica": 15,
+      "rango_movimiento": 1,
+      "rango_ataque": 2
+    },
+    "habilidades": [
+      {
+        "nombre": "Eureka",
+        "tipo": "activa",
+        "descripcion": "Gana oro igual al daño infligido en su próximo ataque",
+        "costo_mana": 25,
+        "cooldown": 3
+      },
+      {
+        "nombre": "Principio de Arquímedes",
+        "tipo": "pasiva",
+        "descripcion": "En terreno río, gana +10 defensa y +1 rango de ataque",
+        "trigger": "terreno_especifico",
+        "terreno": "rio"
+      }
+    ],
+    "descripcion": "Matemático, físico e ingeniero griego de la antigüedad"
+  },
+  {
+    "id": 9,
+    "nombre": "Juana de Arco 9",
+    "tier": 2,
+    "costo": 3,
+    "rol": "guardian",
+    "categoria": "heroes",
+    "stats": {
+      "vida": 80,
+      "dano_fisico": 30,
+      "dano_magico": 20,
+      "defensa_fisica": 20,
+      "defensa_magica": 25,
+      "rango_movimiento": 2,
+      "rango_ataque": 1
+    },
+    "habilidades": [
+      {
+        "nombre": "Visión Divina",
+        "tipo": "activa",
+        "descripcion": "Todos los aliados se vuelven inmunes a efectos negativos",
+        "costo_mana": 50,
+        "cooldown": 5,
+        "rango": "global",
+        "duracion": 3
+      },
+      {
+        "nombre": "Mártir Sagrada",
+        "tipo": "pasiva",
+        "descripcion": "Al morir, resucita con 1 vida e inmunidad durante 2 turnos",
+        "trigger": "al_morir",
+        "solo_una_vez": true
+      }
+    ],
+    "descripcion": "Heroína francesa que liberó Orleans durante la Guerra de los Cien Años"
+  },
+  {
+    "id": 10,
+    "nombre": "Aristóteles 10",
+    "tier": 2,
+    "costo": 3,
+    "rol": "sabio",
+    "categoria": "filosofos",
+    "stats": {
+      "vida": 70,
+      "dano_fisico": 15,
+      "dano_magico": 30,
+      "defensa_fisica": 10,
+      "defensa_magica": 20,
+      "rango_movimiento": 1,
+      "rango_ataque": 2
+    },
+    "habilidades": [
+      {
+        "nombre": "Lógica Aristotélica",
+        "tipo": "activa",
+        "descripcion": "Anula la próxima habilidad enemiga y copia su efecto",
+        "costo_mana": 40,
+        "cooldown": 4,
+        "rango": 3
+      },
+      {
+        "nombre": "Maestro de Alejandro",
+        "tipo": "pasiva",
+        "descripcion": "Los aliados adyacentes ganan experiencia +50% más rápido",
+        "trigger": "experiencia_ganada",
+        "area": "adyacentes",
+        "multiplicador": 1.5
+      }
+    ],
+    "descripcion": "Filósofo griego, discípulo de Platón y maestro de Alejandro Magno"
+  }
+]
