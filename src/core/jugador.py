@@ -173,10 +173,13 @@ class Jugador:
     def _verificar_subida_nivel(self):
         """Verifica y aplica todas las subidas de nivel posibles"""
         niveles_subidos = 0
-        while self.puede_subir_nivel():
+        # Limitar a 10 subidas para prevenir bucles inesperados
+        while self.puede_subir_nivel() and niveles_subidos < 10:
             if not self.subir_nivel():
                 break
             niveles_subidos += 1
+        if niveles_subidos == 10 and self.puede_subir_nivel():
+            log_evento("⚠️ Límite de subidas alcanzado en una sola llamada")
         return niveles_subidos
 
     def intentar_subir_nivel_automatico(self):
