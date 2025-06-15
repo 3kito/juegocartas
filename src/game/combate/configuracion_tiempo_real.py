@@ -4,7 +4,6 @@ Configuración centralizada para el sistema de tiempo real
 
 from dataclasses import dataclass
 from typing import Dict, Any
-import json
 import os
 from src.utils.helpers import log_evento, cargar_json, guardar_json
 
@@ -39,6 +38,15 @@ class ConfiguracionTurnos:
     fps_durante_transicion: int = 5
 
 
+@dataclass
+class ConfiguracionMapas:
+    """Configuración para la generación de mapas"""
+    radio_mapa_global: int = 4
+    celdas_por_zona: int = 19
+    cantidad_parejas: int = 3
+    radio_mapa_individual: int = 2
+
+
 class ConfiguradorTiempoReal:
     """Manejador de configuración para el sistema de tiempo real"""
 
@@ -47,6 +55,7 @@ class ConfiguradorTiempoReal:
         self.motor = ConfiguracionMotor()
         self.componentes = ConfiguracionComponentes()
         self.turnos = ConfiguracionTurnos()
+        self.mapas = ConfiguracionMapas()
 
         # Intentar cargar configuración existente
         self.cargar_configuracion()
@@ -104,6 +113,17 @@ class ConfiguradorTiempoReal:
                 self.turnos.fps_durante_transicion = turnos_data.get('fps_durante_transicion',
                                                                      self.turnos.fps_durante_transicion)
 
+            if 'mapas' in datos:
+                mapa_data = datos['mapas']
+                self.mapas.radio_mapa_global = mapa_data.get('radio_mapa_global',
+                                                             self.mapas.radio_mapa_global)
+                self.mapas.celdas_por_zona = mapa_data.get('celdas_por_zona',
+                                                         self.mapas.celdas_por_zona)
+                self.mapas.cantidad_parejas = mapa_data.get('cantidad_parejas',
+                                                           self.mapas.cantidad_parejas)
+                self.mapas.radio_mapa_individual = mapa_data.get('radio_mapa_individual',
+                                                               self.mapas.radio_mapa_individual)
+
             log_evento(f"✅ Configuración cargada desde {self.archivo_config}")
             return True
 
@@ -135,6 +155,12 @@ class ConfiguradorTiempoReal:
                     'max_turnos_por_partida': self.turnos.max_turnos_por_partida,
                     'fps_durante_combate': self.turnos.fps_durante_combate,
                     'fps_durante_transicion': self.turnos.fps_durante_transicion
+                },
+                'mapas': {
+                    'radio_mapa_global': self.mapas.radio_mapa_global,
+                    'celdas_por_zona': self.mapas.celdas_por_zona,
+                    'cantidad_parejas': self.mapas.cantidad_parejas,
+                    'radio_mapa_individual': self.mapas.radio_mapa_individual
                 }
             }
 
@@ -219,6 +245,12 @@ class ConfiguradorTiempoReal:
                 'max_turnos_por_partida': self.turnos.max_turnos_por_partida,
                 'fps_durante_combate': self.turnos.fps_durante_combate,
                 'fps_durante_transicion': self.turnos.fps_durante_transicion
+            },
+            'mapas': {
+                'radio_mapa_global': self.mapas.radio_mapa_global,
+                'celdas_por_zona': self.mapas.celdas_por_zona,
+                'cantidad_parejas': self.mapas.cantidad_parejas,
+                'radio_mapa_individual': self.mapas.radio_mapa_individual
             }
         }
 
@@ -227,6 +259,7 @@ class ConfiguradorTiempoReal:
         self.motor = ConfiguracionMotor()
         self.componentes = ConfiguracionComponentes()
         self.turnos = ConfiguracionTurnos()
+        self.mapas = ConfiguracionMapas()
         log_evento("🔄 Configuración reseteada a valores por defecto")
 
     def validar_configuracion(self) -> bool:
@@ -245,6 +278,15 @@ class ConfiguradorTiempoReal:
 
             if self.turnos.tiempo_transicion_segundos < 0.1:
                 raise ValueError(f"Tiempo transición muy corto")
+
+            if self.mapas.radio_mapa_global < 1:
+                raise ValueError("radio_mapa_global debe ser > 0")
+            if self.mapas.celdas_por_zona < 1:
+                raise ValueError("celdas_por_zona debe ser > 0")
+            if self.mapas.cantidad_parejas < 1:
+                raise ValueError("cantidad_parejas debe ser > 0")
+            if self.mapas.radio_mapa_individual < 1:
+                raise ValueError("radio_mapa_individual debe ser > 0")
 
             # Validar coherencia entre configuraciones
             if self.turnos.fps_durante_combate > self.motor.fps_objetivo * 2:
