@@ -174,6 +174,16 @@ class CartaBase:
         if self.vida_actual <= 0:
             self.vida_actual = 0
             self.viva = False
+            try:
+                from src.utils.eventos import disparar
+                disparar("carta_muerta", carta=self)
+            except Exception:
+                pass
+            if getattr(self, "tablero", None) and getattr(self, "coordenada", None):
+                try:
+                    self.tablero.quitar_carta(self.coordenada)
+                except Exception:
+                    pass
 
         # Actualizar estadísticas
         self.stats_combate['dano_recibido'] += dano_aplicado

@@ -398,6 +398,29 @@ class MotorTiempoReal:
     def tick(self):
         """Ejecuta un ciclo de actualización manual (solo para testing)."""
         self._procesar_tick()
+
+    # --- Limpieza automática de cartas muertas ---
+    def iniciar_limpieza_cartas_muertas(self, mapa_global, intervalo: float = 1.0):
+        """Programa limpieza periódica de cartas muertas en el mapa."""
+
+        def _limpiar():
+            for coord, carta in list(mapa_global.tablero.celdas.items()):
+                if carta is None:
+                    continue
+                if getattr(carta, "vida_actual", 1) <= 0 or not getattr(carta, "viva", True):
+                    mapa_global.tablero.quitar_carta(coord)
+                    try:
+                        from src.game.cartas.manager_cartas import manager_cartas
+                        manager_cartas.devolver_carta_al_pool(carta)
+                    except Exception:
+                        pass
+                    try:
+                        from src.utils.eventos import disparar
+                        disparar("carta_muerta", carta=carta)
+                    except Exception:
+                        pass
+
+        self.programar_evento(_limpiar, intervalo, recurrente=True, intervalo=intervalo)
     def __str__(self):
         return f"MotorTiempoReal(estado={self.estado.value}, fps={self.fps_actual:.1f}, componentes={len(self.componentes_activos)})"
 

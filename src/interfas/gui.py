@@ -495,7 +495,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
         # Actualizar lista
         self.listbox_tablero.delete(0, tk.END)
-        cartas_tablero = [par for par in self.jugador_actual.obtener_cartas_tablero() if par[1] is not None]
+        cartas_tablero = [
+            par
+            for par in self.jugador_actual.obtener_cartas_tablero()
+            if par[1] is not None and par[1].esta_viva()
+        ]
         for coord, carta in cartas_tablero:
             comp = carta.comportamiento_asignado or "-"
             self.listbox_tablero.insert(tk.END, f"{carta.nombre} en {coord} ({comp})")
@@ -508,7 +512,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if not (self.motor and self.motor.mapa_global and self.jugador_actual):
             return
         for coord, carta in self.motor.mapa_global.tablero.celdas.items():
-            if carta is not None and carta.duenio == self.jugador_actual:
+            if (
+                carta is not None
+                and carta.duenio == self.jugador_actual
+                and carta.esta_viva()
+            ):
                 self.listbox_enfrentamiento.insert(
                     tk.END, f"{carta.nombre} - Pos: ({coord.q}, {coord.r})"
                 )
@@ -805,11 +813,15 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.carta_seleccionada = None
         else:
             coord = self._panel_coords[sel[0]]
-            self.carta_seleccionada = self.motor.mapa_global.tablero.obtener_carta_en(coord)
+            carta = self.motor.mapa_global.tablero.obtener_carta_en(coord)
+            if carta and carta.esta_viva():
+                self.carta_seleccionada = carta
+            else:
+                self.carta_seleccionada = None
         self.actualizar_panel_ordenes()
 
     def ordenar_ataque(self):
-        if not self.carta_seleccionada:
+        if not self.carta_seleccionada or not self.carta_seleccionada.esta_viva():
             return
         if self.motor.fase_actual != "combate":
             messagebox.showwarning("Advertencia", "No estás en fase de combate")
@@ -857,7 +869,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         ttk.Button(top, text="OK", command=confirmar).pack(pady=5)
 
     def ordenar_movimiento(self):
-        if not self.carta_seleccionada:
+        if not self.carta_seleccionada or not self.carta_seleccionada.esta_viva():
             return
         turno = None
         if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
@@ -872,7 +884,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         log_evento(f"🎮 {self.jugador_actual.nombre} ordena mover a {self.carta_seleccionada.nombre}")
 
     def cambiar_comportamiento_carta(self):
-        if not self.carta_seleccionada:
+        if not self.carta_seleccionada or not self.carta_seleccionada.esta_viva():
             return
         turno = None
         if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
@@ -890,7 +902,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
     def actualizar_panel_ordenes(self):
         if not hasattr(self, "lbl_orden_carta"):
             return
-        if not self.carta_seleccionada:
+        if not self.carta_seleccionada or not self.carta_seleccionada.esta_viva():
             self.lbl_orden_carta.config(text="🎮 ÓRDENES PARA: -")
             self.lbl_estado_orden.config(text="Estado: -")
             self.lbl_turno_req.config(text="Turno requerido: -")
