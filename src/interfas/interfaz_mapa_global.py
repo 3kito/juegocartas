@@ -108,10 +108,65 @@ class InterfazMapaGlobal(ttk.Frame):
         return points
 
     def _coord_to_pixel(self, coord):
+        """Convierte una coordenada hexagonal a posición en pixeles sin offset."""
         import math
         x = self.hex_size * (3 / 2 * coord.q)
-        y = self.hex_size * (math.sqrt(3) / 2 * coord.q + math.sqrt(3) * coord.r)
+        y = self.hex_size * (
+            math.sqrt(3) / 2 * coord.q + math.sqrt(3) * coord.r
+        )
         return x, y
+
+    def _hex_round(self, q, r):
+        """Redondea coordenadas axiales flotantes a enteras"""
+        from src.game.tablero.coordenada import CoordenadaHexagonal
+
+        x = q
+        z = r
+        y = -x - z
+
+        rx = round(x)
+        ry = round(y)
+        rz = round(z)
+
+        x_diff = abs(rx - x)
+        y_diff = abs(ry - y)
+        z_diff = abs(rz - z)
+
+        if x_diff > y_diff and x_diff > z_diff:
+            rx = -ry - rz
+        elif y_diff > z_diff:
+            ry = -rx - rz
+        else:
+            rz = -rx - ry
+
+        return CoordenadaHexagonal(int(rx), int(rz))
+
+    def pixel_to_hex(self, x, y):
+        """Convierte coordenadas de pixel (con offset) a hexágono del mapa."""
+        import math
+
+        px, py = x - 200, y - 200
+        q = (2 / 3 * px) / self.hex_size
+        r = (-1 / 3 * px + math.sqrt(3) / 3 * py) / self.hex_size
+
+        coord = self._hex_round(q, r)
+
+        # Verificar conversión inversa para depuración
+        vx, vy = self._coord_to_pixel(coord)
+        vx += 200
+        vy += 200
+        log_evento(
+            f"pixel_to_hex DEBUG: ({x}, {y}) -> {coord} -> ({vx}, {vy})",
+            "DEBUG",
+        )
+
+        if self.mapa and coord not in self.mapa.tablero.celdas:
+            log_evento(
+                f"pixel_to_hex: coordenada {coord} fuera del mapa", "DEBUG"
+            )
+            return None
+
+        return coord
 
     def centrar_en_coordenada(self, coord):
         """Centra la vista en una coordenada"""
