@@ -9,6 +9,9 @@ def decidir_comportamiento(carta, info_entorno):
     vida_actual = carta.vida_actual
     vida_maxima = carta.vida_maxima
 
+    if carta.modo_control != "agresivo":
+        return {"accion": "esperar", "objetivos": []}
+
     if vida_actual < vida_maxima * 0.3:
         return {"accion": "huir", "objetivos": enemigos_cercanos}
 

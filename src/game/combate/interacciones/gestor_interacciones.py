@@ -98,6 +98,22 @@ class GestorInteracciones:
         fuente.stats_combate["dano_infligido"] += aplicado
         if not objetivo.esta_viva():
             fuente.stats_combate["enemigos_eliminados"] += 1
+            if getattr(objetivo, "tablero", None) and getattr(objetivo, "coordenada", None):
+                objetivo.tablero.quitar_carta(objetivo.coordenada)
+                log_evento(f"💀 {objetivo.nombre} removida del mapa global")
+        else:
+            if (
+                getattr(objetivo, "tablero", None)
+                and getattr(objetivo, "coordenada", None)
+                and getattr(fuente, "coordenada", None)
+                and objetivo.coordenada.distancia(fuente.coordenada)
+                <= objetivo.rango_ataque_actual
+                and objetivo.puede_actuar
+                and objetivo.puede_atacar()
+            ):
+                from src.game.combate.ia.ia_utilidades import atacar_si_en_rango
+
+                atacar_si_en_rango(objetivo, fuente)
 
         if self.on_step:
             try:

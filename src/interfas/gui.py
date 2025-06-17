@@ -822,12 +822,15 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             messagebox.showwarning("Advertencia", "NO ES SU TURNO")
             return
         visibles = self.interfaz_mapa.calcular_celdas_visibles(self.jugador_actual)
+        rango = self.carta_seleccionada.rango_ataque_actual
         enemigos = []
         for coord, carta in self.motor.mapa_global.tablero.celdas.items():
             if (
                 carta is not None
                 and not self.carta_seleccionada.es_aliado_de(carta)
                 and coord in visibles
+                and self.carta_seleccionada.coordenada
+                and self.carta_seleccionada.coordenada.distancia(coord) <= rango
             ):
                 enemigos.append((coord, carta))
         if not enemigos:
