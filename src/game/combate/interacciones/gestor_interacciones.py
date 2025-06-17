@@ -38,10 +38,15 @@ class GestorInteracciones:
         )
         for estado in self.estados_cartas.values():
             carta = estado.carta
+            log_evento(f"👀 Revisando {carta.nombre}", "DEBUG")
             if self.tablero and carta.puede_actuar:
                 if carta.tiene_orden_manual():
                     log_evento(
                         f"🔎 {carta.nombre} tiene orden manual pendiente", "DEBUG"
+                    )
+                    log_evento(
+                        f"↪️ Ejecutando _procesar_orden_manual para {carta.nombre}",
+                        "DEBUG",
                     )
                     self._procesar_orden_manual(estado)
                 else:

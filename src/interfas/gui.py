@@ -621,11 +621,16 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             return
         coord = self.mapa_pixel_a_hex(event.x, event.y)
         tablero = self.motor.mapa_global.tablero
-        if not tablero.esta_dentro_del_tablero(coord) or not tablero.esta_vacia(coord):
+        if not tablero.esta_dentro_del_tablero(coord):
             messagebox.showwarning("Error", "Destino inválido")
             return
+
+        origen = tablero.obtener_coordenada_de(self.carta_seleccionada)
         self.carta_seleccionada.marcar_orden_manual("mover", coord)
-        log_evento(f"🎮 {self.jugador_actual.nombre} ordena mover a {self.carta_seleccionada.nombre}")
+        log_evento(
+            f"🎮 {self.jugador_actual.nombre} ordena mover {self.carta_seleccionada.nombre} "
+            f"desde {origen} hacia {coord}"
+        )
         self.ui_mode = "normal"
         self.interfaz_mapa.canvas.configure(cursor="")
         self.lbl_estado_orden.config(text="Estado: orden registrada")
