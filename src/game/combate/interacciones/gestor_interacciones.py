@@ -171,7 +171,13 @@ class GestorInteracciones:
                     f"🎯 Orden de ataque contra {objetivo.nombre} para {carta.nombre}",
                     "DEBUG",
                 )
-                iniciar_ataque_continuo(carta, objetivo, self.tablero, self.motor)
+                iniciar_ataque_continuo(
+                    carta,
+                    objetivo,
+                    self.tablero,
+                    self.motor,
+                    on_step=self.on_step,
+                )
                 orden["progreso"] = "completada"
 
         elif orden["tipo"] == "cambiar_comportamiento":
