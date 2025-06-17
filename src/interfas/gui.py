@@ -240,9 +240,10 @@ class AutoBattlerGUI:
         from src.interfas.interfaz_mapa_global import InterfazMapaGlobal
 
         self.mapa_global = None
-        self.interfaz_mapa = InterfazMapaGlobal(frame, None)
+        self.interfaz_mapa = InterfazMapaGlobal(frame, None, debug=True)
         self.interfaz_mapa.pack(side="left", fill="both", expand=True)
         self.interfaz_mapa.canvas.bind("<Button-1>", self.on_mapa_click)
+        self.interfaz_mapa.canvas.bind("<Motion>", self.on_mapa_motion)
 
         panel = ttk.Frame(frame)
         panel.pack(side="right", fill="y", padx=5)
@@ -597,10 +598,22 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         else:
             self.lbl_coord_actual.config(text="Coordenada: -")
 
-    def on_mapa_click(self, event):
-        coord = self.interfaz_mapa.pixel_to_hex(event.x, event.y)
+    def on_mapa_motion(self, event):
+        x = self.interfaz_mapa.canvas.canvasx(event.x)
+        y = self.interfaz_mapa.canvas.canvasy(event.y)
+        coord = self.interfaz_mapa.pixel_to_hex(x, y)
         if hasattr(self, "lbl_coord_mapa"):
             self.lbl_coord_mapa.config(text=f"Mapa: {coord}" if coord else "Mapa: -")
+
+    def on_mapa_click(self, event):
+        x = self.interfaz_mapa.canvas.canvasx(event.x)
+        y = self.interfaz_mapa.canvas.canvasy(event.y)
+        coord = self.interfaz_mapa.pixel_to_hex(x, y)
+        log_evento(f"Mapa click pixel=({x}, {y}) -> coord={coord}")
+        if hasattr(self, "lbl_coord_mapa"):
+            self.lbl_coord_mapa.config(text=f"Mapa: {coord}" if coord else "Mapa: -")
+        if coord:
+            self.interfaz_mapa.resaltar_coordenada(coord, duracion=1000)
         if coord is None:
             return
         if self.ui_mode != "seleccionar_destino":
