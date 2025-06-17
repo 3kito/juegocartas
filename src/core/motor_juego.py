@@ -68,6 +68,16 @@ class MotorJuego:
             jugadores_por_color[color].append(jugador)
             mapa.ubicar_jugador_en_zona(jugador, color)
 
+        # Aplicar comportamientos asignados a las cartas
+        from src.game.cartas.carta_base import CartaBase
+        for carta in mapa.tablero.celdas.values():
+            if isinstance(carta, CartaBase) and getattr(carta, "comportamiento_asignado", None):
+                carta.modo_control = carta.comportamiento_asignado
+                log_evento(
+                    f"🎯 {carta.nombre} inicia como '{carta.modo_control}'",
+                    "DEBUG",
+                )
+
         # 3. Crear gestor de interacciones y motor
         gestor = GestorInteracciones(tablero=mapa.tablero)
         self.motor = MotorTiempoReal(fps_objetivo=20)
