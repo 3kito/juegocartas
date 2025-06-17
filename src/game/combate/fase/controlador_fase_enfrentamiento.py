@@ -96,6 +96,10 @@ class ControladorFaseEnfrentamiento:
             else:
                 log_evento(f"🛡️ {jugador.nombre} no recibe daño (vida intacta)")
 
+            # Revivir cartas para la siguiente fase
+            for carta in cartas:
+                carta.revivir()
+
 
         if self.al_terminar_fase:
             self.al_terminar_fase()

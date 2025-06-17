@@ -98,9 +98,6 @@ class GestorInteracciones:
         fuente.stats_combate["dano_infligido"] += aplicado
         if not objetivo.esta_viva():
             fuente.stats_combate["enemigos_eliminados"] += 1
-            if self.tablero and getattr(objetivo, "coordenada", None):
-                self.tablero.quitar_carta(objetivo.coordenada)
-                log_evento(f"💀 {objetivo.nombre} removida del mapa global")
         else:
             if (
                 getattr(objetivo, "tablero", None)

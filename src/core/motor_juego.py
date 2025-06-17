@@ -91,8 +91,8 @@ class MotorJuego:
             f"✅ Componentes activos: {self.motor.obtener_componentes_activos()}"
         )
 
-        # Limpieza periódica de cartas muertas
-        self.motor.iniciar_limpieza_cartas_muertas(self.mapa_global)
+        # Limpieza periódica de cartas muertas deshabilitada para mantener las cartas en el mapa
+        # self.motor.iniciar_limpieza_cartas_muertas(self.mapa_global)
 
         # 4. Inicializar turnos y controlador
         secuencia = generar_secuencia_turnos()

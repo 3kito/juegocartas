@@ -174,21 +174,23 @@ class CartaBase:
         if self.vida_actual <= 0:
             self.vida_actual = 0
             self.viva = False
+            self.puede_actuar = False
             try:
                 from src.utils.eventos import disparar
                 disparar("carta_muerta", carta=self)
             except Exception:
                 pass
-            if getattr(self, "tablero", None) and getattr(self, "coordenada", None):
-                try:
-                    self.tablero.quitar_carta(self.coordenada)
-                except Exception:
-                    pass
 
         # Actualizar estadísticas
         self.stats_combate['dano_recibido'] += dano_aplicado
 
         return dano_aplicado
+
+    def revivir(self):
+        """Restaura la carta a un estado activo al inicio de una nueva fase."""
+        self.vida_actual = self.vida_maxima
+        self.viva = True
+        self.puede_actuar = True
 
     # === MÉTODOS DE COMBATE ===
 
