@@ -27,6 +27,8 @@ class TableroHexagonal:
             self.celdas[coordenada] = carta
             if hasattr(carta, "coordenada"):
                 carta.coordenada = coordenada
+            if hasattr(carta, "tablero"):
+                carta.tablero = self
             log_evento(f"✅ Carta colocada en {coordenada}")
         else:
             log_evento(f"❌ Coordenada {coordenada} no existe en el tablero")
@@ -84,6 +86,10 @@ class TableroHexagonal:
                     f"🔸 Carta '{getattr(carta, 'nombre', 'desconocida')}' retirada de {coordenada}",
                     "DEBUG",
                 )
+                if hasattr(carta, "coordenada"):
+                    carta.coordenada = None
+                if hasattr(carta, "tablero"):
+                    carta.tablero = None
         return carta
 
     def contar_cartas(self) -> int:

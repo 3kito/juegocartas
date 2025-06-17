@@ -90,6 +90,9 @@ class CartaBase:
         # Control interno de tiempos para acciones
         self.ultimo_ataque = 0.0
 
+        # Referencia al tablero actual (jugador o mapa global)
+        self.tablero = None
+
         # Stats actuales (pueden ser modificados por efectos)
         self.dano_fisico_actual = self.dano_fisico_base
         self.dano_magico_actual = self.dano_magico_base
@@ -306,7 +309,7 @@ class CartaBase:
             return []
 
         interacciones = []
-        enemigos_en_rango = tablero.obtener_cartas_en_rango(coord, self.rango)
+        enemigos_en_rango = tablero.obtener_cartas_en_rango(coord, self.rango_ataque_actual)
 
         for otra_coord, otra_carta in enemigos_en_rango:
             if otra_carta is self:
