@@ -8,7 +8,10 @@ def calcular_dano(fuente, objetivo, interaccion) -> int:
     """
     Calcula el daño final a aplicar a un objetivo, considerando todas las capas de modificadores.
     """
-    base = interaccion.metadata.get("dano_base", fuente.dano_base)
+    base = interaccion.metadata.get(
+        "dano_base",
+        getattr(fuente, "dano_base", getattr(fuente, "dano_fisico_actual", 0)),
+    )
     tipo_dano = interaccion.metadata.get("tipo_dano", "fisico")
 
     dano_post_defensa = aplicar_defensas(base, objetivo, tipo_dano)
