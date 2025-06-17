@@ -28,17 +28,19 @@ def obtener_info_entorno(carta, tablero):
 def calcular_vision_jugador(jugador, mapa_global):
     """Calcula las celdas visibles para un jugador"""
     celdas_visibles = set()
-    # zonas segun color
-    if jugador.color_fase_actual == "rojo":
-        zonas = mapa_global.zonas_rojas
-    else:
-        zonas = mapa_global.zonas_azules
+
+    # Zonas siempre visibles por color
+    zonas = (
+        mapa_global.zonas_rojas
+        if jugador.color_fase_actual == "rojo"
+        else mapa_global.zonas_azules
+    )
     for zona in zonas:
         celdas_visibles.update(zona.coordenadas)
 
-    # rango alrededor de cartas propias
-    for coord, carta in jugador.tablero.celdas.items():
-        if carta is not None:
+    # Visibilidad desde cartas propias en el mapa global
+    for coord, carta in mapa_global.tablero.celdas.items():
+        if carta is not None and getattr(carta, "duenio", None) == jugador:
             area = coord.obtener_area(carta.rango_vision)
             celdas_visibles.update(area)
 
@@ -77,13 +79,21 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
 
     origen = mapa.obtener_coordenada_de(carta)
     if origen is None:
+        log_evento(f"❌ No se encontró coordenada de {carta.nombre}", "DEBUG")
         return False
 
+    log_evento(
+        f"🧭 Buscando ruta para {carta.nombre}: {origen} → {destino}", "DEBUG"
+    )
     ruta = _buscar_ruta(mapa, origen, destino)
     if not ruta:
+        log_evento("⚠️ Ruta no encontrada", "DEBUG")
         return False
 
-    log_evento(f"🚶 {carta.nombre} se mueve {origen} → {destino}")
+    log_evento(
+        f"🚶 {carta.nombre} se mueve {origen} → {destino} ({len(ruta)} pasos)",
+        "DEBUG",
+    )
 
     if motor is None:
         for paso in ruta:
@@ -98,10 +108,14 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
     for paso in ruta:
         def _ejecutar(p=paso):
             actual = mapa.obtener_coordenada_de(carta)
+            log_evento(f"➡️ {carta.nombre} paso a {p}", "DEBUG")
             mapa.mover_carta(actual, p)
             if on_step:
                 on_step()
 
+        log_evento(
+            f"⏰ Programando paso a {paso} en {acumulado:.2f}s", "DEBUG"
+        )
         motor.programar_evento(_ejecutar, acumulado)
         acumulado += delay
 
@@ -136,8 +150,17 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor):
         if atacante.coordenada is None or objetivo.coordenada is None:
             return
 
-        if atacante.coordenada.distancia(objetivo.coordenada) > atacante.rango_ataque_actual:
-            mover_carta_con_pathfinding(atacante, objetivo.coordenada, mapa, motor)
+        if (
+            atacante.coordenada.distancia(objetivo.coordenada)
+            > atacante.rango_ataque_actual
+        ):
+            log_evento(
+                f"📍 Acercando {atacante.nombre} hacia {objetivo.nombre}",
+                "DEBUG",
+            )
+            mover_carta_con_pathfinding(
+                atacante, objetivo.coordenada, mapa, motor
+            )
             motor.programar_evento(_ciclo, atacante.velocidad_ataque)
             return
 
@@ -146,4 +169,8 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor):
         if objetivo.esta_viva():
             motor.programar_evento(_ciclo, atacante.velocidad_ataque)
 
+    log_evento(
+        f"⏳ Iniciando ataque continuo de {atacante.nombre} a {objetivo.nombre}",
+        "DEBUG",
+    )
     motor.programar_evento(_ciclo, 0.0)

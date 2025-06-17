@@ -28,6 +28,7 @@ class AutoBattlerGUI:
         self.coordenada_origen = None
         self._ultima_fase_mapa = None
         self._ultimo_estado_mapa = None
+        self._jugador_prev = None
         self._panel_coords = []
         self.carta_seleccionada = None
         self.ui_mode = "normal"  # normal, seleccionar_destino
@@ -326,6 +327,9 @@ class AutoBattlerGUI:
         if not self.jugador_actual or not self.motor:
             return
 
+        cambio_jugador = self.jugador_actual is not self._jugador_prev
+        self._jugador_prev = self.jugador_actual
+
         # Actualizar info general
         self.lbl_ronda.config(text=f"Ronda: {self.motor.ronda}")
         self.lbl_fase.config(text=f"Fase: {self.motor.fase_actual}")
@@ -358,6 +362,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                     self.interfaz_mapa.set_mapa(self.motor.mapa_global)
                     self.mapa_global = self.motor.mapa_global
 
+                if cambio_jugador:
+                    self.interfaz_mapa.actualizar_vision_para_jugador(
+                        self.jugador_actual
+                    )
+
                 if self.motor.fase_actual != "preparacion":
                     estado_actual = tuple(
                         (c.q, c.r, id(card) if card else None)
@@ -370,8 +379,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                     if (
                         estado_actual != self._ultimo_estado_mapa
                         or self.motor.fase_actual != self._ultima_fase_mapa
+                        or cambio_jugador
                     ):
-                        visibles = self.interfaz_mapa.calcular_celdas_visibles(self.jugador_actual)
+                        visibles = self.interfaz_mapa.calcular_celdas_visibles(
+                            self.jugador_actual
+                        )
                         self.interfaz_mapa.actualizar_vision(visibles)
                         self.interfaz_mapa.actualizar()
                         self._ultimo_estado_mapa = estado_actual

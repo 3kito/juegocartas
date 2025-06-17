@@ -73,6 +73,11 @@ class GestorInteracciones:
         if not orden:
             return
 
+        log_evento(
+            f"📝 Procesando orden '{orden.get('tipo')}' para {carta.nombre}",
+            "DEBUG",
+        )
+
         if orden["progreso"] == "pendiente":
             orden["progreso"] = "ejecutando"
 
@@ -81,6 +86,10 @@ class GestorInteracciones:
             if destino is None:
                 orden["progreso"] = "completada"
             else:
+                log_evento(
+                    f"🧭 Orden de movimiento a {destino} para {carta.nombre}",
+                    "DEBUG",
+                )
                 mover_carta_con_pathfinding(
                     carta,
                     destino,
