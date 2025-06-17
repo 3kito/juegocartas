@@ -48,6 +48,11 @@ class MotorJuego:
     def _ejecutar_fase_combate(self):
         self.fase_actual = "combate"
         log_evento(f"⚔️ Fase de combate iniciada (Ronda {self.ronda})")
+        if self.on_step_callback:
+            try:
+                self.on_step_callback(evento="transicion_fase")
+            except TypeError:
+                self.on_step_callback()
 
         # 1. Crear mapa global
         mapa = MapaGlobal()
@@ -113,6 +118,11 @@ class MotorJuego:
                 time.sleep(0.1)
     def transicionar_a_fase_preparacion(self):
         log_evento("🔄 Transición a fase de preparación...")
+        if self.on_step_callback:
+            try:
+                self.on_step_callback(evento="transicion_fase")
+            except TypeError:
+                self.on_step_callback()
 
         # Limpiar mapa y controlador de combate
         self.mapa_global = None

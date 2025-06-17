@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from src.game.combate.mapa.mapa_global import MapaGlobal
 from src.utils.helpers import log_evento
+from src.utils.hex_utils import pixel_to_hex as util_pixel_to_hex, hex_to_pixel
 
 
 class InterfazMapaGlobal(ttk.Frame):
@@ -27,6 +28,7 @@ class InterfazMapaGlobal(ttk.Frame):
         self._after_id = None
         self._intervalo_ms = 500
         self.hex_size = hex_size
+        self.offset = (200, 200)
         self.celdas_visibles = set()  # coordenadas visibles para el jugador
 
         self.canvas = tk.Canvas(self, width=600, height=400, bg="white")
@@ -143,18 +145,10 @@ class InterfazMapaGlobal(ttk.Frame):
 
     def pixel_to_hex(self, x, y):
         """Convierte coordenadas de pixel (con offset) a hexágono del mapa."""
-        import math
-
-        px, py = x - 200, y - 200
-        q = (2 / 3 * px) / self.hex_size
-        r = (-1 / 3 * px + math.sqrt(3) / 3 * py) / self.hex_size
-
-        coord = self._hex_round(q, r)
+        coord = util_pixel_to_hex(x, y, self.hex_size, self.offset)
 
         # Verificar conversión inversa para depuración
-        vx, vy = self._coord_to_pixel(coord)
-        vx += 200
-        vy += 200
+        vx, vy = hex_to_pixel(coord, self.hex_size, self.offset)
         log_evento(
             f"pixel_to_hex DEBUG: ({x}, {y}) -> {coord} -> ({vx}, {vy})",
             "DEBUG",
@@ -172,8 +166,7 @@ class InterfazMapaGlobal(ttk.Frame):
         """Centra la vista en una coordenada"""
         if not coord:
             return
-        x, y = self._coord_to_pixel(coord)
-        cx, cy = x + 200, y + 200
+        cx, cy = hex_to_pixel(coord, self.hex_size, self.offset)
         self._centrar_en_pixel(cx, cy)
 
     def _centrar_en_pixel(self, x, y):
@@ -189,8 +182,7 @@ class InterfazMapaGlobal(ttk.Frame):
 
     def resaltar_coordenada(self, coord, duracion=1000):
         """Resalta una coordenada temporalmente"""
-        x, y = self._coord_to_pixel(coord)
-        cx, cy = x + 200, y + 200
+        cx, cy = hex_to_pixel(coord, self.hex_size, self.offset)
         radio = self.hex_size * 0.6
         highlight = self.canvas.create_oval(
             cx - radio,
@@ -208,7 +200,7 @@ class InterfazMapaGlobal(ttk.Frame):
         self.canvas.delete("all")
         board = self.mapa.tablero
         for coord in board.celdas:
-            x, y = self._coord_to_pixel(coord)
+            x, y = hex_to_pixel(coord, self.hex_size, self.offset)
             color = "white"
             zona_color = self.mapa.obtener_color_en(coord)
             if zona_color == "rojo":
@@ -217,7 +209,7 @@ class InterfazMapaGlobal(ttk.Frame):
                 color = "#bbbbff"
             if self.celdas_visibles and coord not in self.celdas_visibles:
                 color = "#404040"
-            points = self._hex_points(x + 200, y + 200, self.hex_size)
+            points = self._hex_points(x, y, self.hex_size)
             self.canvas.create_polygon(points, fill=color, outline="black")
         # Dibujar cartas en el tablero
         for coord, carta in board.celdas.items():
@@ -225,8 +217,7 @@ class InterfazMapaGlobal(ttk.Frame):
                 continue
 
             # Posición base en el canvas
-            x, y = self._coord_to_pixel(coord)
-            cx, cy = x + 200, y + 200
+            cx, cy = hex_to_pixel(coord, self.hex_size, self.offset)
 
             # Color según dueño de la carta
             jugador_color = getattr(carta.duenio, "color_fase_actual", "rojo")
