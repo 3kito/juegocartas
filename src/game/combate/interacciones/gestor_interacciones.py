@@ -1,7 +1,6 @@
 # interacciones/gestor_interacciones.py
 
 from typing import List
-from src.game.cartas.estado_carta import EstadoCarta  # Cada carta tiene un estado de combate
 from src.game.combate.calcular_dano.calculadora_dano import calcular_dano
 from src.game.combate.ia.ia_motor import generar_interacciones_para
 from src.game.combate.interacciones.interaccion_modelo import Interaccion, TipoInteraccion
@@ -21,11 +20,8 @@ class GestorInteracciones:
 
     def __init__(self, tablero=None, motor=None):
         self.interacciones_pendientes: List[Interaccion] = []
-        self.estados_cartas: dict[int, EstadoCarta] = {}  # ID de carta → EstadoCarta
         self.tablero = tablero
         self.motor = motor
-    def registrar_estado_carta(self, estado: EstadoCarta):
-        self.estados_cartas[estado.id_carta] = estado
 
     def registrar_interaccion(self, interaccion: Interaccion):
         log_evento(f"📨 Interacción registrada: {interaccion}")
@@ -33,22 +29,33 @@ class GestorInteracciones:
 
     def procesar_tick(self, delta_time: float) -> bool:
         # 🔁 Generar interacciones u órdenes manuales
+        if not self.tablero:
+            return True
+
+        cartas_activas = {
+            carta.id: carta
+            for carta in self.tablero.celdas.values()
+            if carta is not None
+        }
+
         log_evento(
-            f"🚩 Tick de interacciones con {len(self.estados_cartas)} cartas", "DEBUG"
+            f"🚩 Tick de interacciones con {len(cartas_activas)} cartas",
+            "DEBUG",
         )
-        for estado in self.estados_cartas.values():
-            carta = estado.carta
+
+        for carta in cartas_activas.values():
             log_evento(f"👀 Revisando {carta.nombre}", "DEBUG")
-            if self.tablero and carta.puede_actuar:
+            if carta.puede_actuar:
                 if carta.tiene_orden_manual():
                     log_evento(
-                        f"🔎 {carta.nombre} tiene orden manual pendiente", "DEBUG"
+                        f"🔎 {carta.nombre} tiene orden manual pendiente",
+                        "DEBUG",
                     )
                     log_evento(
                         f"↪️ Ejecutando _procesar_orden_manual para {carta.nombre}",
                         "DEBUG",
                     )
-                    self._procesar_orden_manual(estado)
+                    self._procesar_orden_manual(carta)
                 else:
                     nuevas = generar_interacciones_para(carta, self.tablero)
                     self.interacciones_pendientes.extend(nuevas)
@@ -57,8 +64,8 @@ class GestorInteracciones:
             return True
 
         for interaccion in self.interacciones_pendientes:
-            fuente = self.estados_cartas.get(interaccion.fuente_id)
-            objetivo = self.estados_cartas.get(interaccion.objetivo_id)
+            fuente = cartas_activas.get(interaccion.fuente_id)
+            objetivo = cartas_activas.get(interaccion.objetivo_id)
 
             if not fuente or not objetivo:
                 continue
@@ -69,7 +76,7 @@ class GestorInteracciones:
         self.interacciones_pendientes.clear()
         return True
 
-    def _procesar_ataque(self, interaccion: Interaccion, fuente: EstadoCarta, objetivo: EstadoCarta):
+    def _procesar_ataque(self, interaccion: Interaccion, fuente, objetivo):
         # Registrar en log
         log_evento(f"⚔️ {fuente.nombre} ataca a {objetivo.nombre}")
 
@@ -77,9 +84,8 @@ class GestorInteracciones:
         dano = calcular_dano(fuente, objetivo, interaccion)
         objetivo.recibir_dano(dano)
 
-    def _procesar_orden_manual(self, estado: EstadoCarta):
+    def _procesar_orden_manual(self, carta):
         """Ejecuta la orden manual asignada a la carta"""
-        carta = estado.carta
         orden = carta.orden_actual
         if not orden:
             return
@@ -141,9 +147,14 @@ class GestorInteracciones:
 
 
     def obtener_estadisticas(self):
+        cartas_en_tablero = (
+            len([c for c in self.tablero.celdas.values() if c is not None])
+            if self.tablero
+            else 0
+        )
         return {
             "interacciones_en_cola": len(self.interacciones_pendientes),
-            "cartas_registradas": len(self.estados_cartas)
+            "cartas_registradas": cartas_en_tablero,
         }
 
     def obtener_id_componente(self) -> str:
