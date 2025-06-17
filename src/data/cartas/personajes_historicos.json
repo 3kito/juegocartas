@@ -16,7 +16,7 @@
       "rango_ataque": 3,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -53,7 +53,7 @@
       "rango_ataque": 2,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -90,7 +90,7 @@
       "rango_ataque": 3,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -129,7 +129,7 @@
       "rango_ataque": 4,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -168,7 +168,7 @@
       "rango_ataque": 1,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -206,7 +206,7 @@
       "rango_ataque": 1,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -243,7 +243,7 @@
       "rango_ataque": 2,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -281,7 +281,7 @@
       "rango_ataque": 2,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -318,7 +318,7 @@
       "rango_ataque": 1,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -357,7 +357,7 @@
       "rango_ataque": 2,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -396,7 +396,7 @@
       "rango_ataque": 3,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -434,7 +434,7 @@
       "rango_ataque": 3,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -471,7 +471,7 @@
       "rango_ataque": 2,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -509,7 +509,7 @@
       "rango_ataque": 2,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -547,7 +547,7 @@
       "rango_ataque": 1,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -584,7 +584,7 @@
       "rango_ataque": 1,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -622,7 +622,7 @@
       "rango_ataque": 3,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -660,7 +660,7 @@
       "rango_ataque": 2,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -698,7 +698,7 @@
       "rango_ataque": 1,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {
@@ -735,7 +735,7 @@
       "rango_ataque": 2,
       "velocidad_movimiento": 1.0,
       "velocidad_ataque": 1.5,
-      "rango_vision": 2
+      "rango_vision": 1
     },
     "habilidades": [
       {

@@ -33,10 +33,16 @@ class GestorInteracciones:
 
     def procesar_tick(self, delta_time: float) -> bool:
         # 🔁 Generar interacciones u órdenes manuales
+        log_evento(
+            f"🚩 Tick de interacciones con {len(self.estados_cartas)} cartas", "DEBUG"
+        )
         for estado in self.estados_cartas.values():
             carta = estado.carta
             if self.tablero and carta.puede_actuar:
                 if carta.tiene_orden_manual():
+                    log_evento(
+                        f"🔎 {carta.nombre} tiene orden manual pendiente", "DEBUG"
+                    )
                     self._procesar_orden_manual(estado)
                 else:
                     nuevas = generar_interacciones_para(carta, self.tablero)
@@ -90,11 +96,18 @@ class GestorInteracciones:
                     f"🧭 Orden de movimiento a {destino} para {carta.nombre}",
                     "DEBUG",
                 )
-                mover_carta_con_pathfinding(
+                log_evento(
+                    f"📌 Ejecutando pathfinding de {carta.nombre}", "DEBUG"
+                )
+                exito = mover_carta_con_pathfinding(
                     carta,
                     destino,
                     self.tablero,
                     motor=self.motor,
+                )
+                log_evento(
+                    f"⏳ Movimiento programado ({'ok' if exito else 'fallo'})",
+                    "DEBUG",
                 )
                 # La orden se marca completada inmediatamente; el movimiento
                 # continuará mediante eventos del motor
@@ -115,6 +128,10 @@ class GestorInteracciones:
             orden["progreso"] = "completada"
 
         if orden["progreso"] == "completada":
+            log_evento(
+                f"✅ Orden '{orden.get('tipo')}' completada para {carta.nombre}",
+                "DEBUG",
+            )
             carta.limpiar_orden_manual()
 
 

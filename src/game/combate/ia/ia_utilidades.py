@@ -30,11 +30,8 @@ def calcular_vision_jugador(jugador, mapa_global):
     celdas_visibles = set()
 
     # Zonas siempre visibles por color
-    zonas = (
-        mapa_global.zonas_rojas
-        if jugador.color_fase_actual == "rojo"
-        else mapa_global.zonas_azules
-    )
+    # Todas las zonas deben ser visibles sin importar el color
+    zonas = mapa_global.zonas_rojas + mapa_global.zonas_azules
     for zona in zonas:
         celdas_visibles.update(zona.coordenadas)
 
