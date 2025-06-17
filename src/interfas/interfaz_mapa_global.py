@@ -76,13 +76,27 @@ class InterfazMapaGlobal(ttk.Frame):
         """Calcula celdas visibles para el jugador dado"""
         if not self.mapa or not jugador_actual:
             return set()
-        from src.game.combate.ia.ia_utilidades import calcular_vision_jugador
 
         visibles = set()
-        visibles.update(calcular_vision_jugador(jugador_actual, self.mapa))
-        for zona in self.mapa.zonas_rojas + self.mapa.zonas_azules:
+
+        zonas = (
+            self.mapa.zonas_rojas
+            if jugador_actual.color_fase_actual == "rojo"
+            else self.mapa.zonas_azules
+        )
+        for zona in zonas:
             visibles.update(zona.coordenadas)
+
+        for coord, carta in self.mapa.tablero.celdas.items():
+            if carta is not None and getattr(carta, "duenio", None) == jugador_actual:
+                visibles.update(coord.obtener_area(carta.rango_vision))
+
         return visibles
+
+    def actualizar_vision_para_jugador(self, jugador_actual):
+        """Recalcula y actualiza la visibilidad según el jugador"""
+        celdas = self.calcular_celdas_visibles(jugador_actual)
+        self.actualizar_vision(celdas)
 
     def _hex_points(self, x, y, size):
         import math
@@ -148,7 +162,7 @@ class InterfazMapaGlobal(ttk.Frame):
             elif zona_color == "azul":
                 color = "#bbbbff"
             if self.celdas_visibles and coord not in self.celdas_visibles:
-                color = "#1a1a1a"
+                color = "#404040"
             points = self._hex_points(x + 200, y + 200, self.hex_size)
             self.canvas.create_polygon(points, fill=color, outline="black")
         # Dibujar cartas en el tablero
