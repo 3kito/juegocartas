@@ -195,6 +195,20 @@ class AutoBattlerGUI:
         ttk.Button(control_frame, text="Quitar del Tablero",
                    command=self.quitar_carta_tablero).pack(fill="x")
 
+        ttk.Label(control_frame, text="Comportamiento:").pack(pady=(5, 0))
+        self.combo_comportamiento = ttk.Combobox(
+            control_frame,
+            state="readonly",
+            values=["agresivo", "defensivo", "explorador", "guardian", "seguidor"],
+        )
+        self.combo_comportamiento.current(0)
+        self.combo_comportamiento.pack(fill="x")
+        ttk.Button(
+            control_frame,
+            text="Asignar Comportamiento",
+            command=self.asignar_comportamiento_preparacion,
+        ).pack(fill="x", pady=(2, 2))
+
         ttk.Separator(control_frame, orient="horizontal").pack(fill="x", pady=10)
         ttk.Label(control_frame, text="Cartas en Banco:").pack()
 
@@ -441,7 +455,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.listbox_tablero.delete(0, tk.END)
         cartas_tablero = [par for par in self.jugador_actual.obtener_cartas_tablero() if par[1] is not None]
         for coord, carta in cartas_tablero:
-            self.listbox_tablero.insert(tk.END, f"{carta.nombre} en {coord}")
+            comp = carta.comportamiento_asignado or "-"
+            self.listbox_tablero.insert(tk.END, f"{carta.nombre} en {coord} ({comp})")
 
     def actualizar_panel_enfrentamiento(self):
         if not hasattr(self, "listbox_enfrentamiento"):
@@ -675,6 +690,22 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         else:
             messagebox.showwarning("Error", "No se pudo quitar la carta")
         self.actualizar_interfaz()
+
+    def asignar_comportamiento_preparacion(self):
+        if not self.jugador_actual:
+            return
+        seleccion = self.listbox_tablero.curselection()
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Selecciona una carta del tablero")
+            return
+        cartas = [p for p in self.jugador_actual.obtener_cartas_tablero() if p[1] is not None]
+        if seleccion[0] >= len(cartas):
+            messagebox.showwarning("Error", "Selección inválida")
+            return
+        carta = cartas[seleccion[0]][1]
+        comportamiento = self.combo_comportamiento.get()
+        resultado = carta.asignar_comportamiento(comportamiento)
+        messagebox.showinfo("Comportamiento", resultado)
 
     def centrar_en_carta(self):
         if not self.motor or not self.motor.mapa_global:

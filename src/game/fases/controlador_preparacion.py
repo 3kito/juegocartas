@@ -35,7 +35,7 @@ class ControladorFasePreparacion:
 
     def generar_subasta_publica(self):
         cartas_subasta = max(2, len(self.jugadores))
-        self.subastas = SistemaSubastas(self.jugadores, modo_testeo=self.modo_testeo)
+        self.subastas = SistemaSubastas(self.jugadores, modo_testeo=self.modo_testeo, config=self.config)
         self.subastas.generar_subasta(cartas_subasta)
 
     def pausar_para_ofertas(self):

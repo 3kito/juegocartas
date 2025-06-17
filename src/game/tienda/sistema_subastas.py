@@ -5,17 +5,21 @@ SistemaSubastas - Gestión de subastas públicas por ronda durante la fase de pr
 from typing import List, Dict, Optional
 from src.game.cartas.manager_cartas import manager_cartas
 from src.utils.helpers import log_evento
+from src.data.config.game_config import GameConfig
 
 
 class SistemaSubastas:
-    def __init__(self, jugadores: List, duracion_segundos: int = 15, modo_testeo: bool = False):
+    def __init__(self, jugadores: List, duracion_segundos: int = 15, modo_testeo: bool = False, config: GameConfig | None = None):
         self.jugadores = jugadores
         self.cartas_subastadas: Dict[int, dict] = {}
         self.ofertas_por_jugador: Dict[int, List[int]] = {}
         self.tiempo_restante = None if modo_testeo else duracion_segundos
+        self.config = config or GameConfig()
 
     # En src/game/tienda/sistema_subastas.py - método generar_subasta()
-    def generar_subasta(self, cantidad: int = 3):
+    def generar_subasta(self, cantidad: Optional[int] = None):
+        if cantidad is None:
+            cantidad = self.config.cartas_subasta_default
         self.cartas_subastadas.clear()
         log_evento(f"🏛️ Generando subasta con {cantidad} cartas:")
 

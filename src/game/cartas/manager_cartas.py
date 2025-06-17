@@ -32,10 +32,11 @@ class ManagerCartas:
 
         # Configuración
         self.config = config or GameConfig()
+        log_evento(f"ManagerCartas inicializado (id={id(self)})", "DEBUG")
         self.copias_por_tier = {
-            1: self.config.copias_por_tier.get(1, 5),
-            2: self.config.copias_por_tier.get(2, 3),
-            3: self.config.copias_por_tier.get(3, 2),
+            1: self.config.copias_por_tier.get(1, 8),
+            2: self.config.copias_por_tier.get(2, 5),
+            3: self.config.copias_por_tier.get(3, 3),
         }
         self.max_cartas_por_tier = self.config.max_cartas_por_tier
         self.cartas_activas = set(self.config.cartas_activas)
@@ -192,6 +193,11 @@ class ManagerCartas:
             log_evento("⚠️ Cartas no cargadas, retornando lista vacía")
             return []
 
+        log_evento(
+            f"[Pool {id(self)}] Solicitud de {cantidad} cartas (disponibles: {sum(self.pool_disponibles.values())})",
+            "DEBUG",
+        )
+
         probabilidades = self._obtener_probabilidades_tier(nivel_jugador)
         cartas_seleccionadas = []
 
@@ -267,6 +273,10 @@ class ManagerCartas:
     def devolver_carta_al_pool(self, carta: CartaBase):
         """Devuelve una carta al pool marcándola como disponible"""
         try:
+            log_evento(
+                f"[Pool {id(self)}] Devolviendo {carta.nombre} (ID: {carta.id})",
+                "DEBUG",
+            )
             # Obtener el ID base de la carta
             if hasattr(carta, 'carta_base_id'):
                 carta_base_id = carta.carta_base_id

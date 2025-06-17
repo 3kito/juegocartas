@@ -121,6 +121,7 @@ class CartaBase:
         self.modo_control = "pasivo"  # 'activo', 'pasivo' u 'orden_manual'
         self.orden_manual_pendiente = False
         self.orden_actual = None
+        self.comportamiento_asignado = None  # Preparación: comportamiento elegido
 
     @classmethod
     def crear_basica(cls, id, nombre="Carta", tier=1):
@@ -349,6 +350,21 @@ class CartaBase:
         self.orden_actual = None
         if self.modo_control == "orden_manual":
             self.modo_control = "pasivo"
+
+    def asignar_comportamiento(self, tipo: str) -> str:
+        """Asigna un comportamiento para el inicio del combate"""
+        comportamientos_validos = [
+            "agresivo",
+            "defensivo",
+            "explorador",
+            "guardian",
+            "seguidor",
+        ]
+        if tipo not in comportamientos_validos:
+            return "❌ Comportamiento inválido"
+        self.comportamiento_asignado = tipo
+        log_evento(f"🔧 {self.nombre} configurado como '{tipo}'")
+        return f"✅ Comportamiento '{tipo}' asignado"
     def obtener_habilidades_disponibles(self) -> List[Habilidad]:
         """Retorna lista de habilidades que pueden ser usadas"""
         return [hab for i, hab in enumerate(self.habilidades)
