@@ -1,0 +1,5 @@
+Este juego de cartas automático enfrenta a varios jugadores que controlan un equipo de unidades.
+Cada ronda se divide en dos fases: preparación y combate.
+Durante la preparación compras cartas, colocas unidades en el tablero y configuras tu estrategia.
+En la fase de combate las unidades luchan automáticamente hasta que queda un solo ganador.
+El objetivo es ser el último jugador en pie administrando bien tus recursos y posicionando a tus cartas.

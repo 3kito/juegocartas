@@ -1,0 +1,8 @@
+El proyecto se organiza siguiendo una estructura de carpetas similar a la de un juego de cartas tipo auto-battler.
+
+- **src/** contiene el código fuente principal. Allí se agrupan los módulos de juego, datos y utilidades.
+- **config/** alberga archivos JSON con parámetros como el comportamiento del motor de tiempo real.
+- **docs/** y **documentacion/** incluyen la documentación del proyecto.
+- **tests/** reúne pruebas automáticas que validan parte del funcionamiento.
+
+Dentro de `src/game` se encuentran las subcarpetas de combate, economía, tablero y más, que definen la lógica del juego.

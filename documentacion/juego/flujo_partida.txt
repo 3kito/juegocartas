@@ -1,0 +1,4 @@
+1. **Inicio de ronda**: se genera una nueva tienda con cartas disponibles para cada jugador.
+2. **Preparación**: puedes comprar cartas, mejorar tu nivel o reorganizar tu tablero.
+3. **Enfrentamiento**: las cartas atacan por turnos de forma automática según sus habilidades.
+4. **Fin de ronda**: los jugadores que pierden reciben daño y comienza una nueva ronda si hay más de un sobreviviente.
