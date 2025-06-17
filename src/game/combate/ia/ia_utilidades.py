@@ -157,8 +157,12 @@ def atacar_si_en_rango(carta_atacante, carta_objetivo):
     return True
 
 
-def iniciar_ataque_continuo(atacante, objetivo, mapa, motor):
-    """Ejecuta ataques automáticos mientras el objetivo esté vivo y visible."""
+def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None):
+    """Ejecuta ataques automáticos mientras el objetivo esté vivo y visible.
+
+    ``on_step`` es una función opcional que se llamará tras cada acción para
+    permitir que la interfaz se actualice en tiempo real.
+    """
 
     def _ciclo():
         if not atacante.esta_viva() or not objetivo.esta_viva():
@@ -176,12 +180,17 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor):
                 "DEBUG",
             )
             mover_carta_con_pathfinding(
-                atacante, objetivo.coordenada, mapa, motor
+                atacante, objetivo.coordenada, mapa, motor, on_step=on_step
             )
             motor.programar_evento(_ciclo, atacante.velocidad_ataque)
             return
 
         atacar_si_en_rango(atacante, objetivo)
+        if on_step:
+            try:
+                on_step()
+            except TypeError:
+                on_step()
 
         if objetivo.esta_viva():
             motor.programar_evento(_ciclo, atacante.velocidad_ataque)
