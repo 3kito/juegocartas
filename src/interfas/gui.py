@@ -565,13 +565,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         return CoordenadaHexagonal(int(rx), int(rz))
 
     def mapa_pixel_a_hex(self, x, y):
-        import math
-        size = self.interfaz_mapa.hex_size
-        x = x - 200
-        y = y - 200
-        q = (2/3 * x) / size
-        r = (-1/3 * x + math.sqrt(3)/3 * y) / size
-        return self.hex_round(q, r)
+        """Compatibilidad: delega conversión a InterfazMapaGlobal"""
+        return self.interfaz_mapa.pixel_to_hex(x, y)
 
     def preparar_mover_carta(self, event):
         if not self.jugador_actual:
@@ -629,9 +624,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.lbl_coord_actual.config(text="Coordenada: -")
 
     def on_mapa_click(self, event):
-        coord = self.mapa_pixel_a_hex(event.x, event.y)
+        coord = self.interfaz_mapa.pixel_to_hex(event.x, event.y)
         if hasattr(self, "lbl_coord_mapa"):
-            self.lbl_coord_mapa.config(text=f"Mapa: {coord}")
+            self.lbl_coord_mapa.config(text=f"Mapa: {coord}" if coord else "Mapa: -")
+        if coord is None:
+            return
         if self.ui_mode != "seleccionar_destino":
             return
         if not (self.motor and self.motor.mapa_global and self.carta_seleccionada):
