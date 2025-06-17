@@ -79,11 +79,8 @@ class InterfazMapaGlobal(ttk.Frame):
 
         visibles = set()
 
-        zonas = (
-            self.mapa.zonas_rojas
-            if jugador_actual.color_fase_actual == "rojo"
-            else self.mapa.zonas_azules
-        )
+        # Mostrar siempre ambas zonas sin importar el turno
+        zonas = self.mapa.zonas_rojas + self.mapa.zonas_azules
         for zona in zonas:
             visibles.update(zona.coordenadas)
 
