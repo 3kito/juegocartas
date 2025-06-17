@@ -3,6 +3,7 @@
 from src.game.combate.fase.gestor_turnos import GestorTurnos
 from src.utils.helpers import log_evento
 from typing import Callable, Optional
+import time
 
 
 class ControladorFaseEnfrentamiento:
@@ -27,6 +28,7 @@ class ControladorFaseEnfrentamiento:
         self.al_terminar_fase = al_terminar_fase
         self.modo_testeo = modo_testeo
         self.turno_activo = None
+        self.fin_turno = None
         self.jugadores = [
             jugador for lista in jugadores_por_color.values() for jugador in lista
         ]
@@ -42,6 +44,7 @@ class ControladorFaseEnfrentamiento:
     def _iniciar_turno_actual(self):
         turno = self.turnos.turno_actual_info()
         self.turno_activo = turno["color"]
+        self.fin_turno = time.time() + turno["duracion"]
         log_evento(
             f"🕒 Turno {self.turnos.turno_actual + 1}/{self.turnos.total_turnos()}: {turno['color'].upper()} ({turno['duracion']}s)"
         )
@@ -68,6 +71,7 @@ class ControladorFaseEnfrentamiento:
             self.finalizar_fase()
         else:
             self.turno_activo = self.turnos.turno_actual_info()["color"]
+            self.fin_turno = time.time() + self.turnos.turno_actual_info()["duracion"]
             log_evento(f"🔄 Cambio de turno manual: {self.turno_activo.upper()}")
 
     def finalizar_fase(self):
@@ -75,6 +79,7 @@ class ControladorFaseEnfrentamiento:
             return
 
         self.finalizada = True
+        self.fin_turno = None
         log_evento("🏁 Fase de enfrentamiento finalizada")
 
         for jugador in self.jugadores:
@@ -105,6 +110,12 @@ class ControladorFaseEnfrentamiento:
 
     def obtener_jugadores_activos(self):
         return self.turnos.jugadores_activos()
+
+    def obtener_tiempo_restante_turno(self) -> float:
+        """Segundos restantes para que finalice el turno actual"""
+        if self.fin_turno is None:
+            return 0.0
+        return max(0.0, self.fin_turno - time.time())
 
     def obtener_id_componente(self) -> str:
         return "fase_enfrentamiento"

@@ -2,6 +2,7 @@ from src.game.tienda.tienda_individual import TiendaIndividual
 from src.game.tienda.sistema_subastas import SistemaSubastas
 from src.utils.helpers import log_evento
 from src.data.config.game_config import GameConfig
+import time
 
 
 class ControladorFasePreparacion:
@@ -13,6 +14,7 @@ class ControladorFasePreparacion:
         self.tiendas_individuales = {}
         self.subastas = None
         self.finalizada = False
+        self.fin_fase = None
 
     def iniciar_fase(self, ronda: int):
         log_evento(f"📦 Fase de preparación iniciada (Ronda {ronda})")
@@ -22,6 +24,7 @@ class ControladorFasePreparacion:
             self.generar_tiendas()
             self.generar_subasta_publica()
             self.iniciar_temporizador()
+            self.fin_fase = time.time() + self.config.fase_preparacion_segundos
 
     def entregar_oro(self):
         for jugador in self.jugadores:
@@ -115,6 +118,12 @@ class ControladorFasePreparacion:
             'estado_actual': self.subastas.ver_estado_actual(),
             'tiempo_restante': getattr(self.subastas, 'tiempo_restante', 0)
         }
+
+    def obtener_tiempo_restante(self) -> float:
+        """Devuelve los segundos restantes para que termine la fase"""
+        if self.fin_fase is None:
+            return 0.0
+        return max(0.0, self.fin_fase - time.time())
 
     def realizar_compra_tienda(self, jugador_id: int, indice_carta: int):
         """Facilita la compra de una carta en tienda individual"""

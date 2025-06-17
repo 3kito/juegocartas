@@ -1,6 +1,7 @@
 # interfaces/main_gui.py
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
+import time
 
 from src.utils.helpers import log_evento
 
@@ -34,6 +35,7 @@ class AutoBattlerGUI:
         self.ui_mode = "normal"  # normal, seleccionar_destino
 
         self.crear_interfaz_principal()
+        self.root.after(500, self.refrescar_temporizadores)
 
     def crear_interfaz_principal(self):
         # Frame superior - Info del juego
@@ -45,6 +47,8 @@ class AutoBattlerGUI:
 
         self.lbl_fase = ttk.Label(info_frame, text="Fase: -", font=("Arial", 12))
         self.lbl_fase.pack(side="left", padx=(20, 0))
+        self.lbl_tiempo_fase = ttk.Label(info_frame, text="Tiempo restante: -", font=("Arial", 12))
+        self.lbl_tiempo_fase.pack(side="left", padx=(20, 0))
 
         # Botones de control
         control_frame = ttk.Frame(self.root)
@@ -282,6 +286,8 @@ class AutoBattlerGUI:
         self.lbl_equipo_rojo.pack(side="top", padx=5, anchor="w")
         self.lbl_equipo_azul = ttk.Label(info_frame, text="🔵 EQUIPO AZUL: -")
         self.lbl_equipo_azul.pack(side="top", padx=5, anchor="w")
+        self.lbl_tiempo_turno = ttk.Label(info_frame, text="Tiempo turno: -")
+        self.lbl_tiempo_turno.pack(side="top", padx=5, anchor="w")
 
     # === MÉTODOS DE CONTROL ===
 
@@ -390,6 +396,10 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                         self._ultima_fase_mapa = self.motor.fase_actual
                 else:
                     self._ultima_fase_mapa = self.motor.fase_actual
+            else:
+                if self.interfaz_mapa.mapa is not None:
+                    self.interfaz_mapa.set_mapa(None)
+                self.mapa_global = None
 
         if hasattr(self.motor, "controlador_enfrentamiento") and self.motor.controlador_enfrentamiento:
             turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
@@ -409,10 +419,12 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             for i in range(1, 4):
                 self.notebook.tab(i, state="normal")
             self.canvas_tablero.bind("<Button-1>", self.on_canvas_click)
+            self.notebook.tab(4, state="disabled")
         else:
             for i in range(1, 4):
                 self.notebook.tab(i, state="disabled")
             self.canvas_tablero.unbind("<Button-1>")
+            self.notebook.tab(4, state="normal")
         if not self.motor.modo_testeo and self.frame_mover_test.winfo_ismapped() == 1:
             self.frame_mover_test.pack_forget()
 
@@ -921,6 +933,28 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if hasattr(self.motor, 'controlador_enfrentamiento') and self.motor.controlador_enfrentamiento:
             turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
         self.lbl_turno_activo.config(text=f"Turno: {turno if turno else '-'}")
+
+    def refrescar_temporizadores(self):
+        self.actualizar_temporizador_fase()
+        self.actualizar_temporizador_turno()
+        self.root.after(500, self.refrescar_temporizadores)
+
+    def actualizar_temporizador_fase(self):
+        if not self.motor:
+            self.lbl_tiempo_fase.config(text="Tiempo restante: -")
+            return
+        if self.motor.fase_actual == "preparacion" and hasattr(self.motor, 'controlador_preparacion'):
+            segundos = self.motor.controlador_preparacion.obtener_tiempo_restante()
+            self.lbl_tiempo_fase.config(text=f"Tiempo restante: {int(segundos)}s")
+        else:
+            self.lbl_tiempo_fase.config(text="Tiempo restante: -")
+
+    def actualizar_temporizador_turno(self):
+        if not self.motor or self.motor.fase_actual != "combate" or not hasattr(self.motor, 'controlador_enfrentamiento'):
+            self.lbl_tiempo_turno.config(text="Tiempo turno: -")
+            return
+        segundos = self.motor.controlador_enfrentamiento.obtener_tiempo_restante_turno()
+        self.lbl_tiempo_turno.config(text=f"Tiempo turno: {int(segundos)}s")
 
     def ejecutar(self):
         self.root.mainloop()

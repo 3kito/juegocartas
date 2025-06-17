@@ -107,6 +107,10 @@ class MotorJuego:
     def transicionar_a_fase_preparacion(self):
         log_evento("🔄 Transición a fase de preparación...")
 
+        # Limpiar mapa y controlador de combate
+        self.mapa_global = None
+        self.controlador_enfrentamiento = None
+
         # Eliminar jugadores muertos
         jugadores_antes = len(self.jugadores_vivos)
         self.jugadores_vivos = [j for j in self.jugadores_vivos if j.vida > 0]
