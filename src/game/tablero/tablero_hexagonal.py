@@ -25,6 +25,8 @@ class TableroHexagonal:
     def colocar_carta(self, coordenada: CoordenadaHexagonal, carta):
         if coordenada in self.celdas:
             self.celdas[coordenada] = carta
+            if hasattr(carta, "coordenada"):
+                carta.coordenada = coordenada
             log_evento(f"✅ Carta colocada en {coordenada}")
         else:
             log_evento(f"❌ Coordenada {coordenada} no existe en el tablero")
@@ -113,6 +115,8 @@ class TableroHexagonal:
         # Realizar el movimiento
         self.celdas[desde] = None
         self.celdas[hacia] = carta
+        if hasattr(carta, "coordenada"):
+            carta.coordenada = hacia
         log_evento(f"↔️ Carta movida: {desde} → {hacia}")
         return True
 

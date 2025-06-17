@@ -240,7 +240,6 @@ class AutoBattlerGUI:
 
         self.mapa_global = None
         self.interfaz_mapa = InterfazMapaGlobal(frame, None)
-        self.interfaz_mapa.iniciar_actualizacion_automatica()
         self.interfaz_mapa.pack(side="left", fill="both", expand=True)
         self.interfaz_mapa.canvas.bind("<Button-1>", self.on_mapa_click)
 
@@ -289,6 +288,8 @@ class AutoBattlerGUI:
         self.lbl_equipo_azul.pack(side="top", padx=5, anchor="w")
         self.lbl_tiempo_turno = ttk.Label(info_frame, text="Tiempo turno: -")
         self.lbl_tiempo_turno.pack(side="top", padx=5, anchor="w")
+        self.lbl_coord_mapa = ttk.Label(info_frame, text="Mapa: -")
+        self.lbl_coord_mapa.pack(side="top", padx=5, anchor="w")
 
     # === MÉTODOS DE CONTROL ===
 
@@ -299,7 +300,7 @@ class AutoBattlerGUI:
         self.jugadores = [j1, j2]
 
         # Inicializar motor
-        self.motor = MotorJuego(self.jugadores, on_step_callback=self.interfaz_mapa.forzar_actualizacion)
+        self.motor = MotorJuego(self.jugadores, on_step_callback=self.on_evento_motor)
         self.motor.iniciar()
 
         if self.motor.modo_testeo:
@@ -628,16 +629,17 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.lbl_coord_actual.config(text="Coordenada: -")
 
     def on_mapa_click(self, event):
+        coord = self.mapa_pixel_a_hex(event.x, event.y)
+        if hasattr(self, "lbl_coord_mapa"):
+            self.lbl_coord_mapa.config(text=f"Mapa: {coord}")
         if self.ui_mode != "seleccionar_destino":
             return
         if not (self.motor and self.motor.mapa_global and self.carta_seleccionada):
             return
-        coord = self.mapa_pixel_a_hex(event.x, event.y)
         tablero = self.motor.mapa_global.tablero
         if not tablero.esta_dentro_del_tablero(coord):
             messagebox.showwarning("Error", "Destino inválido")
             return
-
         origen = tablero.obtener_coordenada_de(self.carta_seleccionada)
         self.carta_seleccionada.marcar_orden_manual("mover", coord)
         log_evento(
@@ -956,6 +958,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             return
         segundos = self.motor.controlador_enfrentamiento.obtener_tiempo_restante_turno()
         self.lbl_tiempo_turno.config(text=f"Tiempo turno: {int(segundos)}s")
+
+    def on_evento_motor(self):
+        if self.interfaz_mapa and self.jugador_actual:
+            self.interfaz_mapa.actualizar_vision_para_jugador(self.jugador_actual)
+            self.interfaz_mapa.forzar_actualizacion()
 
     def ejecutar(self):
         self.root.mainloop()
