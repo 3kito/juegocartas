@@ -1,4 +1,5 @@
 # ia_utilidades.py
+from src.utils.helpers import log_evento
 
 def obtener_info_entorno(carta, tablero):
     """
@@ -82,6 +83,8 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
     if not ruta:
         return False
 
+    log_evento(f"🚶 {carta.nombre} se mueve {origen} → {destino}")
+
     if motor is None:
         for paso in ruta:
             mapa.mover_carta(origen, paso)
@@ -111,6 +114,7 @@ def atacar_si_en_rango(carta_atacante, carta_objetivo):
         return False
     if carta_atacante.coordenada.distancia(carta_objetivo.coordenada) > carta_atacante.rango_ataque_actual:
         return False
+    log_evento(f"⚔️ {carta_atacante.nombre} ataca a {carta_objetivo.nombre}")
     from src.game.combate.interacciones.interaccion_modelo import Interaccion, TipoInteraccion
     inter = Interaccion(
         fuente_id=carta_atacante.id,

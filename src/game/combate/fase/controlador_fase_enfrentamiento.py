@@ -41,12 +41,16 @@ class ControladorFaseEnfrentamiento:
 
     def _iniciar_turno_actual(self):
         turno = self.turnos.turno_actual_info()
-        log_evento(f"🕒 Turno {self.turnos.turno_actual + 1}/{self.turnos.total_turnos()}: {turno['color'].upper()} ({turno['duracion']}s)")
-
-        self.motor.programar_evento(
-            callback=self._cambiar_turno,
-            delay_segundos=turno["duracion"]
+        self.turno_activo = turno["color"]
+        log_evento(
+            f"🕒 Turno {self.turnos.turno_actual + 1}/{self.turnos.total_turnos()}: {turno['color'].upper()} ({turno['duracion']}s)"
         )
+
+        if not self.modo_testeo:
+            self.motor.programar_evento(
+                callback=self._cambiar_turno,
+                delay_segundos=turno["duracion"],
+            )
 
     def _cambiar_turno(self):
         print("cambiando turno")

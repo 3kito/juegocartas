@@ -21,6 +21,7 @@ class ControladorFasePreparacion:
             self.entregar_oro()
             self.generar_tiendas()
             self.generar_subasta_publica()
+            self.iniciar_temporizador()
 
     def entregar_oro(self):
         for jugador in self.jugadores:
@@ -37,6 +38,34 @@ class ControladorFasePreparacion:
         cartas_subasta = max(2, len(self.jugadores))
         self.subastas = SistemaSubastas(self.jugadores, modo_testeo=self.modo_testeo, config=self.config)
         self.subastas.generar_subasta(cartas_subasta)
+
+    def iniciar_temporizador(self):
+        """Inicia un temporizador automático para finalizar la fase"""
+        if self.modo_testeo:
+            return
+
+        motor = None
+        if hasattr(self.motor, "programar_evento"):
+            motor = self.motor
+        elif hasattr(self.motor, "motor") and hasattr(self.motor.motor, "programar_evento"):
+            motor = self.motor.motor
+
+        if motor:
+            motor.programar_evento(self.finalizar_fase, self.config.fase_preparacion_segundos)
+            log_evento(
+                f"⏰ Temporizador de preparación: {self.config.fase_preparacion_segundos}s"
+            )
+        else:
+            try:
+                import threading
+
+                t = threading.Timer(self.config.fase_preparacion_segundos, self.finalizar_fase)
+                t.start()
+                log_evento(
+                    f"⏰ Temporizador de preparación (threading) {self.config.fase_preparacion_segundos}s"
+                )
+            except Exception as e:
+                log_evento(f"❌ No se pudo iniciar temporizador: {e}")
 
     def pausar_para_ofertas(self):
         """Pausa el flujo para permitir a los jugadores ofertar manualmente"""

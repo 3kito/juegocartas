@@ -30,6 +30,7 @@ class AutoBattlerGUI:
         self._ultimo_estado_mapa = None
         self._panel_coords = []
         self.carta_seleccionada = None
+        self.ui_mode = "normal"  # normal, seleccionar_destino
 
         self.crear_interfaz_principal()
 
@@ -235,6 +236,7 @@ class AutoBattlerGUI:
         self.mapa_global = None
         self.interfaz_mapa = InterfazMapaGlobal(frame, None)
         self.interfaz_mapa.pack(side="left", fill="both", expand=True)
+        self.interfaz_mapa.canvas.bind("<Button-1>", self.on_mapa_click)
 
         panel = ttk.Frame(frame)
         panel.pack(side="right", fill="y", padx=5)
@@ -369,6 +371,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                         estado_actual != self._ultimo_estado_mapa
                         or self.motor.fase_actual != self._ultima_fase_mapa
                     ):
+                        visibles = self.interfaz_mapa.calcular_celdas_visibles(self.jugador_actual)
+                        self.interfaz_mapa.actualizar_vision(visibles)
                         self.interfaz_mapa.actualizar()
                         self._ultimo_estado_mapa = estado_actual
                         self._ultima_fase_mapa = self.motor.fase_actual
@@ -534,6 +538,15 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         from src.game.tablero.coordenada import CoordenadaHexagonal
         return CoordenadaHexagonal(int(rx), int(rz))
 
+    def mapa_pixel_a_hex(self, x, y):
+        import math
+        size = self.interfaz_mapa.hex_size
+        x = x - 200
+        y = y - 200
+        q = (2/3 * x) / size
+        r = (-1/3 * x + math.sqrt(3)/3 * y) / size
+        return self.hex_round(q, r)
+
     def preparar_mover_carta(self, event):
         if not self.jugador_actual:
             return
@@ -588,6 +601,23 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.lbl_coord_actual.config(text=f"Coordenada: {coord}")
         else:
             self.lbl_coord_actual.config(text="Coordenada: -")
+
+    def on_mapa_click(self, event):
+        if self.ui_mode != "seleccionar_destino":
+            return
+        if not (self.motor and self.motor.mapa_global and self.carta_seleccionada):
+            return
+        coord = self.mapa_pixel_a_hex(event.x, event.y)
+        tablero = self.motor.mapa_global.tablero
+        if not tablero.esta_dentro_del_tablero(coord) or not tablero.esta_vacia(coord):
+            messagebox.showwarning("Error", "Destino inválido")
+            return
+        self.carta_seleccionada.marcar_orden_manual("mover", coord)
+        log_evento(f"🎮 {self.jugador_actual.nombre} ordena mover a {self.carta_seleccionada.nombre}")
+        self.ui_mode = "normal"
+        self.interfaz_mapa.canvas.configure(cursor="")
+        self.lbl_estado_orden.config(text="Estado: orden registrada")
+        self.actualizar_panel_ordenes()
 
     # === MÉTODOS DE ACCIÓN ===
 
@@ -761,18 +791,37 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if turno != color:
             messagebox.showwarning("Advertencia", "NO ES SU TURNO")
             return
-        q = simpledialog.askinteger("Atacar", "Coordenada q del objetivo:")
-        r = simpledialog.askinteger("Atacar", "Coordenada r del objetivo:")
-        if q is None or r is None:
+        visibles = self.interfaz_mapa.calcular_celdas_visibles(self.jugador_actual)
+        enemigos = []
+        for coord, carta in self.motor.mapa_global.tablero.celdas.items():
+            if (
+                carta is not None
+                and not self.carta_seleccionada.es_aliado_de(carta)
+                and coord in visibles
+            ):
+                enemigos.append((coord, carta))
+        if not enemigos:
+            messagebox.showinfo("Atacar", "No hay objetivos visibles")
             return
-        from src.game.tablero.coordenada import CoordenadaHexagonal
-        coord = CoordenadaHexagonal(q, r)
-        objetivo = self.motor.mapa_global.tablero.obtener_carta_en(coord)
-        if objetivo is None or self.carta_seleccionada.es_aliado_de(objetivo):
-            messagebox.showwarning("Error", "Objetivo inválido")
-            return
-        self.carta_seleccionada.marcar_orden_manual("atacar", objetivo)
-        self.actualizar_panel_ordenes()
+        top = tk.Toplevel(self.root)
+        top.title("Seleccionar Objetivo")
+        ttk.Label(top, text="Objetivo:").pack(padx=5, pady=5)
+        opciones = [f"{carta.nombre} ({coord.q},{coord.r})" for coord, carta in enemigos]
+        combo = ttk.Combobox(top, values=opciones, state="readonly")
+        combo.pack(padx=5, pady=5)
+        combo.current(0)
+
+        def confirmar():
+            idx = combo.current()
+            coord, objetivo = enemigos[idx]
+            self.carta_seleccionada.marcar_orden_manual("atacar", objetivo)
+            log_evento(
+                f"🎮 {self.jugador_actual.nombre} ordena atacar a {objetivo.nombre}"
+            )
+            self.actualizar_panel_ordenes()
+            top.destroy()
+
+        ttk.Button(top, text="OK", command=confirmar).pack(pady=5)
 
     def ordenar_movimiento(self):
         if not self.carta_seleccionada:
@@ -784,18 +833,10 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if turno != color:
             messagebox.showwarning("Advertencia", "NO ES SU TURNO")
             return
-        q = simpledialog.askinteger("Mover", "Coordenada q destino:")
-        r = simpledialog.askinteger("Mover", "Coordenada r destino:")
-        if q is None or r is None:
-            return
-        from src.game.tablero.coordenada import CoordenadaHexagonal
-        destino = CoordenadaHexagonal(q, r)
-        tablero = self.motor.mapa_global.tablero
-        if not tablero.esta_dentro_del_tablero(destino) or not tablero.esta_vacia(destino):
-            messagebox.showwarning("Error", "Destino inválido")
-            return
-        self.carta_seleccionada.marcar_orden_manual("mover", destino)
-        self.actualizar_panel_ordenes()
+        self.ui_mode = "seleccionar_destino"
+        self.interfaz_mapa.canvas.configure(cursor="crosshair")
+        self.lbl_estado_orden.config(text="Selecciona destino en el mapa")
+        log_evento(f"🎮 {self.jugador_actual.nombre} ordena mover a {self.carta_seleccionada.nombre}")
 
     def cambiar_comportamiento_carta(self):
         if not self.carta_seleccionada:
