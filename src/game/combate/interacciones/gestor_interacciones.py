@@ -25,7 +25,7 @@ class GestorInteracciones:
         self.on_step = on_step
 
     def registrar_interaccion(self, interaccion: Interaccion):
-        log_evento(f"📨 Interacción registrada: {interaccion}")
+        log_evento(f"📨 Interacción registrada: {interaccion}", "DEBUG")
         self.interacciones_pendientes.append(interaccion)
 
     def procesar_tick(self, delta_time: float) -> bool:
@@ -87,12 +87,23 @@ class GestorInteracciones:
         return True
 
     def _procesar_ataque(self, interaccion: Interaccion, fuente, objetivo):
-        # Registrar en log
-        log_evento(f"⚔️ {fuente.nombre} ataca a {objetivo.nombre}")
-
-        # Aplicar daño
         dano = calcular_dano(fuente, objetivo, interaccion)
-        objetivo.recibir_dano(dano)
+        aplicado = objetivo.recibir_dano(dano)
+        fuente.registrar_ataque()
+
+        log_evento(
+            f"⚔️ {fuente.nombre} golpea a {objetivo.nombre} por {aplicado} daño (vida restante: {objetivo.vida_actual})"
+        )
+
+        fuente.stats_combate["dano_infligido"] += aplicado
+        if not objetivo.esta_viva():
+            fuente.stats_combate["enemigos_eliminados"] += 1
+
+        if self.on_step:
+            try:
+                self.on_step()
+            except TypeError:
+                self.on_step()
 
     def _procesar_orden_manual(self, carta):
         """Ejecuta la orden manual asignada a la carta"""

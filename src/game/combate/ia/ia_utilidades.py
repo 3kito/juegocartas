@@ -133,15 +133,27 @@ def atacar_si_en_rango(carta_atacante, carta_objetivo):
         return False
     if carta_atacante.coordenada.distancia(carta_objetivo.coordenada) > carta_atacante.rango_ataque_actual:
         return False
-    log_evento(f"⚔️ {carta_atacante.nombre} ataca a {carta_objetivo.nombre}")
     from src.game.combate.interacciones.interaccion_modelo import Interaccion, TipoInteraccion
+    from src.game.combate.calcular_dano.calculadora_dano import calcular_dano
+
     inter = Interaccion(
         fuente_id=carta_atacante.id,
         objetivo_id=carta_objetivo.id,
         tipo=TipoInteraccion.ATAQUE,
         metadata={"dano_base": carta_atacante.dano_fisico_actual},
     )
-    carta_objetivo.recibir_dano(carta_atacante.dano_fisico_actual)
+
+    dano = calcular_dano(carta_atacante, carta_objetivo, inter)
+    aplicado = carta_objetivo.recibir_dano(dano)
+    carta_atacante.registrar_ataque()
+
+    log_evento(
+        f"⚔️ {carta_atacante.nombre} golpea a {carta_objetivo.nombre} por {aplicado} daño (vida restante: {carta_objetivo.vida_actual})"
+    )
+
+    if not carta_objetivo.esta_viva():
+        carta_atacante.stats_combate["enemigos_eliminados"] += 1
+    carta_atacante.stats_combate["dano_infligido"] += aplicado
     return True
 
 
