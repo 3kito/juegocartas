@@ -29,8 +29,14 @@ class GestorInteracciones:
 
     def procesar_tick(self, delta_time: float) -> bool:
         # 🔁 Generar interacciones u órdenes manuales
+        log_evento("🔄 GestorInteracciones.procesar_tick() ejecutándose", "DEBUG")
         if not self.tablero:
             return True
+
+        log_evento(
+            f"📊 Revisando {len([c for c in self.tablero.celdas.values() if c])} cartas en tablero",
+            "DEBUG",
+        )
 
         cartas_activas = {
             carta.id: carta
@@ -44,11 +50,14 @@ class GestorInteracciones:
         )
 
         for carta in cartas_activas.values():
-            log_evento(f"👀 Revisando {carta.nombre}", "DEBUG")
+            log_evento(
+                f"🔍 Revisando carta {carta.nombre} - tiene_orden_manual: {carta.tiene_orden_manual()}",
+                "DEBUG",
+            )
             if carta.puede_actuar:
                 if carta.tiene_orden_manual():
                     log_evento(
-                        f"🔎 {carta.nombre} tiene orden manual pendiente",
+                        f"📝 ORDEN DETECTADA en {carta.nombre}: {carta.orden_actual}",
                         "DEBUG",
                     )
                     log_evento(
@@ -91,7 +100,7 @@ class GestorInteracciones:
             return
 
         log_evento(
-            f"📝 Procesando orden '{orden.get('tipo')}' para {carta.nombre}",
+            f"⚙️ Procesando orden manual para {carta.nombre}: tipo={orden.get('tipo')}, progreso={orden.get('progreso')}",
             "DEBUG",
         )
 
@@ -129,12 +138,20 @@ class GestorInteracciones:
             if objetivo is None or not objetivo.esta_viva():
                 orden["progreso"] = "completada"
             else:
+                log_evento(
+                    f"🎯 Orden de ataque contra {objetivo.nombre} para {carta.nombre}",
+                    "DEBUG",
+                )
                 iniciar_ataque_continuo(carta, objetivo, self.tablero, self.motor)
                 orden["progreso"] = "completada"
 
         elif orden["tipo"] == "cambiar_comportamiento":
             nuevo = orden.get("datos_adicionales", {}).get("nuevo_comportamiento")
             if nuevo:
+                log_evento(
+                    f"🔄 Cambiando comportamiento de {carta.nombre} a '{nuevo}'",
+                    "DEBUG",
+                )
                 carta.modo_control = nuevo
             orden["progreso"] = "completada"
 

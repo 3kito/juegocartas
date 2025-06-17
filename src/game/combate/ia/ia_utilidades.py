@@ -80,6 +80,9 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
         return False
 
     log_evento(
+        f"🚶 INICIANDO pathfinding {carta.nombre}: {origen} → {destino}", "DEBUG"
+    )
+    log_evento(
         f"🧭 Buscando ruta para {carta.nombre}: {origen} → {destino}", "DEBUG"
     )
     ruta = _buscar_ruta(mapa, origen, destino)
@@ -87,6 +90,10 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
         log_evento("⚠️ Ruta no encontrada", "DEBUG")
         return False
 
+    log_evento(
+        f"🗺️ Ruta encontrada: {len(ruta)} pasos",
+        "DEBUG",
+    )
     log_evento(
         f"🚶 {carta.nombre} se mueve {origen} → {destino} ({len(ruta)} pasos)",
         "DEBUG",
@@ -111,7 +118,8 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
                 on_step()
 
         log_evento(
-            f"⏰ Programando paso a {paso} en {acumulado:.2f}s", "DEBUG"
+            f"⏰ Programando evento movimiento con delay {acumulado:.2f}s",
+            "DEBUG",
         )
         motor.programar_evento(_ejecutar, acumulado)
         acumulado += delay
