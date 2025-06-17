@@ -225,6 +225,12 @@ class ControladorFasePreparacion:
         self.finalizada = True
         log_evento("📦 Fase de preparación finalizada")
 
+        if hasattr(self.motor, "on_step_callback") and self.motor.on_step_callback:
+            try:
+                self.motor.on_step_callback(evento="transicion_fase")
+            except TypeError:
+                self.motor.on_step_callback()
+
         # Iniciar la siguiente fase
         if hasattr(self.motor, 'iniciar_fase_enfrentamiento'):
             self.motor.iniciar_fase_enfrentamiento()

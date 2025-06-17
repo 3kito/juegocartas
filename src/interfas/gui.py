@@ -8,6 +8,7 @@ from src.utils.helpers import log_evento
 from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
 from src.game.combate.mapa.mapa_global import MapaGlobal
+from src.utils.hex_utils import pixel_to_hex, hex_to_pixel
 
 
 class AutoBattlerGUI:
@@ -506,14 +507,12 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
     def dibujar_tablero_hexagonal(self):
         # Dibujar una representación simple del tablero hexagonal
-        center_x, center_y = self.board_center
         hex_size = self.hex_size
 
         # Dibujar hexágonos para cada coordenada
         for coord in self.jugador_actual.tablero.celdas.keys():
             # Convertir coordenadas hexagonales a pixel
-            x = center_x + hex_size * (3 / 2 * coord.q)
-            y = center_y + hex_size * (math.sqrt(3) / 2 * coord.q + math.sqrt(3) * coord.r)
+            x, y = hex_to_pixel(coord, hex_size, self.board_center)
 
             # Dibujar hexágono
             carta = self.jugador_actual.tablero.celdas[coord]
@@ -536,33 +535,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.canvas_tablero.create_polygon(points, fill=color, outline="black")
 
     def pixel_a_hex(self, x, y):
-        import math
-        cx, cy = self.board_center
-        size = self.hex_size
-        x = x - cx
-        y = y - cy
-        q = (2/3 * x) / size
-        r = (-1/3 * x + math.sqrt(3)/3 * y) / size
-        return self.hex_round(q, r)
+        return pixel_to_hex(x, y, self.hex_size, self.board_center)
 
-    def hex_round(self, q, r):
-        x = q
-        z = r
-        y = -x - z
-        rx = round(x)
-        ry = round(y)
-        rz = round(z)
-        x_diff = abs(rx - x)
-        y_diff = abs(ry - y)
-        z_diff = abs(rz - z)
-        if x_diff > y_diff and x_diff > z_diff:
-            rx = -ry - rz
-        elif y_diff > z_diff:
-            ry = -rx - rz
-        else:
-            rz = -rx - ry
-        from src.game.tablero.coordenada import CoordenadaHexagonal
-        return CoordenadaHexagonal(int(rx), int(rz))
 
     def mapa_pixel_a_hex(self, x, y):
         """Compatibilidad: delega conversión a InterfazMapaGlobal"""
@@ -956,10 +930,15 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         segundos = self.motor.controlador_enfrentamiento.obtener_tiempo_restante_turno()
         self.lbl_tiempo_turno.config(text=f"Tiempo turno: {int(segundos)}s")
 
-    def on_evento_motor(self):
-        if self.interfaz_mapa and self.jugador_actual:
-            self.interfaz_mapa.actualizar_vision_para_jugador(self.jugador_actual)
-            self.interfaz_mapa.forzar_actualizacion()
+    def on_evento_motor(self, evento="actualizacion_mapa"):
+        def _actualizar():
+            if evento in ("transicion_fase", "actualizacion_mapa"):
+                self.actualizar_interfaz()
+            if evento == "actualizacion_mapa" and self.interfaz_mapa and self.jugador_actual:
+                self.interfaz_mapa.actualizar_vision_para_jugador(self.jugador_actual)
+                self.interfaz_mapa.forzar_actualizacion()
+
+        self.root.after(0, _actualizar)
 
     def ejecutar(self):
         self.root.mainloop()
