@@ -41,8 +41,8 @@ def guardar_json(datos, ruta_archivo):
 
 def log_evento(mensaje, nivel="INFO"):
     """Registra un evento en consola y opcionalmente en archivo"""
-    if nivel == "TRACE":
-        # Logs de nivel TRACE se ignoran para evitar ruido en consola
+    if nivel in ("TRACE", "DEBUG"):
+        # Logs muy verbosos se ignoran para evitar ruido en consola
         return
 
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
