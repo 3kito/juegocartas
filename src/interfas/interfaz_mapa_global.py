@@ -21,7 +21,7 @@ class InterfazMapaGlobal(ttk.Frame):
            regiones modificadas utilizando ``Canvas.coords``.
     """
 
-    def __init__(self, master, mapa: MapaGlobal | None = None, hex_size: int = 20):
+    def __init__(self, master, mapa: MapaGlobal | None = None, hex_size: int = 20, debug: bool = False):
         super().__init__(master)
         self.mapa = mapa
         self._ultimo_estado = None
@@ -29,7 +29,11 @@ class InterfazMapaGlobal(ttk.Frame):
         self._intervalo_ms = 500
         self.hex_size = hex_size
         self.offset = (200, 200)
+        self.debug = debug
         self.celdas_visibles = set()  # coordenadas visibles para el jugador
+        log_evento(
+            f"InterfazMapaGlobal init hex_size={self.hex_size} offset={self.offset} debug={self.debug}"
+        )
 
         self.canvas = tk.Canvas(self, width=600, height=400, bg="white")
         h_scroll = ttk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
@@ -150,8 +154,7 @@ class InterfazMapaGlobal(ttk.Frame):
         # Verificar conversión inversa para depuración
         vx, vy = hex_to_pixel(coord, self.hex_size, self.offset)
         log_evento(
-            f"pixel_to_hex DEBUG: ({x}, {y}) -> {coord} -> ({vx}, {vy})",
-            "DEBUG",
+            f"pixel_to_hex: click ({x}, {y}) -> {coord} -> ({vx:.2f}, {vy:.2f})"
         )
 
         if self.mapa and coord not in self.mapa.tablero.celdas:
@@ -193,8 +196,16 @@ class InterfazMapaGlobal(ttk.Frame):
             width=2,
             tags="highlight",
         )
+        text = self.canvas.create_text(
+            cx,
+            cy,
+            text=f"({coord.q},{coord.r})",
+            fill="yellow",
+            font=("Arial", 10, "bold"),
+            tags="highlight",
+        )
         self._centrar_en_pixel(cx, cy)
-        self.canvas.after(duracion, lambda: self.canvas.delete(highlight))
+        self.canvas.after(duracion, lambda: self.canvas.delete("highlight"))
 
     def _dibujar_mapa(self):
         self.canvas.delete("all")
@@ -211,6 +222,14 @@ class InterfazMapaGlobal(ttk.Frame):
                 color = "#404040"
             points = self._hex_points(x, y, self.hex_size)
             self.canvas.create_polygon(points, fill=color, outline="black")
+            if self.debug:
+                self.canvas.create_text(
+                    x,
+                    y,
+                    text=f"{coord.q},{coord.r}",
+                    fill="black",
+                    font=("Arial", 8),
+                )
         # Dibujar cartas en el tablero
         for coord, carta in board.celdas.items():
             if carta is None:
