@@ -2,5 +2,6 @@ __pycache__/
 *.py[cod]
 tests/
 
-claude/
+claude/**/
+!claude/
 deprec/
