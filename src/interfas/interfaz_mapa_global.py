@@ -72,6 +72,18 @@ class InterfazMapaGlobal(ttk.Frame):
         self._dibujar_mapa()
         log_evento("Mapa global dibujado")
 
+    def calcular_celdas_visibles(self, jugador_actual):
+        """Calcula celdas visibles para el jugador dado"""
+        if not self.mapa or not jugador_actual:
+            return set()
+        from src.game.combate.ia.ia_utilidades import calcular_vision_jugador
+
+        visibles = set()
+        visibles.update(calcular_vision_jugador(jugador_actual, self.mapa))
+        for zona in self.mapa.zonas_rojas + self.mapa.zonas_azules:
+            visibles.update(zona.coordenadas)
+        return visibles
+
     def _hex_points(self, x, y, size):
         import math
         points = []
@@ -135,16 +147,10 @@ class InterfazMapaGlobal(ttk.Frame):
                 color = "#ffbbbb"
             elif zona_color == "azul":
                 color = "#bbbbff"
+            if self.celdas_visibles and coord not in self.celdas_visibles:
+                color = "#1a1a1a"
             points = self._hex_points(x + 200, y + 200, self.hex_size)
             self.canvas.create_polygon(points, fill=color, outline="black")
-            if self.celdas_visibles and coord not in self.celdas_visibles:
-                # Overlay semitransparente para el fog of war
-                self.canvas.create_polygon(
-                    points,
-                    fill="black",
-                    stipple="gray50",
-                    outline="",
-                )
         # Dibujar cartas en el tablero
         for coord, carta in board.celdas.items():
             if carta is None:
