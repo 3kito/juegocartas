@@ -15,16 +15,15 @@ class ControladorFasePreparacion:
         self.subastas = None
         self.finalizada = False
         self.fin_fase = None
+        self._temporizador = None
 
     def iniciar_fase(self, ronda: int):
         log_evento(f"📦 Fase de preparación iniciada (Ronda {ronda})")
 
-        if not self.modo_testeo:
-            self.entregar_oro()
-            self.generar_tiendas()
-            self.generar_subasta_publica()
-            self.iniciar_temporizador()
-            self.fin_fase = time.time() + self.config.fase_preparacion_segundos
+        self.entregar_oro()
+        self.generar_tiendas()
+        self.generar_subasta_publica()
+        self.iniciar_temporizador()
 
     def entregar_oro(self):
         for jugador in self.jugadores:
@@ -44,31 +43,28 @@ class ControladorFasePreparacion:
 
     def iniciar_temporizador(self):
         """Inicia un temporizador automático para finalizar la fase"""
-        if self.modo_testeo:
-            return
-
         motor = None
         if hasattr(self.motor, "programar_evento"):
             motor = self.motor
         elif hasattr(self.motor, "motor") and hasattr(self.motor.motor, "programar_evento"):
             motor = self.motor.motor
 
+        duracion = 999999 if self.modo_testeo else self.config.fase_preparacion_segundos
+
         if motor:
-            motor.programar_evento(self.finalizar_fase, self.config.fase_preparacion_segundos)
-            log_evento(
-                f"⏰ Temporizador de preparación: {self.config.fase_preparacion_segundos}s"
-            )
+            self._temporizador = motor.programar_evento(self.finalizar_fase, duracion)
+            log_evento(f"⏰ Temporizador de preparación: {duracion}s")
         else:
             try:
                 import threading
 
-                t = threading.Timer(self.config.fase_preparacion_segundos, self.finalizar_fase)
-                t.start()
-                log_evento(
-                    f"⏰ Temporizador de preparación (threading) {self.config.fase_preparacion_segundos}s"
-                )
+                self._temporizador = threading.Timer(duracion, self.finalizar_fase)
+                self._temporizador.start()
+                log_evento(f"⏰ Temporizador de preparación (threading) {duracion}s")
             except Exception as e:
                 log_evento(f"❌ No se pudo iniciar temporizador: {e}")
+
+        self.fin_fase = time.time() + duracion
 
     def pausar_para_ofertas(self):
         """Pausa el flujo para permitir a los jugadores ofertar manualmente"""
@@ -124,6 +120,30 @@ class ControladorFasePreparacion:
         if self.fin_fase is None:
             return 0.0
         return max(0.0, self.fin_fase - time.time())
+
+    def acelerar_temporizador(self, segundos: int = 2):
+        """Reduce el temporizador activo a los segundos indicados"""
+        if self.finalizada or self.fin_fase is None:
+            return
+
+        # Cancelar temporizador existente si es un threading.Timer
+        if isinstance(self._temporizador, object) and hasattr(self._temporizador, "cancel"):
+            try:
+                self._temporizador.cancel()
+            except Exception:
+                pass
+
+        self.fin_fase = time.time() + segundos
+
+        if hasattr(self.motor, "eventos_programados") and isinstance(self._temporizador, str):
+            evento = self.motor.eventos_programados.get(self._temporizador)
+            if evento:
+                evento.tiempo_ejecucion = self.fin_fase
+        else:
+            import threading
+
+            self._temporizador = threading.Timer(segundos, self.finalizar_fase)
+            self._temporizador.start()
 
     def realizar_compra_tienda(self, jugador_id: int, indice_carta: int):
         """Facilita la compra de una carta en tienda individual"""

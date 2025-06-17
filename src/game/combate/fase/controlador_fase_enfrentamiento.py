@@ -32,28 +32,25 @@ class ControladorFaseEnfrentamiento:
         self.jugadores = [
             jugador for lista in jugadores_por_color.values() for jugador in lista
         ]
+        self._evento_turno = None
         
     def iniciar_fase(self):
         log_evento("🎬 Iniciando fases de enfrentamiento")
-        if self.modo_testeo:
-            self.turno_activo = self.turnos.turno_actual_info()["color"]
-            log_evento(f"🕒 Turno manual inicial: {self.turno_activo.upper()}")
-        else:
-            self._iniciar_turno_actual()
+        self._iniciar_turno_actual()
 
     def _iniciar_turno_actual(self):
         turno = self.turnos.turno_actual_info()
         self.turno_activo = turno["color"]
-        self.fin_turno = time.time() + turno["duracion"]
+        duracion = 999999 if self.modo_testeo else turno["duracion"]
+        self.fin_turno = time.time() + duracion
         log_evento(
-            f"🕒 Turno {self.turnos.turno_actual + 1}/{self.turnos.total_turnos()}: {turno['color'].upper()} ({turno['duracion']}s)"
+            f"🕒 Turno {self.turnos.turno_actual + 1}/{self.turnos.total_turnos()}: {turno['color'].upper()} ({duracion}s)"
         )
 
-        if not self.modo_testeo:
-            self.motor.programar_evento(
-                callback=self._cambiar_turno,
-                delay_segundos=turno["duracion"],
-            )
+        self._evento_turno = self.motor.programar_evento(
+            callback=self._cambiar_turno,
+            delay_segundos=duracion,
+        )
 
     def _cambiar_turno(self):
         print("cambiando turno")
@@ -116,6 +113,14 @@ class ControladorFaseEnfrentamiento:
         if self.fin_turno is None:
             return 0.0
         return max(0.0, self.fin_turno - time.time())
+
+    def acelerar_temporizador(self, segundos: int = 2):
+        """Reduce el tiempo restante del turno actual"""
+        if self.fin_turno is None:
+            return
+        self.fin_turno = time.time() + segundos
+        if self._evento_turno and self._evento_turno in self.motor.eventos_programados:
+            self.motor.eventos_programados[self._evento_turno].tiempo_ejecucion = self.fin_turno
 
     def obtener_id_componente(self) -> str:
         return "fase_enfrentamiento"

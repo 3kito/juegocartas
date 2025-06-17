@@ -52,7 +52,7 @@ class GestorInteracciones:
         for carta in cartas_activas.values():
             log_evento(
                 f"🔍 Revisando carta {carta.nombre} - tiene_orden_manual: {carta.tiene_orden_manual()}",
-                "DEBUG",
+                "TRACE",
             )
             if carta.puede_actuar:
                 if carta.tiene_orden_manual():
