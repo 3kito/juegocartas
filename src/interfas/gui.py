@@ -240,6 +240,7 @@ class AutoBattlerGUI:
 
         self.mapa_global = None
         self.interfaz_mapa = InterfazMapaGlobal(frame, None)
+        self.interfaz_mapa.iniciar_actualizacion_automatica()
         self.interfaz_mapa.pack(side="left", fill="both", expand=True)
         self.interfaz_mapa.canvas.bind("<Button-1>", self.on_mapa_click)
 
@@ -298,7 +299,7 @@ class AutoBattlerGUI:
         self.jugadores = [j1, j2]
 
         # Inicializar motor
-        self.motor = MotorJuego(self.jugadores)
+        self.motor = MotorJuego(self.jugadores, on_step_callback=self.interfaz_mapa.forzar_actualizacion)
         self.motor.iniciar()
 
         if self.motor.modo_testeo:

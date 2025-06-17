@@ -24,6 +24,8 @@ class InterfazMapaGlobal(ttk.Frame):
         super().__init__(master)
         self.mapa = mapa
         self._ultimo_estado = None
+        self._after_id = None
+        self._intervalo_ms = 500
         self.hex_size = hex_size
         self.celdas_visibles = set()  # coordenadas visibles para el jugador
 
@@ -196,4 +198,27 @@ class InterfazMapaGlobal(ttk.Frame):
             )
 
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    # === Actualización automática ===
+    def iniciar_actualizacion_automatica(self, intervalo_ms: int = 500):
+        """Inicia un loop que refresca el mapa periódicamente"""
+        self._intervalo_ms = intervalo_ms
+        if self._after_id:
+            self.after_cancel(self._after_id)
+        self._after_id = self.after(self._intervalo_ms, self._loop_actualizacion)
+
+    def detener_actualizacion_automatica(self):
+        """Detiene el refresco periódico"""
+        if self._after_id:
+            self.after_cancel(self._after_id)
+            self._after_id = None
+
+    def _loop_actualizacion(self):
+        self.forzar_actualizacion()
+        self._after_id = self.after(self._intervalo_ms, self._loop_actualizacion)
+
+    def forzar_actualizacion(self):
+        """Fuerza un redibujo del mapa"""
+        self._ultimo_estado = None
+        self.actualizar()
 

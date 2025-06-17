@@ -14,7 +14,7 @@
       "defensa_magica": 25,
       "rango_movimiento": 2,
       "rango_ataque": 3,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -51,7 +51,7 @@
       "defensa_magica": 15,
       "rango_movimiento": 3,
       "rango_ataque": 2,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -88,7 +88,7 @@
       "defensa_magica": 20,
       "rango_movimiento": 1,
       "rango_ataque": 3,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -127,7 +127,7 @@
       "defensa_magica": 15,
       "rango_movimiento": 2,
       "rango_ataque": 4,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -166,7 +166,7 @@
       "defensa_magica": 12,
       "rango_movimiento": 2,
       "rango_ataque": 1,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -204,7 +204,7 @@
       "defensa_magica": 35,
       "rango_movimiento": 1,
       "rango_ataque": 1,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -241,7 +241,7 @@
       "defensa_magica": 18,
       "rango_movimiento": 2,
       "rango_ataque": 2,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -279,7 +279,7 @@
       "defensa_magica": 15,
       "rango_movimiento": 1,
       "rango_ataque": 2,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -316,7 +316,7 @@
       "defensa_magica": 25,
       "rango_movimiento": 2,
       "rango_ataque": 1,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -355,7 +355,7 @@
       "defensa_magica": 20,
       "rango_movimiento": 1,
       "rango_ataque": 2,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -394,7 +394,7 @@
       "defensa_magica": 22,
       "rango_movimiento": 2,
       "rango_ataque": 3,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -432,7 +432,7 @@
       "defensa_magica": 20,
       "rango_movimiento": 2,
       "rango_ataque": 3,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -469,7 +469,7 @@
       "defensa_magica": 15,
       "rango_movimiento": 1,
       "rango_ataque": 2,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -507,7 +507,7 @@
       "defensa_magica": 12,
       "rango_movimiento": 2,
       "rango_ataque": 2,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -545,7 +545,7 @@
       "defensa_magica": 15,
       "rango_movimiento": 3,
       "rango_ataque": 1,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -582,7 +582,7 @@
       "defensa_magica": 18,
       "rango_movimiento": 3,
       "rango_ataque": 1,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -620,7 +620,7 @@
       "defensa_magica": 25,
       "rango_movimiento": 2,
       "rango_ataque": 3,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -658,7 +658,7 @@
       "defensa_magica": 12,
       "rango_movimiento": 1,
       "rango_ataque": 2,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -696,7 +696,7 @@
       "defensa_magica": 10,
       "rango_movimiento": 3,
       "rango_ataque": 1,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
@@ -733,7 +733,7 @@
       "defensa_magica": 20,
       "rango_movimiento": 2,
       "rango_ataque": 2,
-      "velocidad_movimiento": 1.0,
+      "velocidad_movimiento": 0.5,
       "velocidad_ataque": 1.5,
       "rango_vision": 1
     },
