@@ -81,6 +81,7 @@ class MotorJuego:
         # 3. Crear gestor de interacciones y motor
         gestor = GestorInteracciones(tablero=mapa.tablero)
         self.motor = MotorTiempoReal(fps_objetivo=20)
+        gestor.motor = self.motor
         self.motor.agregar_componente(gestor)
 
         # 4. Inicializar turnos y controlador

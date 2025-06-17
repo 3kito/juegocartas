@@ -66,18 +66,42 @@ def _buscar_ruta(tablero, origen, destino):
     return []
 
 
-def mover_carta_con_pathfinding(carta, destino, mapa):
-    """Mueve la carta paso a paso usando pathfinding"""
+def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
+    """Mueve la carta paso a paso usando pathfinding.
+
+    Si se proporciona ``motor`` los pasos se ejecutan con delay usando
+    :meth:`MotorTiempoReal.programar_evento` respetando la velocidad de
+    movimiento de la carta. Devuelve ``True`` si se encontró una ruta.
+    """
+
     origen = mapa.obtener_coordenada_de(carta)
     if origen is None:
         return False
+
     ruta = _buscar_ruta(mapa, origen, destino)
     if not ruta:
         return False
-    # tiempo por celda
+
+    if motor is None:
+        for paso in ruta:
+            mapa.mover_carta(origen, paso)
+            origen = paso
+            if on_step:
+                on_step()
+        return True
+
+    delay = max(0.1, 1.0 / max(0.01, getattr(carta, "velocidad_movimiento", 1.0)))
+    acumulado = 0.0
     for paso in ruta:
-        mapa.mover_carta(origen, paso)
-        origen = paso
+        def _ejecutar(p=paso):
+            actual = mapa.obtener_coordenada_de(carta)
+            mapa.mover_carta(actual, p)
+            if on_step:
+                on_step()
+
+        motor.programar_evento(_ejecutar, acumulado)
+        acumulado += delay
+
     return True
 
 
@@ -96,3 +120,26 @@ def atacar_si_en_rango(carta_atacante, carta_objetivo):
     )
     carta_objetivo.recibir_dano(carta_atacante.dano_fisico_actual)
     return True
+
+
+def iniciar_ataque_continuo(atacante, objetivo, mapa, motor):
+    """Ejecuta ataques automáticos mientras el objetivo esté vivo y visible."""
+
+    def _ciclo():
+        if not atacante.esta_viva() or not objetivo.esta_viva():
+            return
+
+        if atacante.coordenada is None or objetivo.coordenada is None:
+            return
+
+        if atacante.coordenada.distancia(objetivo.coordenada) > atacante.rango_ataque_actual:
+            mover_carta_con_pathfinding(atacante, objetivo.coordenada, mapa, motor)
+            motor.programar_evento(_ciclo, atacante.velocidad_ataque)
+            return
+
+        atacar_si_en_rango(atacante, objetivo)
+
+        if objetivo.esta_viva():
+            motor.programar_evento(_ciclo, atacante.velocidad_ataque)
+
+    motor.programar_evento(_ciclo, 0.0)

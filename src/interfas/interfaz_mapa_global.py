@@ -5,13 +5,27 @@ from src.utils.helpers import log_evento
 
 
 class InterfazMapaGlobal(ttk.Frame):
-    """Widget para visualizar el mapa global"""
+    """Widget para visualizar el mapa global con soporte de *fog of war*.
+
+    Para celdas fuera de ``self.celdas_visibles`` se dibuja un overlay oscuro.
+    Esta lista puede actualizarse mediante :meth:`actualizar_vision`.
+
+    Ideas para mejorar la performance del "fog of war"::
+
+        1. Dibujar el overlay en un canvas separado y mantenerlo cacheado,
+           actualizando solo las celdas cuya visibilidad cambió.
+        2. Generar imágenes pre-renderizadas por patrón de visibilidad y
+           reutilizarlas cuando se mueva la cámara.
+        3. Mantener un mapa de bits con la visibilidad y sólo redibujar las
+           regiones modificadas utilizando ``Canvas.coords``.
+    """
 
     def __init__(self, master, mapa: MapaGlobal | None = None, hex_size: int = 20):
         super().__init__(master)
         self.mapa = mapa
         self._ultimo_estado = None
         self.hex_size = hex_size
+        self.celdas_visibles = set()  # coordenadas visibles para el jugador
 
         self.canvas = tk.Canvas(self, width=600, height=400, bg="white")
         h_scroll = ttk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
@@ -33,15 +47,24 @@ class InterfazMapaGlobal(ttk.Frame):
         self._ultimo_estado = None
         self.actualizar()
 
+    def actualizar_vision(self, celdas_visibles: set):
+        """Actualiza las celdas visibles y redibuja si es necesario"""
+        self.celdas_visibles = set(celdas_visibles)
+        self._ultimo_estado = None
+        self.actualizar()
+
     def actualizar(self):
         """Redibuja el mapa completo si hay cambios"""
         if not self.mapa:
             return
-        estado_actual = tuple(
-            (c.q, c.r, id(card) if card else None)
-            for c, card in sorted(
-                self.mapa.tablero.celdas.items(), key=lambda i: (i[0].q, i[0].r)
-            )
+        estado_actual = (
+            tuple(
+                (c.q, c.r, id(card) if card else None)
+                for c, card in sorted(
+                    self.mapa.tablero.celdas.items(), key=lambda i: (i[0].q, i[0].r)
+                )
+            ),
+            tuple(sorted((c.q, c.r) for c in self.celdas_visibles)),
         )
         if estado_actual == self._ultimo_estado:
             return
@@ -114,6 +137,14 @@ class InterfazMapaGlobal(ttk.Frame):
                 color = "#bbbbff"
             points = self._hex_points(x + 200, y + 200, self.hex_size)
             self.canvas.create_polygon(points, fill=color, outline="black")
+            if self.celdas_visibles and coord not in self.celdas_visibles:
+                # Overlay semitransparente para el fog of war
+                self.canvas.create_polygon(
+                    points,
+                    fill="black",
+                    stipple="gray50",
+                    outline="",
+                )
         # Dibujar cartas en el tablero
         for coord, carta in board.celdas.items():
             if carta is None:

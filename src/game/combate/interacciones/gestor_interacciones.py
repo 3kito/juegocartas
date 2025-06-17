@@ -5,7 +5,11 @@ from src.game.cartas.estado_carta import EstadoCarta  # Cada carta tiene un esta
 from src.game.combate.calcular_dano.calculadora_dano import calcular_dano
 from src.game.combate.ia.ia_motor import generar_interacciones_para
 from src.game.combate.interacciones.interaccion_modelo import Interaccion, TipoInteraccion
-from src.game.combate.ia.ia_utilidades import mover_carta_con_pathfinding, atacar_si_en_rango
+from src.game.combate.ia.ia_utilidades import (
+    mover_carta_con_pathfinding,
+    atacar_si_en_rango,
+    iniciar_ataque_continuo,
+)
 from src.utils.helpers import log_evento
 
 
@@ -15,10 +19,11 @@ class GestorInteracciones:
     Se ejecuta como componente dentro del motor de tiempo real.
     """
 
-    def __init__(self, tablero=None):
+    def __init__(self, tablero=None, motor=None):
         self.interacciones_pendientes: List[Interaccion] = []
         self.estados_cartas: dict[int, EstadoCarta] = {}  # ID de carta → EstadoCarta
         self.tablero = tablero
+        self.motor = motor
     def registrar_estado_carta(self, estado: EstadoCarta):
         self.estados_cartas[estado.id_carta] = estado
 
@@ -76,20 +81,23 @@ class GestorInteracciones:
             if destino is None:
                 orden["progreso"] = "completada"
             else:
-                mover_carta_con_pathfinding(carta, destino, self.tablero)
-                if self.tablero.obtener_coordenada_de(carta) == destino:
-                    orden["progreso"] = "completada"
+                mover_carta_con_pathfinding(
+                    carta,
+                    destino,
+                    self.tablero,
+                    motor=self.motor,
+                )
+                # La orden se marca completada inmediatamente; el movimiento
+                # continuará mediante eventos del motor
+                orden["progreso"] = "completada"
 
         elif orden["tipo"] == "atacar":
             objetivo = orden.get("objetivo")
             if objetivo is None or not objetivo.esta_viva():
                 orden["progreso"] = "completada"
             else:
-                if not atacar_si_en_rango(carta, objetivo):
-                    mover_carta_con_pathfinding(carta, objetivo.coordenada, self.tablero)
-                    atacar_si_en_rango(carta, objetivo)
-                if not objetivo.esta_viva() or atacar_si_en_rango(carta, objetivo):
-                    orden["progreso"] = "completada"
+                iniciar_ataque_continuo(carta, objetivo, self.tablero, self.motor)
+                orden["progreso"] = "completada"
 
         elif orden["tipo"] == "cambiar_comportamiento":
             nuevo = orden.get("datos_adicionales", {}).get("nuevo_comportamiento")
