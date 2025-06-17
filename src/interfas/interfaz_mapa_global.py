@@ -153,14 +153,10 @@ class InterfazMapaGlobal(ttk.Frame):
 
         # Verificar conversión inversa para depuración
         vx, vy = hex_to_pixel(coord, self.hex_size, self.offset)
-        log_evento(
-            f"pixel_to_hex: click ({x}, {y}) -> {coord} -> ({vx:.2f}, {vy:.2f})"
-        )
+        # Eliminado log detallado para evitar ruido al hacer clic
 
         if self.mapa and coord not in self.mapa.tablero.celdas:
-            log_evento(
-                f"pixel_to_hex: coordenada {coord} fuera del mapa", "DEBUG"
-            )
+            # No registrar en logs para no saturar la salida
             return None
 
         return coord

@@ -34,6 +34,7 @@ class AutoBattlerGUI:
         self._panel_coords = []
         self.carta_seleccionada = None
         self.ui_mode = "normal"  # normal, seleccionar_destino
+        self.var_mostrar_coordenadas = tk.BooleanVar(value=True)
 
         self.crear_interfaz_principal()
         self.root.after(500, self.refrescar_temporizadores)
@@ -240,7 +241,9 @@ class AutoBattlerGUI:
         from src.interfas.interfaz_mapa_global import InterfazMapaGlobal
 
         self.mapa_global = None
-        self.interfaz_mapa = InterfazMapaGlobal(frame, None, debug=True)
+        self.interfaz_mapa = InterfazMapaGlobal(
+            frame, None, debug=self.var_mostrar_coordenadas.get()
+        )
         self.interfaz_mapa.pack(side="left", fill="both", expand=True)
         self.interfaz_mapa.canvas.bind("<Button-1>", self.on_mapa_click)
         self.interfaz_mapa.canvas.bind("<Motion>", self.on_mapa_motion)
@@ -292,6 +295,13 @@ class AutoBattlerGUI:
         self.lbl_tiempo_turno.pack(side="top", padx=5, anchor="w")
         self.lbl_coord_mapa = ttk.Label(info_frame, text="Mapa: -")
         self.lbl_coord_mapa.pack(side="top", padx=5, anchor="w")
+        self.chk_mostrar_coords = ttk.Checkbutton(
+            info_frame,
+            text="Mostrar coordenadas",
+            variable=self.var_mostrar_coordenadas,
+            command=self.toggle_mostrar_coordenadas,
+        )
+        self.chk_mostrar_coords.pack(side="top", padx=5, anchor="w")
 
     # === MÉTODOS DE CONTROL ===
 
@@ -609,7 +619,6 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         x = self.interfaz_mapa.canvas.canvasx(event.x)
         y = self.interfaz_mapa.canvas.canvasy(event.y)
         coord = self.interfaz_mapa.pixel_to_hex(x, y)
-        log_evento(f"Mapa click pixel=({x}, {y}) -> coord={coord}")
         if hasattr(self, "lbl_coord_mapa"):
             self.lbl_coord_mapa.config(text=f"Mapa: {coord}" if coord else "Mapa: -")
         if coord:
@@ -634,6 +643,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.interfaz_mapa.canvas.configure(cursor="")
         self.lbl_estado_orden.config(text="Estado: orden registrada")
         self.actualizar_panel_ordenes()
+
+    def toggle_mostrar_coordenadas(self):
+        if self.interfaz_mapa:
+            self.interfaz_mapa.debug = self.var_mostrar_coordenadas.get()
+            self.interfaz_mapa.forzar_actualizacion()
 
     # === MÉTODOS DE ACCIÓN ===
 
