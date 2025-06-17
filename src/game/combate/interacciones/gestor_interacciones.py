@@ -175,7 +175,7 @@ class GestorInteracciones:
         }
 
     def obtener_id_componente(self) -> str:
-        return "interacciones"
+        return f"interacciones_{id(self)}"
 
 
 # Exponer la clase en builtins para compatibilidad con algunos tests

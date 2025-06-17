@@ -281,6 +281,11 @@ class MotorTiempoReal:
         with self.lock:
             componentes = list(self.componentes_activos.items())
 
+        log_evento(
+            f"⚙️ Procesando {len(componentes)} componentes: {[id_comp for id_comp, _ in componentes]}",
+            "DEBUG",
+        )
+
         for id_componente, componente in componentes:
             try:
                 # Procesar componente
@@ -293,7 +298,10 @@ class MotorTiempoReal:
                 self.stats['componentes_procesados'] += 1
 
             except Exception as e:
-                log_evento(f"❌ Error procesando componente {id_componente}: {e}")
+                log_evento(
+                    f"❌ Error en {id_componente}: {e}",
+                    "ERROR",
+                )
                 componentes_a_remover.append(id_componente)
 
         # Remover componentes inactivos

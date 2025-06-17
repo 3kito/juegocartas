@@ -82,7 +82,12 @@ class MotorJuego:
         gestor = GestorInteracciones(tablero=mapa.tablero)
         self.motor = MotorTiempoReal(fps_objetivo=20)
         gestor.motor = self.motor
+
+        log_evento("🔧 Registrando GestorInteracciones...")
         self.motor.agregar_componente(gestor)
+        log_evento(
+            f"✅ Componentes activos: {self.motor.obtener_componentes_activos()}"
+        )
 
         # 4. Inicializar turnos y controlador
         secuencia = generar_secuencia_turnos()
