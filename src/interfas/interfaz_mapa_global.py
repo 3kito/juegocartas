@@ -230,6 +230,8 @@ class InterfazMapaGlobal(ttk.Frame):
         for coord, carta in board.celdas.items():
             if carta is None:
                 continue
+            if self.celdas_visibles and coord not in self.celdas_visibles:
+                continue
 
             # Posición base en el canvas
             cx, cy = hex_to_pixel(coord, self.hex_size, self.offset)

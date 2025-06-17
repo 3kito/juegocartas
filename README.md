@@ -158,3 +158,11 @@ Los jugadores tienen un método para subir de nivel automáticamente utilizando 
 
 Estos bucles coordinados permiten que el juego avance por rondas ejecutando acciones en tiempo real y actualizando el estado de cada jugador.
 
+## Visibilidad y "fog of war"
+
+El mapa global implementa un sistema de celdas visibles por jugador.
+Cada carta tiene un `rango_vision` y las celdas en ese radio se añaden
+al conjunto de visibilidad. Al renderizar el tablero, las cartas
+enemigas solo se muestran cuando su coordenada pertenece a las celdas
+visibles del jugador actual, evitando revelar unidades ocultas.
+
