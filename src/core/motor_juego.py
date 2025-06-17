@@ -100,14 +100,24 @@ class MotorJuego:
         )
 
         self.motor.agregar_componente(controlador)
+
+        if not self.modo_testeo:
+            controlador.iniciar_fase()
+
+        # Iniciar motor de tiempo real antes de continuar
+        self.motor.iniciar()
+        log_evento(
+            f"🚀 Motor iniciado en modo {'testeo' if self.modo_testeo else 'normal'}"
+        )
+
         if self.modo_testeo:
             self.controlador_enfrentamiento = controlador
             self._configurar_pasos_combate()
         else:
-            controlador.iniciar_fase()
-            # 5. Ejecutar motor de tiempo real
-            self.motor.iniciar()
-            while not controlador.finalizada and self.motor.estado.value == "ejecutando":
+            while (
+                not controlador.finalizada
+                and self.motor.estado.value == "ejecutando"
+            ):
                 time.sleep(0.1)
     def transicionar_a_fase_preparacion(self):
         log_evento("🔄 Transición a fase de preparación...")
