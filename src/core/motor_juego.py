@@ -55,7 +55,9 @@ class MotorJuego:
                 self.on_step_callback()
 
         # 1. Crear mapa global
-        mapa = MapaGlobal()
+        cant_jugadores = len(self.jugadores_vivos)
+        cantidad_parejas = (cant_jugadores + 1) // 2
+        mapa = MapaGlobal(cantidad_parejas=cantidad_parejas)
         self.mapa_global = mapa
 
         # 2. Asignar jugadores a zonas
