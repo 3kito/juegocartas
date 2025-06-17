@@ -1,0 +1,7 @@
+El motor de tiempo real gestiona la ejecución continua de los componentes del juego.
+
+- Cada componente implementa el método `procesar_tick(delta_time)` y es llamado en cada ciclo del motor.
+- El motor mantiene un hilo separado que ejecuta el bucle principal y regula los FPS.
+- También existe un sistema de eventos programados que permite ejecutar acciones en el futuro o de forma recurrente.
+
+Este sistema permite que las cartas y efectos se resuelvan de manera ordenada sin detener el flujo del juego.

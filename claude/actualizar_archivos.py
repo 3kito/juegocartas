@@ -24,7 +24,12 @@ def limpiar_destino():
 
 
 def copiar_archivos():
-    """Copia los archivos .py del proyecto aplicando los filtros."""
+    """Copia los archivos del proyecto aplicando los filtros.
+
+    - Archivos ``.py`` y ``.json`` se copian siempre.
+    - Archivos ``.txt`` solo se copian si provienen de la carpeta
+      ``documentacion``.
+    """
     for raiz, dirs, files in os.walk(ROOT_DIR):
         rel_raiz = os.path.relpath(raiz, ROOT_DIR)
         if rel_raiz == '.':
@@ -38,8 +43,16 @@ def copiar_archivos():
         dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
 
         for archivo in files:
-            # Excluir archivos que no son .py O archivos específicos como __init__.py
-            if not (archivo.endswith('.py') or archivo.endswith('.json')) or archivo in EXCLUDE_FILES:
+            # Filtrar extensiones permitidas
+            ext = os.path.splitext(archivo)[1]
+            permitido = False
+
+            if ext in {'.py', '.json'}:
+                permitido = True
+            elif ext == '.txt' and rel_raiz.startswith('documentacion'):
+                permitido = True
+
+            if not permitido or archivo in EXCLUDE_FILES:
                 continue
 
             ruta_rel = os.path.normpath(os.path.join(rel_raiz, archivo))
