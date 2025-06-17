@@ -87,6 +87,9 @@ class CartaBase:
         self.velocidad_ataque = stats_data.get('velocidad_ataque', 1.5)
         self.rango_vision = stats_data.get('rango_vision', 2)
 
+        # Control interno de tiempos para acciones
+        self.ultimo_ataque = 0.0
+
         # Stats actuales (pueden ser modificados por efectos)
         self.dano_fisico_actual = self.dano_fisico_base
         self.dano_magico_actual = self.dano_magico_base
@@ -173,6 +176,20 @@ class CartaBase:
         self.stats_combate['dano_recibido'] += dano_aplicado
 
         return dano_aplicado
+
+    # === MÉTODOS DE COMBATE ===
+
+    def puede_atacar(self, tiempo_actual: float | None = None) -> bool:
+        import time
+
+        if tiempo_actual is None:
+            tiempo_actual = time.time()
+        return (tiempo_actual - self.ultimo_ataque) >= self.velocidad_ataque
+
+    def registrar_ataque(self, tiempo: float | None = None):
+        import time
+
+        self.ultimo_ataque = tiempo if tiempo is not None else time.time()
 
     def curar(self, cantidad: int) -> int:
         """Cura a la carta sin exceder vida máxima"""
