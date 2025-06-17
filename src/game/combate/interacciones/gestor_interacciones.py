@@ -18,10 +18,11 @@ class GestorInteracciones:
     Se ejecuta como componente dentro del motor de tiempo real.
     """
 
-    def __init__(self, tablero=None, motor=None):
+    def __init__(self, tablero=None, motor=None, on_step=None):
         self.interacciones_pendientes: List[Interaccion] = []
         self.tablero = tablero
         self.motor = motor
+        self.on_step = on_step
 
     def registrar_interaccion(self, interaccion: Interaccion):
         log_evento(f"📨 Interacción registrada: {interaccion}")
@@ -124,6 +125,7 @@ class GestorInteracciones:
                     destino,
                     self.tablero,
                     motor=self.motor,
+                    on_step=self.on_step,
                 )
                 log_evento(
                     f"⏳ Movimiento programado ({'ok' if exito else 'fallo'})",

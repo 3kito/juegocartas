@@ -15,9 +15,9 @@ from src.game.fases.controlador_preparacion import ControladorFasePreparacion
 
 
 class MotorJuego:
-    def __init__(self, jugadores: list[Jugador]):
+    def __init__(self, jugadores: list[Jugador] | None = None, on_step_callback=None):
         self.jugadores = jugadores
-        self.jugadores_vivos = list(jugadores)
+        self.jugadores_vivos = list(jugadores) if jugadores else []
         self.fase_actual = "preparacion"
         self.ronda = 1
         self.config = GameConfig()
@@ -25,6 +25,7 @@ class MotorJuego:
 
         self.controlador_enfrentamiento = None
         self.mapa_global = None
+        self.on_step_callback = on_step_callback
 
         # Controlador especializado para la fase de preparación
         self.controlador_preparacion = ControladorFasePreparacion(
@@ -73,7 +74,7 @@ class MotorJuego:
                 )
 
         # 3. Crear gestor de interacciones y motor
-        gestor = GestorInteracciones(tablero=mapa.tablero)
+        gestor = GestorInteracciones(tablero=mapa.tablero, on_step=self.on_step_callback)
         self.motor = MotorTiempoReal(fps_objetivo=20)
         gestor.motor = self.motor
 
