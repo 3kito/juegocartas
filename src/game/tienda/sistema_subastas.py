@@ -13,7 +13,7 @@ class SistemaSubastas:
         self.jugadores = jugadores
         self.cartas_subastadas: Dict[int, dict] = {}
         self.ofertas_por_jugador: Dict[int, List[int]] = {}
-        self.tiempo_restante = None if modo_testeo else duracion_segundos
+        self.tiempo_restante = 999999 if modo_testeo else duracion_segundos
         self.config = config or GameConfig()
 
     # En src/game/tienda/sistema_subastas.py - método generar_subasta()
@@ -73,3 +73,9 @@ class SistemaSubastas:
             f"{data['carta'].nombre} (ID: {cid}) - Mejor oferta: {data['mejor_oferta']}"
             for cid, data in self.cartas_subastadas.items()
         ]
+
+    def acelerar_temporizador(self, segundos: int = 2):
+        """Reduce el tiempo restante a los segundos indicados"""
+        if self.tiempo_restante is None:
+            return
+        self.tiempo_restante = segundos

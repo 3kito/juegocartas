@@ -261,7 +261,7 @@ class MotorTiempoReal:
 
         log_evento(
             f"🌀 Tick motor con {len(self.componentes_activos)} componentes",
-            "DEBUG",
+            "TRACE",
         )
 
         # Procesar componentes activos
@@ -289,7 +289,7 @@ class MotorTiempoReal:
         for id_componente, componente in componentes:
             try:
                 # Procesar componente
-                log_evento(f"⚙️ Procesando componente {id_componente}", "DEBUG")
+                log_evento(f"⚙️ Procesando componente {id_componente}", "TRACE")
                 sigue_activo = componente.procesar_tick(delta_time)
 
                 if not sigue_activo:

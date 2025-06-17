@@ -34,9 +34,6 @@ class MotorJuego:
             modo_testeo=self.modo_testeo
         )
 
-        # Manejo de pasos manuales
-        self._pasos = []
-        self._indice_paso = 0
 
     def iniciar(self):
         log_evento("🎮 Iniciando juego...")
@@ -46,9 +43,6 @@ class MotorJuego:
             manager_cartas.cargar_cartas()
 
         self.controlador_preparacion.iniciar_fase(self.ronda)
-
-        if self.modo_testeo:
-            self._configurar_pasos_preparacion()
 
     def _ejecutar_fase_combate(self):
         self.fase_actual = "combate"
@@ -100,9 +94,7 @@ class MotorJuego:
         )
 
         self.motor.agregar_componente(controlador)
-
-        if not self.modo_testeo:
-            controlador.iniciar_fase()
+        controlador.iniciar_fase()
 
         # Iniciar motor de tiempo real antes de continuar
         self.motor.iniciar()
@@ -110,10 +102,9 @@ class MotorJuego:
             f"🚀 Motor iniciado en modo {'testeo' if self.modo_testeo else 'normal'}"
         )
 
-        if self.modo_testeo:
-            self.controlador_enfrentamiento = controlador
-            self._configurar_pasos_combate()
-        else:
+        self.controlador_enfrentamiento = controlador
+
+        if not self.modo_testeo:
             while (
                 not controlador.finalizada
                 and self.motor.estado.value == "ejecutando"
@@ -153,8 +144,6 @@ class MotorJuego:
             modo_testeo=self.modo_testeo
         )
         self.controlador_preparacion.iniciar_fase(self.ronda)
-        if self.modo_testeo:
-            self._configurar_pasos_preparacion()
 
     def get_tienda_para(self, jugador_id: int):
         """Devuelve la tienda individual de un jugador"""
@@ -176,37 +165,16 @@ class MotorJuego:
         self._ejecutar_fase_combate()
 
     # === MODO TESTEO ===
-    def _configurar_pasos_preparacion(self):
-        self._pasos = [
-            ("Entregar oro base a jugadores", self.controlador_preparacion.entregar_oro),
-            ("Generar tiendas individuales", self.controlador_preparacion.generar_tiendas),
-            ("Generar cartas para subasta pública", self.controlador_preparacion.generar_subasta_publica),
-            ("Pausa para ofertas", self.controlador_preparacion.pausar_para_ofertas),
-            ("Cerrar subasta y resolver ofertas", self.controlador_preparacion.cerrar_subasta),
-            ("Finalizar preparación → Iniciar combate", self.controlador_preparacion.finalizar_fase),
-        ]
-        self._indice_paso = 0
-
-    def _configurar_pasos_combate(self):
-        self._pasos = [
-            ("Iniciar combate (generar mapa y ubicar cartas)", self.controlador_enfrentamiento.iniciar_fase),
-            ("Cambiar turno", self.controlador_enfrentamiento.cambiar_turno_manual),
-            ("Finalizar combate → Calcular daño → Nueva ronda", self.controlador_enfrentamiento.finalizar_fase),
-        ]
-        self._indice_paso = 0
-
     def describir_proximo_paso(self) -> str:
-        if self._indice_paso < len(self._pasos):
-            return self._pasos[self._indice_paso][0]
+        if self.fase_actual == "preparacion" and self.controlador_preparacion:
+            return "Finalizar preparación"
+        if self.fase_actual == "combate" and self.controlador_enfrentamiento:
+            return f"Cambiar turno ({self.controlador_enfrentamiento.obtener_turno_activo()})"
         return "Sin acciones pendientes"
 
     def ejecutar_siguiente_paso(self):
-        if self._indice_paso >= len(self._pasos):
-            return
-        accion = self._pasos[self._indice_paso][1]
-        accion()
-        if self.fase_actual == "combate" and self._indice_paso == 1 and self.controlador_enfrentamiento and not self.controlador_enfrentamiento.finalizada:
-            pass
-        else:
-            self._indice_paso += 1
+        if self.fase_actual == "preparacion" and self.controlador_preparacion:
+            self.controlador_preparacion.acelerar_temporizador()
+        elif self.fase_actual == "combate" and self.controlador_enfrentamiento:
+            self.controlador_enfrentamiento.acelerar_temporizador()
 
