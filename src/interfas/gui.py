@@ -217,6 +217,14 @@ class AutoBattlerGUI:
             command=self.asignar_comportamiento_preparacion,
         ).pack(fill="x", pady=(2, 2))
 
+        # Panel con información de la carta seleccionada
+        self.frame_estado_carta = ttk.LabelFrame(control_frame, text="Estado Carta")
+        self.frame_estado_carta.pack(fill="x", pady=5)
+        self.lbl_estado_carta = ttk.Label(
+            self.frame_estado_carta, text="Selecciona una carta"
+        )
+        self.lbl_estado_carta.pack()
+
         ttk.Separator(control_frame, orient="horizontal").pack(fill="x", pady=10)
         ttk.Label(control_frame, text="Cartas en Banco:").pack()
 
@@ -257,6 +265,14 @@ class AutoBattlerGUI:
         btns = ttk.Frame(panel)
         btns.pack(fill="x", pady=2)
         ttk.Button(btns, text="Centrar en Carta", command=self.centrar_en_carta).pack(fill="x")
+
+        # Información de la carta seleccionada en el mapa global
+        self.frame_estado_carta_global = ttk.LabelFrame(panel, text="Estado Carta")
+        self.frame_estado_carta_global.pack(fill="x", pady=5)
+        self.lbl_estado_carta_global = ttk.Label(
+            self.frame_estado_carta_global, text="Selecciona una carta"
+        )
+        self.lbl_estado_carta_global.pack()
         self.frame_mover_test = ttk.LabelFrame(panel, text="Mover (Test)")
         self.frame_mover_test.pack(fill="x", pady=5)
         self.frame_mover_test.pack_forget()
@@ -275,9 +291,20 @@ class AutoBattlerGUI:
         self.lbl_orden_carta.pack(anchor="w")
         orden_btns = ttk.Frame(self.frame_ordenes)
         orden_btns.pack(fill="x", pady=2)
-        ttk.Button(orden_btns, text="Mover a Posición", command=self.ordenar_movimiento).pack(fill="x")
-        ttk.Button(orden_btns, text="Atacar Enemigo", command=self.ordenar_ataque).pack(fill="x")
-        ttk.Button(orden_btns, text="Cambiar Comportamiento", command=self.cambiar_comportamiento_carta).pack(fill="x")
+        self.btn_orden_mover = ttk.Button(
+            orden_btns, text="Mover a Posición", command=self.ordenar_movimiento
+        )
+        self.btn_orden_mover.pack(fill="x")
+        self.btn_orden_atacar = ttk.Button(
+            orden_btns, text="Atacar Enemigo", command=self.ordenar_ataque
+        )
+        self.btn_orden_atacar.pack(fill="x")
+        self.btn_orden_comportamiento = ttk.Button(
+            orden_btns,
+            text="Cambiar Comportamiento",
+            command=self.cambiar_comportamiento_carta,
+        )
+        self.btn_orden_comportamiento.pack(fill="x")
         self.lbl_estado_orden = ttk.Label(self.frame_ordenes, text="Estado: -")
         self.lbl_estado_orden.pack(anchor="w")
         self.lbl_turno_req = ttk.Label(self.frame_ordenes, text="Turno requerido: -")
@@ -492,6 +519,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.dibujar_tablero_hexagonal()
 
         self.lbl_modo_mover.config(text="" if not self.modo_mover_carta else self.lbl_modo_mover.cget("text"))
+        self.actualizar_estado_carta_tablero(None)
 
         # Actualizar lista
         self.listbox_tablero.delete(0, tk.END)
@@ -509,6 +537,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             return
         self.listbox_enfrentamiento.delete(0, tk.END)
         self._panel_coords = []
+        self.actualizar_estado_carta_global(None)
         if not (self.motor and self.motor.mapa_global and self.jugador_actual):
             return
         for coord, carta in self.motor.mapa_global.tablero.celdas.items():
@@ -575,6 +604,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         carta = cartas[seleccion[0]][1]
         self.lbl_modo_mover.config(text=f"Mover {carta.nombre}: elige destino")
         self.listbox_banco_tablero.selection_clear(0, tk.END)
+        self.actualizar_estado_carta_tablero(carta)
 
     def on_canvas_click(self, event):
         if not self.jugador_actual:
@@ -593,6 +623,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.coordenada_origen = None
             self.lbl_modo_mover.config(text="")
             self.listbox_tablero.selection_clear(0, tk.END)
+            self.actualizar_estado_carta_tablero(None)
             self.actualizar_interfaz()
             return
 
@@ -632,6 +663,15 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if coord:
             self.interfaz_mapa.resaltar_coordenada(coord, duracion=1000)
         if coord is None:
+            return
+        if self.ui_mode == "normal" and self.motor and self.motor.mapa_global:
+            carta = self.motor.mapa_global.tablero.obtener_carta_en(coord)
+            if carta and carta.esta_viva():
+                self.carta_seleccionada = carta
+            else:
+                self.carta_seleccionada = None
+            self.actualizar_estado_carta_global(self.carta_seleccionada)
+            self.actualizar_panel_ordenes()
             return
         if self.ui_mode != "seleccionar_destino":
             return
@@ -818,6 +858,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                 self.carta_seleccionada = carta
             else:
                 self.carta_seleccionada = None
+        self.actualizar_estado_carta_global(self.carta_seleccionada)
         self.actualizar_panel_ordenes()
 
     def ordenar_ataque(self):
@@ -899,13 +940,56 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         self.carta_seleccionada.marcar_orden_manual("cambiar_comportamiento", datos_adicionales={"nuevo_comportamiento": nuevo})
         self.actualizar_panel_ordenes()
 
+    def actualizar_estado_carta_tablero(self, carta=None):
+        if not hasattr(self, "lbl_estado_carta"):
+            return
+        if carta:
+            info = (
+                f"{carta.nombre}\n"
+                f"Vida: {carta.vida_actual}/{carta.vida_maxima}\n"
+                f"Daño: {carta.dano_fisico_actual}\n"
+                f"Defensa: {carta.defensa_fisica_actual}\n"
+                f"Comportamiento: {carta.comportamiento_asignado or '-'}"
+            )
+            self.lbl_estado_carta.config(text=info)
+        else:
+            self.lbl_estado_carta.config(text="Selecciona una carta")
+
+    def actualizar_estado_carta_global(self, carta=None):
+        if not hasattr(self, "lbl_estado_carta_global"):
+            return
+        if carta:
+            info = (
+                f"{carta.nombre}\n"
+                f"Vida: {carta.vida_actual}/{carta.vida_maxima}"
+            )
+            if carta.duenio == self.jugador_actual:
+                comp = carta.comportamiento_asignado or "-"
+                info += f"\nComportamiento: {comp}"
+            else:
+                info += "\nComportamiento: desconocido"
+            self.lbl_estado_carta_global.config(text=info)
+        else:
+            self.lbl_estado_carta_global.config(text="Selecciona una carta")
+
     def actualizar_panel_ordenes(self):
         if not hasattr(self, "lbl_orden_carta"):
             return
-        if not self.carta_seleccionada or not self.carta_seleccionada.esta_viva():
+        if (
+            not self.carta_seleccionada
+            or not self.carta_seleccionada.esta_viva()
+            or self.carta_seleccionada.duenio != self.jugador_actual
+        ):
             self.lbl_orden_carta.config(text="🎮 ÓRDENES PARA: -")
             self.lbl_estado_orden.config(text="Estado: -")
             self.lbl_turno_req.config(text="Turno requerido: -")
+            for btn in (
+                getattr(self, "btn_orden_mover", None),
+                getattr(self, "btn_orden_atacar", None),
+                getattr(self, "btn_orden_comportamiento", None),
+            ):
+                if btn:
+                    btn.state(["disabled"])
             return
 
         self.lbl_orden_carta.config(text=f"🎮 ÓRDENES PARA: {self.carta_seleccionada.nombre}")
@@ -918,6 +1002,13 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         rojo = "✅" if turno == "rojo" else "❌"
         azul = "✅" if turno == "azul" else "❌"
         self.lbl_turno_req.config(text=f"Turno requerido: ROJO {rojo} / AZUL {azul}")
+        for btn in (
+            getattr(self, "btn_orden_mover", None),
+            getattr(self, "btn_orden_atacar", None),
+            getattr(self, "btn_orden_comportamiento", None),
+        ):
+            if btn:
+                btn.state(["!disabled"])
 
     def usar_habilidad(self):
         messagebox.showinfo("Info", "Uso de habilidades en desarrollo")
