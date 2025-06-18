@@ -71,7 +71,9 @@ def _buscar_ruta(tablero, origen, destino):
     return []
 
 
-def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
+def mover_carta_con_pathfinding(
+    carta, destino, mapa, motor=None, on_step=None, on_finish=None
+):
     """Mueve la carta paso a paso usando pathfinding.
 
     Si se proporciona ``motor`` los pasos se ejecutan con delay usando
@@ -121,26 +123,34 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
         return True
 
     delay = max(0.1, 1.0 / max(0.01, getattr(carta, "velocidad_movimiento", 1.0)))
-    acumulado = 0.0
-    for paso in ruta:
-        def _ejecutar(p=paso):
+    def _programar_paso(indice: int):
+        if indice >= len(ruta):
+            carta.eventos_activos.pop("movimiento", None)
+            if on_finish:
+                on_finish()
+            return
+
+        paso = ruta[indice]
+
+        def _ejecutar():
             actual = mapa.obtener_coordenada_de(carta)
-            log_evento(f"➡️ {carta.nombre} paso a {p}", "DEBUG")
-            mapa.mover_carta(actual, p)
+            log_evento(f"➡️ {carta.nombre} paso a {paso}", "DEBUG")
+            mapa.mover_carta(actual, paso)
             if on_step:
                 on_step()
+            _programar_paso(indice + 1)
 
         log_evento(
-            f"⏰ Programando evento movimiento con delay {acumulado:.2f}s",
+            f"⏰ Programando evento movimiento con delay {delay:.2f}s",
             "DEBUG",
         )
-        evt_id = motor.programar_evento(_ejecutar, acumulado)
+        evt_id = motor.programar_evento(_ejecutar, delay if indice > 0 else 0.0)
         try:
             carta.registrar_evento_activo("movimiento", evt_id)
         except AttributeError:
             pass
-        acumulado += delay
 
+    _programar_paso(0)
     return True
 
 
