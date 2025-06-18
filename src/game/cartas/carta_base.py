@@ -456,6 +456,10 @@ class CartaBase:
             motor.cancelar_evento(id_evento)
             self.eventos_activos.pop(tipo, None)
 
+    def tiene_evento_activo(self, tipo: str) -> bool:
+        """Indica si existe un evento activo del tipo especificado."""
+        return tipo in self.eventos_activos
+
     def cancelar_todos_eventos(self, motor):
         """Cancela y limpia todos los eventos registrados para esta carta."""
         for id_evento in list(self.eventos_activos.values()):

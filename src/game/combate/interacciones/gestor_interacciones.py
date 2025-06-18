@@ -23,6 +23,7 @@ class GestorInteracciones:
         self.tablero = tablero
         self.motor = motor
         self.on_step = on_step
+        self.controlador = None
 
     def registrar_interaccion(self, interaccion: Interaccion):
         log_evento(f"📨 Interacción registrada: {interaccion}", "DEBUG")
@@ -55,7 +56,14 @@ class GestorInteracciones:
                 f"🔍 Revisando carta {carta.nombre} - tiene_orden_manual: {carta.tiene_orden_manual()}",
                 "TRACE",
             )
-            if carta.puede_actuar:
+            if (
+                carta.puede_actuar
+                and (
+                    not self.controlador
+                    or getattr(carta.duenio, "color_fase_actual", None)
+                    == self.controlador.obtener_turno_activo()
+                )
+            ):
                 if carta.tiene_orden_manual() or carta.tiene_orden_simulada():
                     log_evento(
                         f"📝 ORDEN DETECTADA en {carta.nombre}: {carta.orden_actual}",
@@ -69,6 +77,11 @@ class GestorInteracciones:
                 else:
                     nuevas = generar_interacciones_para(carta, self.tablero)
                     self.interacciones_pendientes.extend(nuevas)
+            elif carta.puede_actuar:
+                log_evento(
+                    f"⏭️ {carta.nombre} intenta actuar fuera de su turno",
+                    "DEBUG",
+                )
 
         if not self.interacciones_pendientes:
             return True
@@ -158,6 +171,7 @@ class GestorInteracciones:
                     self.tablero,
                     motor=self.motor,
                     on_step=self.on_step,
+                    on_finish=lambda: self._reanudar_comportamiento(carta),
                 )
                 log_evento(
                     f"⏳ Movimiento programado ({'ok' if exito else 'fallo'})",
@@ -210,10 +224,9 @@ class GestorInteracciones:
             )
             simulada = orden.get("simulada")
             carta.limpiar_orden_manual()
-            if simulada:
-                log_evento("⚡ [Continuar] Evaluando siguiente orden", "DEBUG")
-                nuevas = generar_interacciones_para(carta, self.tablero)
-                self.interacciones_pendientes.extend(nuevas)
+            log_evento("⚡ [Reanudar] Evaluando siguiente orden", "DEBUG")
+            nuevas = generar_interacciones_para(carta, self.tablero)
+            self.interacciones_pendientes.extend(nuevas)
 
 
     def obtener_estadisticas(self):
@@ -229,6 +242,11 @@ class GestorInteracciones:
 
     def obtener_id_componente(self) -> str:
         return f"interacciones_{id(self)}"
+
+    def _reanudar_comportamiento(self, carta):
+        """Genera nuevas interacciones automáticas tras finalizar una orden."""
+        nuevas = generar_interacciones_para(carta, self.tablero)
+        self.interacciones_pendientes.extend(nuevas)
 
 
 # Exponer la clase en builtins para compatibilidad con algunos tests

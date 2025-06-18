@@ -22,7 +22,15 @@ class MovementProcessor(BehaviorComponent):
         self.tipo = tipo
 
     def ejecutar(self, carta, tablero, info_entorno) -> Optional[object]:
-        if carta.tiene_orden_manual() or carta.tiene_orden_simulada():
+        if (
+            carta.tiene_orden_manual()
+            or carta.tiene_orden_simulada()
+            or carta.tiene_evento_activo("movimiento")
+        ):
+            log_evento(
+                f"⏳ {carta.nombre} omite nueva orden de movimiento (en curso)",
+                "DEBUG",
+            )
             return None
 
         destino = None
@@ -57,6 +65,18 @@ class MovementProcessor(BehaviorComponent):
                     destino = base
 
         if destino is not None:
+            log_evento(
+                f"📍 {carta.nombre} determina destino {destino}",
+                "DEBUG",
+            )
             carta.marcar_orden_simulada("mover", destino)
-            log_evento(f"🤖 [SimOrden] {carta.nombre} genera movimiento a {destino}", "DEBUG")
+            log_evento(
+                f"🤖 [SimOrden] {carta.nombre} genera movimiento a {destino}",
+                "DEBUG",
+            )
+        else:
+            log_evento(
+                f"❌ {carta.nombre} no encuentra destino para {self.tipo.value}",
+                "DEBUG",
+            )
         return None

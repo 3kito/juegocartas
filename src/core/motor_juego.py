@@ -121,6 +121,7 @@ class MotorJuego:
         )
 
         self.motor.agregar_componente(controlador)
+        gestor.controlador = controlador
         controlador.iniciar_fase()
 
         # Iniciar motor de tiempo real antes de continuar
