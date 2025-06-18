@@ -222,6 +222,14 @@ class MotorTiempoReal:
 
         return False
 
+    def cancelar_eventos_carta(self, carta) -> None:
+        """Cancela todos los eventos registrados por una carta."""
+        ids = getattr(carta, "eventos_activos", {}).values()
+        for id_evento in list(ids):
+            self.cancelar_evento(id_evento)
+        if hasattr(carta, "eventos_activos"):
+            carta.eventos_activos.clear()
+
     def _loop_principal(self):
         """Loop principal del motor (ejecutado en hilo separado)"""
         log_evento(f"🔄 Loop principal iniciado (Objetivo: {self.fps_objetivo} FPS)")

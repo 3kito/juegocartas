@@ -79,6 +79,14 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
         log_evento(f"❌ No se encontró coordenada de {carta.nombre}", "DEBUG")
         return False
 
+    # Al iniciar un movimiento cancelamos eventos de ataque previos
+    if motor is not None:
+        try:
+            carta.cancelar_evento_activo("ataque", motor)
+            carta.cancelar_evento_activo("movimiento", motor)
+        except AttributeError:
+            pass
+
     log_evento(
         f"🚶 INICIANDO pathfinding {carta.nombre}: {origen} → {destino}", "DEBUG"
     )
@@ -121,7 +129,11 @@ def mover_carta_con_pathfinding(carta, destino, mapa, motor=None, on_step=None):
             f"⏰ Programando evento movimiento con delay {acumulado:.2f}s",
             "DEBUG",
         )
-        motor.programar_evento(_ejecutar, acumulado)
+        evt_id = motor.programar_evento(_ejecutar, acumulado)
+        try:
+            carta.registrar_evento_activo("movimiento", evt_id)
+        except AttributeError:
+            pass
         acumulado += delay
 
     return True
@@ -164,17 +176,29 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None):
     permitir que la interfaz se actualice en tiempo real.
     """
 
+    try:
+        atacante.cancelar_evento_activo("movimiento", motor)
+        atacante.cancelar_evento_activo("ataque", motor)
+    except AttributeError:
+        pass
+
     def _ciclo():
         if not atacante.esta_viva() or not objetivo.esta_viva():
+            try:
+                atacante.cancelar_evento_activo("ataque", motor)
+            except AttributeError:
+                pass
             return
 
         if atacante.coordenada is None or objetivo.coordenada is None:
+            try:
+                atacante.cancelar_evento_activo("ataque", motor)
+            except AttributeError:
+                pass
             return
 
-        if (
-            atacante.coordenada.distancia(objetivo.coordenada)
-            > atacante.rango_ataque_actual
-        ):
+        distancia = atacante.coordenada.distancia(objetivo.coordenada)
+        if distancia > atacante.rango_ataque_actual:
             log_evento(
                 f"📍 Acercando {atacante.nombre} hacia {objetivo.nombre}",
                 "DEBUG",
@@ -182,21 +206,36 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None):
             mover_carta_con_pathfinding(
                 atacante, objetivo.coordenada, mapa, motor, on_step=on_step
             )
-            motor.programar_evento(_ciclo, atacante.velocidad_ataque)
+            evt = motor.programar_evento(_ciclo, atacante.velocidad_ataque)
+            try:
+                atacante.registrar_evento_activo("ataque", evt)
+            except AttributeError:
+                pass
             return
 
-        atacar_si_en_rango(atacante, objetivo)
-        if on_step:
-            try:
-                on_step()
-            except TypeError:
-                on_step()
+        if distancia <= atacante.rango_ataque_actual:
+            atacar_si_en_rango(atacante, objetivo)
+            if on_step:
+                try:
+                    on_step()
+                except TypeError:
+                    on_step()
 
         if objetivo.esta_viva():
-            motor.programar_evento(_ciclo, atacante.velocidad_ataque)
+            evt = motor.programar_evento(_ciclo, atacante.velocidad_ataque)
+            try:
+                atacante.registrar_evento_activo("ataque", evt)
+            except AttributeError:
+                pass
 
     log_evento(
         f"⏳ Iniciando ataque continuo de {atacante.nombre} a {objetivo.nombre}",
         "DEBUG",
     )
-    motor.programar_evento(_ciclo, 0.0)
+    evt_inicio = motor.programar_evento(_ciclo, 0.0)
+    try:
+        atacante.registrar_evento_activo("ataque", evt_inicio)
+    except AttributeError:
+        pass
+
+

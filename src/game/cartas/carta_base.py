@@ -113,6 +113,8 @@ class CartaBase:
         self.viva = True
         self.puede_actuar = True
         self.efectos_activos = []
+        # Registro de eventos programados por el motor
+        self.eventos_activos: Dict[str, str] = {}
 
         # Posición (será asignada cuando se coloque en tablero)
         self.coordenada = None
@@ -392,6 +394,24 @@ class CartaBase:
         self.orden_actual = None
         if self.modo_control == "orden_manual":
             self.modo_control = "pasivo"
+
+    # --- Gestión de eventos activos ---
+    def registrar_evento_activo(self, tipo: str, id_evento: str):
+        """Asocia un ID de evento programado a la carta."""
+        self.eventos_activos[tipo] = id_evento
+
+    def cancelar_evento_activo(self, tipo: str, motor):
+        """Cancela un evento específico asociado a la carta."""
+        id_evento = self.eventos_activos.get(tipo)
+        if id_evento:
+            motor.cancelar_evento(id_evento)
+            self.eventos_activos.pop(tipo, None)
+
+    def cancelar_todos_eventos(self, motor):
+        """Cancela y limpia todos los eventos registrados para esta carta."""
+        for id_evento in list(self.eventos_activos.values()):
+            motor.cancelar_evento(id_evento)
+        self.eventos_activos.clear()
 
     def asignar_comportamiento(self, tipo: str) -> str:
         """Asigna un comportamiento para el inicio del combate"""

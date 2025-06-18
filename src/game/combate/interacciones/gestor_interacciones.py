@@ -132,6 +132,12 @@ class GestorInteracciones:
         if orden["progreso"] == "pendiente":
             orden["progreso"] = "ejecutando"
 
+        if self.motor:
+            try:
+                self.motor.cancelar_eventos_carta(carta)
+            except AttributeError:
+                pass
+
         if orden["tipo"] == "mover":
             destino = orden.get("objetivo")
             if destino is None:
