@@ -251,6 +251,16 @@ class ManagerCartas:
 
         return cartas_seleccionadas
 
+    def obtener_carta_aleatoria_tier(self, tier: int) -> Optional[CartaBase]:
+        """Obtiene una carta aleatoria de un tier específico"""
+        if not self.cartas_cargadas:
+            return None
+        ids = [cid for cid in self.cartas_por_tier.get(tier, []) if self.pool_disponibles.get(cid, 0) > 0]
+        if not ids:
+            return None
+        carta_id = random.choice(ids)
+        return self._tomar_instancia_del_pool(carta_id)
+
     def _tomar_instancia_del_pool(self, carta_id: int) -> Optional[CartaBase]:
         """Toma una instancia específica del pool y la marca como usada"""
         if carta_id not in self.pool_instancias or self.pool_disponibles.get(carta_id, 0) <= 0:
