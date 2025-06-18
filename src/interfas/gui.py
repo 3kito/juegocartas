@@ -478,6 +478,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.lbl_equipo_azul.config(text=f"🔵 EQUIPO AZUL: {azules or '-'}")
 
         if self.motor.modo_testeo:
+            if self.frame_testeo.winfo_ismapped() == 0:
+                self.frame_testeo.pack(fill="x", padx=10, pady=5)
             self.actualizar_controles_testeo()
             if self.frame_mover_test.winfo_ismapped() == 0:
                 self.frame_mover_test.pack(fill="x", pady=5)
