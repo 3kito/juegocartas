@@ -7,5 +7,5 @@
   "max_cartas_por_tier": {"1": 0, "2": 0, "3": 0},
   "cartas_subasta_default": 5,
   "cartas_activas": [],
-  "modo_testeo": false
+  "modo_testeo": true
 }
