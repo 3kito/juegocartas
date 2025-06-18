@@ -37,8 +37,12 @@ class ControladorFasePreparacion:
             log_evento(f"🛒 Tienda creada para {jugador.nombre}")
 
     def generar_subasta_publica(self):
-        cartas_subasta = max(2, len(self.jugadores))
-        self.subastas = SistemaSubastas(self.jugadores, modo_testeo=self.modo_testeo, config=self.config)
+        cartas_subasta = max(self.config.cartas_subasta_default, len(self.jugadores))
+        self.subastas = SistemaSubastas(
+            self.jugadores,
+            modo_testeo=self.modo_testeo,
+            config=self.config,
+        )
         self.subastas.generar_subasta(cartas_subasta)
 
     def iniciar_temporizador(self):
