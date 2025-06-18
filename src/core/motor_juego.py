@@ -24,6 +24,10 @@ class MotorJuego:
         self.config = GameConfig()
         self.modo_testeo = self.config.modo_testeo
 
+        print(f"\U0001F50D MotorJuego.__init__ - Configuraci\u00f3n:")
+        print(f"   config.modo_testeo: {self.config.modo_testeo}")
+        print(f"   self.modo_testeo: {self.modo_testeo}")
+
         self.controlador_enfrentamiento = None
         self.mapa_global = None
         self.on_step_callback = on_step_callback
@@ -35,6 +39,10 @@ class MotorJuego:
             config=self.config,
             modo_testeo=self.modo_testeo
         )
+
+        print(f"\U0001F50D M\u00e9todos de testeo disponibles:")
+        print(f"   describir_proximo_paso: {hasattr(self, 'describir_proximo_paso')}")
+        print(f"   ejecutar_siguiente_paso: {hasattr(self, 'ejecutar_siguiente_paso')}")
 
 
     def iniciar(self):

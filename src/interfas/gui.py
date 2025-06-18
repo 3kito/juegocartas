@@ -40,6 +40,10 @@ class AutoBattlerGUI:
         self.var_mostrar_coordenadas = tk.BooleanVar(value=True)
 
         self.crear_interfaz_principal()
+        print(f"\U0001F50D GUI.__init__ - Configuraci\u00f3n inicial:")
+        print(f"   config.modo_testeo: {self.config.modo_testeo}")
+        print(f"   self.modo_testeo: {self.modo_testeo}")
+        print(f"   Frame testeo creado: {hasattr(self, 'frame_testeo')}")
         if self.modo_testeo:
             # Mostrar controles de testeo incluso antes de iniciar el juego
             self.frame_testeo.pack(fill="x", padx=10, pady=5)
@@ -104,6 +108,10 @@ class AutoBattlerGUI:
             command=self.asignar_tokens_infinitos,
         )
         self.btn_tokens_infinitos.pack(side="left", padx=5)
+        print(f"\U0001F50D Frame testeo creado exitosamente")
+        print(f"   Widgets hijos: {len(self.frame_testeo.winfo_children())}")
+        print(f"   Existe lbl_proximo_paso: {hasattr(self, 'lbl_proximo_paso')}")
+        print(f"   Existe btn_oro_infinito: {hasattr(self, 'btn_oro_infinito')}")
 
     def crear_tab_estado(self):
         # Tab de estado general del jugador
@@ -365,12 +373,23 @@ class AutoBattlerGUI:
         # Inicializar motor
         self.motor = MotorJuego(self.jugadores, on_step_callback=self.on_evento_motor)
         self.motor.iniciar()
+        print(f"\U0001F50D iniciar_juego - Estados del modo testeo:")
+        print(f"   Config inicial: {self.config.modo_testeo}")
+        print(f"   Motor creado: {self.motor is not None}")
+        if self.motor:
+            print(f"   Motor.modo_testeo: {self.motor.modo_testeo}")
+            print(f"   Motor tiene describir_proximo_paso: {hasattr(self.motor, 'describir_proximo_paso')}")
+        print(f"   Motor tiene ejecutar_siguiente_paso: {hasattr(self.motor, 'ejecutar_siguiente_paso')}")
 
         # Actualizar modo de testeo según la configuración del motor
         self.modo_testeo = self.motor.modo_testeo
+        print(f"   self.modo_testeo actualizado: {self.modo_testeo}")
+        print(f"   Frame testeo mapeado ANTES: {self.frame_testeo.winfo_ismapped()}")
 
         if self.motor.modo_testeo:
+            print(f"   Ejecutando pack() del frame testeo")
             self.frame_testeo.pack(fill="x", padx=10, pady=5)
+            print(f"   Frame testeo mapeado DESPUES: {self.frame_testeo.winfo_ismapped()}")
             self.actualizar_controles_testeo()
 
         # Configurar combo
@@ -398,6 +417,11 @@ class AutoBattlerGUI:
             self.actualizar_interfaz()
 
     def actualizar_interfaz(self):
+        print(f"\U0001F50D actualizar_interfaz - Estado actual:")
+        print(f"   Motor existe: {self.motor is not None}")
+        if self.motor:
+            print(f"   Motor.modo_testeo: {self.motor.modo_testeo}")
+            print(f"   Frame testeo mapeado: {self.frame_testeo.winfo_ismapped()}")
         if not self.jugador_actual or not self.motor:
             return
 
@@ -478,8 +502,13 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.lbl_equipo_azul.config(text=f"🔵 EQUIPO AZUL: {azules or '-'}")
 
         if self.motor.modo_testeo:
+            print(f"   Entrando en secci\u00f3n modo testeo")
             if self.frame_testeo.winfo_ismapped() == 0:
+                print(f"   \u26a0\ufe0f Frame no mapeado, intentando pack()")
                 self.frame_testeo.pack(fill="x", padx=10, pady=5)
+            else:
+                print(f"   \u2705 Frame ya est\u00e1 mapeado")
+            print(f"   Llamando actualizar_controles_testeo()")
             self.actualizar_controles_testeo()
             if self.frame_mover_test.winfo_ismapped() == 0:
                 self.frame_mover_test.pack(fill="x", pady=5)
@@ -1106,9 +1135,18 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.actualizar_controles_testeo()
 
     def actualizar_controles_testeo(self):
+        print(f"\U0001F50D actualizar_controles_testeo - Iniciando")
         if not self.motor:
+            print(f"   \u274c No hay motor disponible")
             return
-        self.lbl_proximo_paso.config(text=f"Próximo Paso: {self.motor.describir_proximo_paso()}")
+
+        try:
+            proximo_paso = self.motor.describir_proximo_paso()
+            print(f"   \u2705 describir_proximo_paso: '{proximo_paso}'")
+            self.lbl_proximo_paso.config(text=f"Pr\u00f3ximo Paso: {proximo_paso}")
+        except Exception as e:
+            print(f"   \u274c Error en describir_proximo_paso: {e}")
+
         estado = f"{self.motor.fase_actual}"
         self.lbl_estado_actual.config(text=f"Estado: {estado}")
         turno = "-"
