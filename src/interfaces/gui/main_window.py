@@ -591,7 +591,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
 
         if index_to_select is not None:
             self.listbox_enfrentamiento.selection_set(index_to_select)
-        else:
+        elif not (
+            self.carta_seleccionada
+            and self.carta_seleccionada.esta_viva()
+            and selected_coord
+        ):
             self.carta_seleccionada = None
 
         self.actualizar_estado_carta_global(self.carta_seleccionada)
@@ -938,8 +942,12 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if not enemigos:
             messagebox.showinfo("Atacar", "No hay objetivos visibles")
             return
+        carta_ref = self.carta_seleccionada
+
         top = tk.Toplevel(self.root)
         top.title("Seleccionar Objetivo")
+        top.transient(self.root)
+        top.grab_set()
         ttk.Label(top, text="Objetivo:").pack(padx=5, pady=5)
         opciones = [f"{carta.nombre} ({coord.q},{coord.r})" for coord, carta in enemigos]
         combo = ttk.Combobox(top, values=opciones, state="readonly")
@@ -949,7 +957,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         def confirmar():
             idx = combo.current()
             coord, objetivo = enemigos[idx]
-            self.carta_seleccionada.marcar_orden_manual("atacar", objetivo)
+            if carta_ref and carta_ref.esta_viva():
+                carta_ref.marcar_orden_manual("atacar", objetivo)
             log_evento(
                 f"🎮 {self.jugador_actual.nombre} ordena atacar a {objetivo.nombre}"
             )
@@ -957,6 +966,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             top.destroy()
 
         ttk.Button(top, text="OK", command=confirmar).pack(pady=5)
+        self.root.wait_window(top)
 
     def ordenar_movimiento(self):
         if not self.carta_seleccionada or not self.carta_seleccionada.esta_viva():
@@ -998,8 +1008,12 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             else [b.value for b in CombatBehavior]
         )
 
+        carta_ref = self.carta_seleccionada
+
         top = tk.Toplevel(self.root)
         top.title("Cambiar Comportamiento")
+        top.transient(self.root)
+        top.grab_set()
 
         ttk.Label(top, text="Movimiento:").pack(padx=5, pady=(5, 0))
         combo_mov = ttk.Combobox(top, values=mov_opciones, state="readonly")
@@ -1020,14 +1034,16 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         def confirmar():
             nuevo_mov = combo_mov.get()
             nuevo_com = combo_com.get()
-            self.carta_seleccionada.marcar_orden_manual(
-                "cambiar_comportamiento",
-                datos_adicionales={"nuevo_movimiento": nuevo_mov, "nuevo_combate": nuevo_com},
-            )
+            if carta_ref and carta_ref.esta_viva():
+                carta_ref.marcar_orden_manual(
+                    "cambiar_comportamiento",
+                    datos_adicionales={"nuevo_movimiento": nuevo_mov, "nuevo_combate": nuevo_com},
+                )
             self.actualizar_panel_ordenes()
             top.destroy()
 
         ttk.Button(top, text="OK", command=confirmar).pack(pady=5)
+        self.root.wait_window(top)
 
     def actualizar_estado_carta_tablero(self, carta=None):
         if not hasattr(self, "lbl_estado_carta"):
