@@ -4,6 +4,7 @@ from tkinter import ttk, messagebox, simpledialog
 import time
 
 from src.utils.helpers import log_evento
+from src.data.config.game_config import GameConfig
 
 from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
@@ -13,6 +14,8 @@ from src.utils.hex_utils import pixel_to_hex, hex_to_pixel
 
 class AutoBattlerGUI:
     def __init__(self):
+        self.config = GameConfig()
+        self.modo_testeo = self.config.modo_testeo
         self.motor = None
         self.jugador_actual = None
         self.jugadores = []
@@ -37,6 +40,9 @@ class AutoBattlerGUI:
         self.var_mostrar_coordenadas = tk.BooleanVar(value=True)
 
         self.crear_interfaz_principal()
+        if self.modo_testeo:
+            # Mostrar controles de testeo incluso antes de iniciar el juego
+            self.frame_testeo.pack(fill="x", padx=10, pady=5)
         self.root.after(500, self.refrescar_temporizadores)
 
     def crear_interfaz_principal(self):
@@ -359,6 +365,9 @@ class AutoBattlerGUI:
         # Inicializar motor
         self.motor = MotorJuego(self.jugadores, on_step_callback=self.on_evento_motor)
         self.motor.iniciar()
+
+        # Actualizar modo de testeo según la configuración del motor
+        self.modo_testeo = self.motor.modo_testeo
 
         if self.motor.modo_testeo:
             self.frame_testeo.pack(fill="x", padx=10, pady=5)
