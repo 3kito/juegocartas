@@ -9,6 +9,8 @@ from src.game.combate.mapa.mapa_global import MapaGlobal
 from src.game.combate.motor.motor_tiempo_real import MotorTiempoReal
 from src.utils.helpers import log_evento
 from src.game.combate.fase.secuencia_turnos import generar_secuencia_turnos
+from src.interfaces.core.base_interface import BaseInterface
+from src.interfaces.headless.console_interface import ConsoleInterface
 
 from src.game.combate.fase.controlador_fase_enfrentamiento import ControladorFaseEnfrentamiento
 from src.game.combate.fase.gestor_turnos import GestorTurnos
@@ -16,7 +18,12 @@ from src.game.fases.controlador_preparacion import ControladorFasePreparacion
 
 
 class MotorJuego:
-    def __init__(self, jugadores: list[Jugador] | None = None, on_step_callback=None):
+    def __init__(
+        self,
+        jugadores: list[Jugador] | None = None,
+        on_step_callback=None,
+        interface: BaseInterface | None = None,
+    ):
         self.jugadores = jugadores
         self.jugadores_vivos = list(jugadores) if jugadores else []
         self.fase_actual = "preparacion"
@@ -28,6 +35,7 @@ class MotorJuego:
         self.controlador_enfrentamiento = None
         self.mapa_global = None
         self.on_step_callback = on_step_callback
+        self.interface = interface or ConsoleInterface()
 
         # Controlador especializado para la fase de preparación
         self.controlador_preparacion = ControladorFasePreparacion(
