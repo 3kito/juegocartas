@@ -10,7 +10,7 @@ from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
 from src.game.combate.mapa.mapa_global import MapaGlobal
 from src.utils.hex_utils import pixel_to_hex, hex_to_pixel
-from src.interfas.ventana_testeo import PanelTesteo
+from src.interfaces.gui.game_panels.testing_panel import PanelTesteo
 
 
 class AutoBattlerGUI:
@@ -259,7 +259,7 @@ class AutoBattlerGUI:
         frame = ttk.Frame(self.notebook)
         self.notebook.add(frame, text="Enfrentamiento")
 
-        from src.interfas.interfaz_mapa_global import InterfazMapaGlobal
+        from src.interfaces.gui.widgets.hex_canvas import InterfazMapaGlobal
 
         self.mapa_global = None
         self.interfaz_mapa = InterfazMapaGlobal(
@@ -983,8 +983,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if turno != color:
             messagebox.showwarning("Advertencia", "NO ES SU TURNO")
             return
-        from src.game.combate.comportamientos.movement_behaviors import MovementBehavior
-        from src.game.combate.comportamientos.combat_behaviors import CombatBehavior
+        from src.game.comportamientos.movement_behaviors import MovementBehavior
+        from src.game.comportamientos.combat_behaviors import CombatBehavior
 
         restricciones = getattr(self.carta_seleccionada, "behavior_restrictions", None)
         mov_opciones = (
