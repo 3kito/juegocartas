@@ -983,17 +983,51 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if turno != color:
             messagebox.showwarning("Advertencia", "NO ES SU TURNO")
             return
-        nuevo_mov = simpledialog.askstring("Movimiento", "Nuevo movimiento:", initialvalue=self.carta_seleccionada.movement_behavior)
-        if nuevo_mov is None:
-            return
-        nuevo_com = simpledialog.askstring("Combate", "Nuevo combate:", initialvalue=self.carta_seleccionada.combat_behavior)
-        if nuevo_com is None:
-            return
-        self.carta_seleccionada.marcar_orden_manual(
-            "cambiar_comportamiento",
-            datos_adicionales={"nuevo_movimiento": nuevo_mov, "nuevo_combate": nuevo_com},
+        from src.game.combate.comportamientos.movement_behaviors import MovementBehavior
+        from src.game.combate.comportamientos.combat_behaviors import CombatBehavior
+
+        restricciones = getattr(self.carta_seleccionada, "behavior_restrictions", None)
+        mov_opciones = (
+            [b.value for b in restricciones.movement]
+            if restricciones and restricciones.movement
+            else [b.value for b in MovementBehavior]
         )
-        self.actualizar_panel_ordenes()
+        com_opciones = (
+            [b.value for b in restricciones.combat]
+            if restricciones and restricciones.combat
+            else [b.value for b in CombatBehavior]
+        )
+
+        top = tk.Toplevel(self.root)
+        top.title("Cambiar Comportamiento")
+
+        ttk.Label(top, text="Movimiento:").pack(padx=5, pady=(5, 0))
+        combo_mov = ttk.Combobox(top, values=mov_opciones, state="readonly")
+        combo_mov.pack(padx=5, pady=5)
+        if self.carta_seleccionada.movement_behavior in mov_opciones:
+            combo_mov.current(mov_opciones.index(self.carta_seleccionada.movement_behavior))
+        else:
+            combo_mov.current(0)
+
+        ttk.Label(top, text="Combate:").pack(padx=5, pady=(5, 0))
+        combo_com = ttk.Combobox(top, values=com_opciones, state="readonly")
+        combo_com.pack(padx=5, pady=5)
+        if self.carta_seleccionada.combat_behavior in com_opciones:
+            combo_com.current(com_opciones.index(self.carta_seleccionada.combat_behavior))
+        else:
+            combo_com.current(0)
+
+        def confirmar():
+            nuevo_mov = combo_mov.get()
+            nuevo_com = combo_com.get()
+            self.carta_seleccionada.marcar_orden_manual(
+                "cambiar_comportamiento",
+                datos_adicionales={"nuevo_movimiento": nuevo_mov, "nuevo_combate": nuevo_com},
+            )
+            self.actualizar_panel_ordenes()
+            top.destroy()
+
+        ttk.Button(top, text="OK", command=confirmar).pack(pady=5)
 
     def actualizar_estado_carta_tablero(self, carta=None):
         if not hasattr(self, "lbl_estado_carta"):
