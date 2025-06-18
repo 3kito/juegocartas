@@ -13,15 +13,20 @@ def obtener_info_entorno(carta, tablero):
     """
     coord = tablero.obtener_coordenada_de(carta)
     enemigos = []
+    aliados = []
 
     if coord:
         for otra_coord, otra_carta in tablero.obtener_cartas_en_rango(coord, carta.rango_ataque_actual):
-            if otra_carta and not carta.es_aliado_de(otra_carta):
-                enemigos.append(otra_carta)
+            if otra_carta:
+                if carta.es_aliado_de(otra_carta):
+                    aliados.append(otra_carta)
+                else:
+                    enemigos.append(otra_carta)
 
     return {
         "coordenada_actual": coord,
-        "enemigos_en_rango": enemigos
+        "enemigos_en_rango": enemigos,
+        "aliados": aliados
     }
 
 

@@ -388,28 +388,61 @@ class CartaBase:
     # === MÉTODOS DE INFORMACIÓN ===
 
     def tiene_orden_manual(self) -> bool:
-        """Indica si la carta tiene una orden manual en curso"""
+        """Indica si existe una orden manual activa."""
         return (
             self.orden_actual is not None
+            and not self.orden_actual.get("simulada", False)
+            and self.orden_actual.get("progreso") in {"pendiente", "ejecutando"}
+        )
+
+    def tiene_orden_simulada(self) -> bool:
+        """Retorna ``True`` si la carta mantiene una orden simulada en curso."""
+        return (
+            self.orden_actual is not None
+            and self.orden_actual.get("simulada", False)
             and self.orden_actual.get("progreso") in {"pendiente", "ejecutando"}
         )
 
     def marcar_orden_manual(self, tipo: str, objetivo=None, datos_adicionales=None):
-        """Registra una nueva orden manual para la carta"""
+        """Registra una nueva orden manual para la carta y cancela la simulada actual."""
+        if self.tiene_orden_simulada():
+            log_evento(f"🔄 [Cancelar] Cancelando orden simulada de {self.nombre}", "DEBUG")
+            self.limpiar_orden_manual()
         self.orden_actual = {
             "tipo": tipo,
             "objetivo": objetivo,
             "progreso": "pendiente",
             "datos_adicionales": datos_adicionales or {},
+            "simulada": False,
         }
+        log_evento(f"🎮 [Manual] Orden '{tipo}' para {self.nombre}", "DEBUG")
         self.modo_control = "orden_manual"
         self.orden_manual_pendiente = True
+
+    def marcar_orden_simulada(self, tipo: str, objetivo=None, datos_adicionales=None):
+        """Genera una orden automática simulada."""
+        if self.tiene_orden_manual() or self.tiene_orden_simulada():
+            return
+        self.orden_actual = {
+            "tipo": tipo,
+            "objetivo": objetivo,
+            "progreso": "pendiente",
+            "datos_adicionales": datos_adicionales or {},
+            "simulada": True,
+        }
+        log_evento(f"🤖 [SimOrden] {self.nombre} -> {tipo} {objetivo}", "DEBUG")
+        self.modo_control = "orden_simulada"
 
     def limpiar_orden_manual(self):
         self.orden_manual_pendiente = False
         self.orden_actual = None
-        if self.modo_control == "orden_manual":
+        if self.modo_control in {"orden_manual", "orden_simulada"}:
             self.modo_control = "pasivo"
+
+    def cancelar_orden_simulada(self):
+        if self.tiene_orden_simulada():
+            log_evento(f"🔄 [Cancelar] Orden simulada cancelada en {self.nombre}", "DEBUG")
+            self.limpiar_orden_manual()
 
     # --- Gestión de eventos activos ---
     def registrar_evento_activo(self, tipo: str, id_evento: str):
