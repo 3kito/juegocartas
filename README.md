@@ -166,3 +166,10 @@ al conjunto de visibilidad. Al renderizar el tablero, las cartas
 enemigas solo se muestran cuando su coordenada pertenece a las celdas
 visibles del jugador actual, evitando revelar unidades ocultas.
 
+## Limpieza de estructura (2024)
+
+Tras la última reorganización se eliminaron módulos de compatibilidad que solo
+reexportaban código heredado y varios *placeholders* de la interfaz. El código
+legacy se movió a `src/game/comportamientos/legacy/OLD/` para referencia
+histórica. El número de archivos del repositorio se redujo de 119 a 109.
+

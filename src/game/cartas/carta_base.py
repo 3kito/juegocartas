@@ -131,9 +131,9 @@ class CartaBase:
         self.orden_actual = None
         self.comportamiento_asignado = None  # Preparación: comportamiento elegido
 
-        from src.game.comportamientos.movement_behaviors import MovementBehavior
-        from src.game.comportamientos.combat_behaviors import CombatBehavior
-        from src.game.comportamientos.behavior_restrictions import BehaviorRestrictions
+        from src.game.comportamientos.legacy.OLD.movement_behaviors import MovementBehavior
+        from src.game.comportamientos.legacy.OLD.combat_behaviors import CombatBehavior
+        from src.game.comportamientos.legacy.OLD.behavior_restrictions import BehaviorRestrictions
 
         default_behaviors = datos_carta.get("comportamiento_default", {})
         self.movement_behavior = default_behaviors.get("movimiento", MovementBehavior.PARADO.value)
@@ -431,8 +431,8 @@ class CartaBase:
 
     def asignar_comportamiento(self, tipo: str) -> str:
         """Mantiene compatibilidad con el antiguo sistema de un solo comportamiento."""
-        from src.game.comportamientos.movement_behaviors import MovementBehavior
-        from src.game.comportamientos.combat_behaviors import CombatBehavior
+        from src.game.comportamientos.legacy.OLD.movement_behaviors import MovementBehavior
+        from src.game.comportamientos.legacy.OLD.combat_behaviors import CombatBehavior
 
         mapeo_mov = {
             "explorador": MovementBehavior.EXPLORADOR,
