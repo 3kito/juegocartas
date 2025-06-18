@@ -56,7 +56,7 @@ class GestorInteracciones:
                 "TRACE",
             )
             if carta.puede_actuar:
-                if carta.tiene_orden_manual():
+                if carta.tiene_orden_manual() or carta.tiene_orden_simulada():
                     log_evento(
                         f"📝 ORDEN DETECTADA en {carta.nombre}: {carta.orden_actual}",
                         "DEBUG",
@@ -124,8 +124,10 @@ class GestorInteracciones:
         if not orden:
             return
 
+        origen = "Manual" if not orden.get("simulada") else "SimOrden"
+        pref = "🎮" if origen == "Manual" else "🤖"
         log_evento(
-            f"⚙️ Procesando orden manual para {carta.nombre}: tipo={orden.get('tipo')}, progreso={orden.get('progreso')}",
+            f"{pref} [{origen}] Procesando orden para {carta.nombre}: tipo={orden.get('tipo')}, progreso={orden.get('progreso')}",
             "DEBUG",
         )
 
@@ -203,10 +205,15 @@ class GestorInteracciones:
 
         if orden["progreso"] == "completada":
             log_evento(
-                f"✅ Orden '{orden.get('tipo')}' completada para {carta.nombre}",
+                f"🎯 [Completar] Orden '{orden.get('tipo')}' para {carta.nombre}",
                 "DEBUG",
             )
+            simulada = orden.get("simulada")
             carta.limpiar_orden_manual()
+            if simulada:
+                log_evento("⚡ [Continuar] Evaluando siguiente orden", "DEBUG")
+                nuevas = generar_interacciones_para(carta, self.tablero)
+                self.interacciones_pendientes.extend(nuevas)
 
 
     def obtener_estadisticas(self):
