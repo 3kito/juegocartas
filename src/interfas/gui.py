@@ -203,14 +203,32 @@ class AutoBattlerGUI:
         ttk.Button(control_frame, text="Quitar del Tablero",
                    command=self.quitar_carta_tablero).pack(fill="x")
 
-        ttk.Label(control_frame, text="Comportamiento:").pack(pady=(5, 0))
-        self.combo_comportamiento = ttk.Combobox(
+        ttk.Label(control_frame, text="Movimiento:").pack(pady=(5, 0))
+        self.combo_movimiento = ttk.Combobox(
             control_frame,
             state="readonly",
-            values=["agresivo", "defensivo", "explorador", "guardian", "seguidor"],
+            values=[
+                "explorador",
+                "merodeador",
+                "seguidor",
+                "huir",
+                "regreso",
+                "parado",
+                "cazador",
+            ],
         )
-        self.combo_comportamiento.current(0)
-        self.combo_comportamiento.pack(fill="x")
+        self.combo_movimiento.current(0)
+        self.combo_movimiento.pack(fill="x")
+
+        ttk.Label(control_frame, text="Combate:").pack(pady=(5, 0))
+        self.combo_combate = ttk.Combobox(
+            control_frame,
+            state="readonly",
+            values=["agresivo", "defensivo", "guardian", "ignorar"],
+        )
+        self.combo_combate.current(0)
+        self.combo_combate.pack(fill="x")
+
         ttk.Button(
             control_frame,
             text="Asignar Comportamiento",
@@ -533,8 +551,11 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             if par[1] is not None and par[1].esta_viva()
         ]
         for coord, carta in cartas_tablero:
-            comp = carta.comportamiento_asignado or "-"
-            self.listbox_tablero.insert(tk.END, f"{carta.nombre} en {coord} ({comp})")
+            mov = getattr(carta, "movement_behavior", "-")
+            com = getattr(carta, "combat_behavior", "-")
+            self.listbox_tablero.insert(
+                tk.END, f"{carta.nombre} en {coord} (M:{mov} C:{com})"
+            )
 
     def actualizar_panel_enfrentamiento(self):
         if not hasattr(self, "listbox_enfrentamiento"):
@@ -840,9 +861,14 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             messagebox.showwarning("Error", "Selección inválida")
             return
         carta = cartas[seleccion[0]][1]
-        comportamiento = self.combo_comportamiento.get()
-        resultado = carta.asignar_comportamiento(comportamiento)
-        messagebox.showinfo("Comportamiento", resultado)
+        mov = self.combo_movimiento.get()
+        com = self.combo_combate.get()
+        carta.movement_behavior = mov
+        carta.combat_behavior = com
+        messagebox.showinfo(
+            "Comportamiento",
+            f"Movimiento: {mov}\nCombate: {com}",
+        )
 
     def centrar_en_carta(self):
         if not self.motor or not self.motor.mapa_global:
@@ -963,10 +989,16 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if turno != color:
             messagebox.showwarning("Advertencia", "NO ES SU TURNO")
             return
-        nuevo = simpledialog.askstring("Comportamiento", "Nuevo comportamiento:", initialvalue="agresivo")
-        if not nuevo:
+        nuevo_mov = simpledialog.askstring("Movimiento", "Nuevo movimiento:", initialvalue=self.carta_seleccionada.movement_behavior)
+        if nuevo_mov is None:
             return
-        self.carta_seleccionada.marcar_orden_manual("cambiar_comportamiento", datos_adicionales={"nuevo_comportamiento": nuevo})
+        nuevo_com = simpledialog.askstring("Combate", "Nuevo combate:", initialvalue=self.carta_seleccionada.combat_behavior)
+        if nuevo_com is None:
+            return
+        self.carta_seleccionada.marcar_orden_manual(
+            "cambiar_comportamiento",
+            datos_adicionales={"nuevo_movimiento": nuevo_mov, "nuevo_combate": nuevo_com},
+        )
         self.actualizar_panel_ordenes()
 
     def actualizar_estado_carta_tablero(self, carta=None):
@@ -978,7 +1010,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                 f"Vida: {carta.vida_actual}/{carta.vida_maxima}\n"
                 f"Daño: {carta.dano_fisico_actual}\n"
                 f"Defensa: {carta.defensa_fisica_actual}\n"
-                f"Comportamiento: {carta.comportamiento_asignado or '-'}"
+                f"Mov: {getattr(carta, 'movement_behavior', '-') }\n"
+                f"Comb: {getattr(carta, 'combat_behavior', '-') }"
             )
             self.lbl_estado_carta.config(text=info)
         else:
@@ -993,8 +1026,10 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                 f"Vida: {carta.vida_actual}/{carta.vida_maxima}"
             )
             if carta.duenio == self.jugador_actual:
-                comp = carta.comportamiento_asignado or "-"
-                info += f"\nComportamiento: {comp}"
+                info += (
+                    f"\nMov: {getattr(carta, 'movement_behavior', '-')}"
+                    f"\nComb: {getattr(carta, 'combat_behavior', '-')}"
+                )
             else:
                 info += "\nComportamiento: desconocido"
             self.lbl_estado_carta_global.config(text=info)
