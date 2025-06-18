@@ -10,6 +10,7 @@ from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
 from src.game.combate.mapa.mapa_global import MapaGlobal
 from src.utils.hex_utils import pixel_to_hex, hex_to_pixel
+from src.interfas.ventana_testeo import VentanaTesteo
 
 
 class AutoBattlerGUI:
@@ -19,6 +20,7 @@ class AutoBattlerGUI:
         self.motor = None
         self.jugador_actual = None
         self.jugadores = []
+        self.ventana_testeo = None
 
         # Ventana principal
         self.root = tk.Tk()
@@ -40,13 +42,7 @@ class AutoBattlerGUI:
         self.var_mostrar_coordenadas = tk.BooleanVar(value=True)
 
         self.crear_interfaz_principal()
-        print(f"\U0001F50D GUI.__init__ - Configuraci\u00f3n inicial:")
-        print(f"   config.modo_testeo: {self.config.modo_testeo}")
-        print(f"   self.modo_testeo: {self.modo_testeo}")
-        print(f"   Frame testeo creado: {hasattr(self, 'frame_testeo')}")
-        if self.modo_testeo:
-            # Mostrar controles de testeo incluso antes de iniciar el juego
-            self.frame_testeo.pack(fill="x", padx=10, pady=5)
+        self.root.protocol("WM_DELETE_WINDOW", self.cerrar_aplicacion)
         self.root.after(500, self.refrescar_temporizadores)
 
     def crear_interfaz_principal(self):
@@ -87,31 +83,7 @@ class AutoBattlerGUI:
         self.crear_tab_tablero()
         self.crear_tab_enfrentamiento()
 
-        # Controles de Testeo (ocultos por defecto)
-        self.frame_testeo = ttk.LabelFrame(self.root, text="Controles de Testeo")
-        self.lbl_proximo_paso = ttk.Label(self.frame_testeo, text="Próximo Paso: -")
-        self.lbl_proximo_paso.pack(side="left", padx=5)
-        ttk.Button(self.frame_testeo, text="Ejecutar Siguiente Paso", command=self.ejecutar_paso_testeo).pack(side="left", padx=5)
-        self.lbl_estado_actual = ttk.Label(self.frame_testeo, text="Estado: -")
-        self.lbl_estado_actual.pack(side="left", padx=5)
-        self.lbl_turno_activo = ttk.Label(self.frame_testeo, text="Turno: -")
-        self.lbl_turno_activo.pack(side="left", padx=5)
-        self.btn_oro_infinito = ttk.Button(
-            self.frame_testeo,
-            text="Oro Infinito",
-            command=self.asignar_oro_infinito,
-        )
-        self.btn_oro_infinito.pack(side="left", padx=5)
-        self.btn_tokens_infinitos = ttk.Button(
-            self.frame_testeo,
-            text="Tokens Infinitos",
-            command=self.asignar_tokens_infinitos,
-        )
-        self.btn_tokens_infinitos.pack(side="left", padx=5)
-        print(f"\U0001F50D Frame testeo creado exitosamente")
-        print(f"   Widgets hijos: {len(self.frame_testeo.winfo_children())}")
-        print(f"   Existe lbl_proximo_paso: {hasattr(self, 'lbl_proximo_paso')}")
-        print(f"   Existe btn_oro_infinito: {hasattr(self, 'btn_oro_infinito')}")
+
 
     def crear_tab_estado(self):
         # Tab de estado general del jugador
@@ -373,24 +345,11 @@ class AutoBattlerGUI:
         # Inicializar motor
         self.motor = MotorJuego(self.jugadores, on_step_callback=self.on_evento_motor)
         self.motor.iniciar()
-        print(f"\U0001F50D iniciar_juego - Estados del modo testeo:")
-        print(f"   Config inicial: {self.config.modo_testeo}")
-        print(f"   Motor creado: {self.motor is not None}")
-        if self.motor:
-            print(f"   Motor.modo_testeo: {self.motor.modo_testeo}")
-            print(f"   Motor tiene describir_proximo_paso: {hasattr(self.motor, 'describir_proximo_paso')}")
-        print(f"   Motor tiene ejecutar_siguiente_paso: {hasattr(self.motor, 'ejecutar_siguiente_paso')}")
 
         # Actualizar modo de testeo según la configuración del motor
         self.modo_testeo = self.motor.modo_testeo
-        print(f"   self.modo_testeo actualizado: {self.modo_testeo}")
-        print(f"   Frame testeo mapeado ANTES: {self.frame_testeo.winfo_ismapped()}")
-
         if self.motor.modo_testeo:
-            print(f"   Ejecutando pack() del frame testeo")
-            self.frame_testeo.pack(fill="x", padx=10, pady=5)
-            print(f"   Frame testeo mapeado DESPUES: {self.frame_testeo.winfo_ismapped()}")
-            self.actualizar_controles_testeo()
+            self.abrir_ventana_testeo()
 
         # Configurar combo
         self.combo_jugador['values'] = [f"{j.nombre} (ID: {j.id})" for j in self.jugadores]
@@ -417,11 +376,6 @@ class AutoBattlerGUI:
             self.actualizar_interfaz()
 
     def actualizar_interfaz(self):
-        print(f"\U0001F50D actualizar_interfaz - Estado actual:")
-        print(f"   Motor existe: {self.motor is not None}")
-        if self.motor:
-            print(f"   Motor.modo_testeo: {self.motor.modo_testeo}")
-            print(f"   Frame testeo mapeado: {self.frame_testeo.winfo_ismapped()}")
         if not self.jugador_actual or not self.motor:
             return
 
@@ -501,17 +455,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.lbl_equipo_rojo.config(text=f"🔴 EQUIPO ROJO: {rojos or '-'}")
             self.lbl_equipo_azul.config(text=f"🔵 EQUIPO AZUL: {azules or '-'}")
 
-        if self.motor.modo_testeo:
-            print(f"   Entrando en secci\u00f3n modo testeo")
-            if self.frame_testeo.winfo_ismapped() == 0:
-                print(f"   \u26a0\ufe0f Frame no mapeado, intentando pack()")
-                self.frame_testeo.pack(fill="x", padx=10, pady=5)
-            else:
-                print(f"   \u2705 Frame ya est\u00e1 mapeado")
-            print(f"   Llamando actualizar_controles_testeo()")
-            self.actualizar_controles_testeo()
-            if self.frame_mover_test.winfo_ismapped() == 0:
-                self.frame_mover_test.pack(fill="x", pady=5)
+        if self.motor.modo_testeo and self.frame_mover_test.winfo_ismapped() == 0:
+            self.frame_mover_test.pack(fill="x", pady=5)
         
         # Habilitar/deshabilitar controles según fase
         if self.motor.fase_actual == "preparacion":
@@ -1117,46 +1062,32 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
     def usar_habilidad(self):
         messagebox.showinfo("Info", "Uso de habilidades en desarrollo")
 
-    def asignar_oro_infinito(self):
-        if self.jugador_actual:
-            self.jugador_actual.oro = 999999
-            self.actualizar_interfaz()
+    def abrir_ventana_testeo(self):
+        if self.ventana_testeo is None or not self.ventana_testeo.window.winfo_exists():
+            self.ventana_testeo = VentanaTesteo(self.motor, lambda: self.jugador_actual, on_close=self.on_cerrar_ventana_testeo)
 
-    def asignar_tokens_infinitos(self):
-        if self.jugador_actual:
-            self.jugador_actual.tokens_reroll = 999
-            self.actualizar_interfaz()
+    def on_cerrar_ventana_testeo(self):
+        self.ventana_testeo = None
 
-    # === CONTROLES DE TESTEO ===
-    def ejecutar_paso_testeo(self):
-        if self.motor:
-            self.motor.ejecutar_siguiente_paso()
-            self.actualizar_interfaz()
-            self.actualizar_controles_testeo()
+    def verificar_ventana_testeo(self):
+        if self.motor and self.motor.modo_testeo:
+            if self.ventana_testeo is None or not self.ventana_testeo.window.winfo_exists():
+                self.abrir_ventana_testeo()
+        elif self.ventana_testeo:
+            self.ventana_testeo.cerrar_ventana()
+            self.ventana_testeo = None
 
-    def actualizar_controles_testeo(self):
-        print(f"\U0001F50D actualizar_controles_testeo - Iniciando")
-        if not self.motor:
-            print(f"   \u274c No hay motor disponible")
-            return
+    def cerrar_aplicacion(self):
+        if self.ventana_testeo:
+            self.ventana_testeo.cerrar_ventana()
+            self.ventana_testeo = None
+        self.root.destroy()
 
-        try:
-            proximo_paso = self.motor.describir_proximo_paso()
-            print(f"   \u2705 describir_proximo_paso: '{proximo_paso}'")
-            self.lbl_proximo_paso.config(text=f"Pr\u00f3ximo Paso: {proximo_paso}")
-        except Exception as e:
-            print(f"   \u274c Error en describir_proximo_paso: {e}")
-
-        estado = f"{self.motor.fase_actual}"
-        self.lbl_estado_actual.config(text=f"Estado: {estado}")
-        turno = "-"
-        if hasattr(self.motor, 'controlador_enfrentamiento') and self.motor.controlador_enfrentamiento:
-            turno = self.motor.controlador_enfrentamiento.obtener_turno_activo()
-        self.lbl_turno_activo.config(text=f"Turno: {turno if turno else '-'}")
 
     def refrescar_temporizadores(self):
         self.actualizar_temporizador_fase()
         self.actualizar_temporizador_turno()
+        self.verificar_ventana_testeo()
         self.root.after(500, self.refrescar_temporizadores)
 
     def actualizar_temporizador_fase(self):

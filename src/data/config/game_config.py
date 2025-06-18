@@ -5,7 +5,6 @@ CONFIG_PATH = os.path.join(os.path.dirname(__file__), "game_config.json")
 
 class GameConfig:
     def __init__(self):
-        print(f"\U0001F50D GameConfig cargando...")
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
 
@@ -33,4 +32,3 @@ class GameConfig:
 
         # Modo testeo manual
         self.modo_testeo = data.get("modo_testeo", False)
-        print(f"   modo_testeo desde JSON: {self.modo_testeo}")
