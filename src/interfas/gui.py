@@ -10,7 +10,7 @@ from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
 from src.game.combate.mapa.mapa_global import MapaGlobal
 from src.utils.hex_utils import pixel_to_hex, hex_to_pixel
-from src.interfas.ventana_testeo import VentanaTesteo
+from src.interfas.ventana_testeo import PanelTesteo
 
 
 class AutoBattlerGUI:
@@ -20,7 +20,7 @@ class AutoBattlerGUI:
         self.motor = None
         self.jugador_actual = None
         self.jugadores = []
-        self.ventana_testeo = None
+        self.panel_testeo = None  # panel incrustado
 
         # Ventana principal
         self.root = tk.Tk()
@@ -72,9 +72,18 @@ class AutoBattlerGUI:
         self.combo_jugador.pack(side="left", padx=(10, 0))
         self.combo_jugador.bind('<<ComboboxSelected>>', self.on_jugador_changed)
 
+        # Contenedor principal para las vistas y el panel de testeo
+        self.main_frame = ttk.Frame(self.root)
+        self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
         # Notebook para las diferentes vistas
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
+        self.notebook = ttk.Notebook(self.main_frame)
+        self.notebook.pack(side="left", fill="both", expand=True)
+
+        # Panel de testeo (inicialmente oculto)
+        self.panel_testeo = PanelTesteo(self.main_frame, None, lambda: self.jugador_actual)
+        self.panel_testeo.pack(side="right", fill="y", padx=(10, 0))
+        self.panel_testeo.pack_forget()
 
         # Tabs
         self.crear_tab_estado()
@@ -349,7 +358,7 @@ class AutoBattlerGUI:
         # Actualizar modo de testeo según la configuración del motor
         self.modo_testeo = self.motor.modo_testeo
         if self.motor.modo_testeo:
-            self.abrir_ventana_testeo()
+            self.mostrar_panel_testeo()
 
         # Configurar combo
         self.combo_jugador['values'] = [f"{j.nombre} (ID: {j.id})" for j in self.jugadores]
@@ -1062,25 +1071,28 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
     def usar_habilidad(self):
         messagebox.showinfo("Info", "Uso de habilidades en desarrollo")
 
-    def abrir_ventana_testeo(self):
-        if self.ventana_testeo is None or not self.ventana_testeo.window.winfo_exists():
-            self.ventana_testeo = VentanaTesteo(self.motor, lambda: self.jugador_actual, on_close=self.on_cerrar_ventana_testeo)
+    def mostrar_panel_testeo(self):
+        if not self.panel_testeo:
+            return
+        self.panel_testeo.motor = self.motor
+        if not self.panel_testeo.winfo_ismapped():
+            self.panel_testeo.pack(side="right", fill="y", padx=(10, 0))
+        self.panel_testeo.detener()
+        self.panel_testeo.actualizar_informacion()
 
-    def on_cerrar_ventana_testeo(self):
-        self.ventana_testeo = None
+    def ocultar_panel_testeo(self):
+        if self.panel_testeo and self.panel_testeo.winfo_ismapped():
+            self.panel_testeo.detener()
+            self.panel_testeo.pack_forget()
 
     def verificar_ventana_testeo(self):
         if self.motor and self.motor.modo_testeo:
-            if self.ventana_testeo is None or not self.ventana_testeo.window.winfo_exists():
-                self.abrir_ventana_testeo()
-        elif self.ventana_testeo:
-            self.ventana_testeo.cerrar_ventana()
-            self.ventana_testeo = None
+            self.mostrar_panel_testeo()
+        else:
+            self.ocultar_panel_testeo()
 
     def cerrar_aplicacion(self):
-        if self.ventana_testeo:
-            self.ventana_testeo.cerrar_ventana()
-            self.ventana_testeo = None
+        self.ocultar_panel_testeo()
         self.root.destroy()
 
 
