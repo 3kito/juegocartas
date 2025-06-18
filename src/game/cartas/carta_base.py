@@ -175,6 +175,16 @@ class CartaBase:
             self.vida_actual = 0
             self.viva = False
             self.puede_actuar = False
+
+            # Remover del tablero si está colocada
+            if getattr(self, "tablero", None) and getattr(self, "coordenada", None):
+                try:
+                    self.tablero.quitar_carta(self.coordenada)
+                    from src.game.cartas.manager_cartas import manager_cartas
+                    manager_cartas.devolver_carta_al_pool(self)
+                except Exception:
+                    pass
+
             try:
                 from src.utils.eventos import disparar
                 disparar("carta_muerta", carta=self)
