@@ -328,6 +328,28 @@ class Jugador:
         """Cuenta todas las cartas (tablero + banco)"""
         return self.contar_cartas_tablero() + self.contar_cartas_banco()
 
+    def autocompletar_tablero(self):
+        """Llena el tablero automáticamente con cartas del banco hasta el límite"""
+        max_cartas = self.obtener_max_cartas_tablero()
+        actuales = self.contar_cartas_tablero()
+        faltantes = max_cartas - actuales
+
+        if faltantes <= 0 or not self.cartas_banco:
+            return
+
+        log_evento(
+            f"🤖 Autocompletando tablero de {self.nombre}: {faltantes} espacios",
+            "DEBUG",
+        )
+
+        while faltantes > 0 and self.cartas_banco and self.puede_colocar_carta_en_tablero():
+            carta = self.cartas_banco.pop(0)
+            if not self.colocar_carta_en_tablero(carta):
+                # Si no se pudo colocar, devolver la carta y salir
+                self.cartas_banco.insert(0, carta)
+                break
+            faltantes -= 1
+
     # === MÉTODOS DE TOKENS Y COMBATE (sin cambios) ===
 
     def ganar_tokens_reroll(self, cantidad):

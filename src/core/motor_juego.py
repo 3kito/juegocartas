@@ -1,4 +1,5 @@
 import time
+import random
 
 from src.core.jugador import Jugador
 from src.data.config.game_config import GameConfig
@@ -43,6 +44,8 @@ class MotorJuego:
         if not manager_cartas.cartas_cargadas:
             manager_cartas.cargar_cartas()
 
+        self._entregar_cartas_iniciales()
+
         self.controlador_preparacion.iniciar_fase(self.ronda)
 
     def _ejecutar_fase_combate(self):
@@ -59,6 +62,9 @@ class MotorJuego:
         cantidad_parejas = (cant_jugadores + 1) // 2
         mapa = MapaGlobal(cantidad_parejas=cantidad_parejas)
         self.mapa_global = mapa
+
+        # Autocompletar tableros antes de ubicar jugadores
+        self._autocompletar_tableros()
 
         # 2. Asignar jugadores a zonas
         jugadores_por_color = {"rojo": [], "azul": []}
@@ -193,4 +199,24 @@ class MotorJuego:
             self.controlador_preparacion.acelerar_temporizador()
         elif self.fase_actual == "combate" and self.controlador_enfrentamiento:
             self.controlador_enfrentamiento.acelerar_temporizador()
+
+    # === MÉTODOS AUXILIARES ===
+    def _entregar_cartas_iniciales(self):
+        """Da a todos los jugadores una carta inicial de un mismo tier (1 o 2)"""
+        if not self.jugadores_vivos:
+            return
+
+        tier = random.choice([1, 2])
+        log_evento(f"🎁 Entregando carta inicial de tier {tier} a todos los jugadores")
+        for jugador in self.jugadores_vivos:
+            carta = manager_cartas.obtener_carta_aleatoria_tier(tier)
+            if carta:
+                jugador.agregar_carta_al_banco(carta)
+            else:
+                log_evento("⚠️ No se pudo obtener carta inicial", "WARNING")
+
+    def _autocompletar_tableros(self):
+        """Autocompleta los tableros de los jugadores con cartas de su banco"""
+        for jugador in self.jugadores_vivos:
+            jugador.autocompletar_tablero()
 
