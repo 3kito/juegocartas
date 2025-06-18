@@ -983,8 +983,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if turno != color:
             messagebox.showwarning("Advertencia", "NO ES SU TURNO")
             return
-        from src.game.comportamientos.movement_behaviors import MovementBehavior
-        from src.game.comportamientos.combat_behaviors import CombatBehavior
+        from src.game.comportamientos.legacy.OLD.movement_behaviors import MovementBehavior
+        from src.game.comportamientos.legacy.OLD.combat_behaviors import CombatBehavior
 
         restricciones = getattr(self.carta_seleccionada, "behavior_restrictions", None)
         mov_opciones = (

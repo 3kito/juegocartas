@@ -1,4 +1,4 @@
-from src.game.comportamientos.behavior_executor import BehaviorExecutor
+from src.game.comportamientos.legacy.OLD.behavior_executor import BehaviorExecutor
 
 _executor = BehaviorExecutor()
 
