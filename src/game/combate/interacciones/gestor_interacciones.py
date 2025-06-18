@@ -184,13 +184,21 @@ class GestorInteracciones:
                 orden["progreso"] = "completada"
 
         elif orden["tipo"] == "cambiar_comportamiento":
-            nuevo = orden.get("datos_adicionales", {}).get("nuevo_comportamiento")
-            if nuevo:
+            datos = orden.get("datos_adicionales", {})
+            nuevo_mov = datos.get("nuevo_movimiento")
+            nuevo_com = datos.get("nuevo_combate")
+            if nuevo_mov:
                 log_evento(
-                    f"🔄 Cambiando comportamiento de {carta.nombre} a '{nuevo}'",
+                    f"🔄 Cambiando movimiento de {carta.nombre} a '{nuevo_mov}'",
                     "DEBUG",
                 )
-                carta.modo_control = nuevo
+                carta.movement_behavior = nuevo_mov
+            if nuevo_com:
+                log_evento(
+                    f"🔄 Cambiando combate de {carta.nombre} a '{nuevo_com}'",
+                    "DEBUG",
+                )
+                carta.combat_behavior = nuevo_com
             orden["progreso"] = "completada"
 
         if orden["progreso"] == "completada":

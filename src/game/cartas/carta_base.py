@@ -131,6 +131,22 @@ class CartaBase:
         self.orden_actual = None
         self.comportamiento_asignado = None  # Preparación: comportamiento elegido
 
+        from src.game.combate.comportamientos.movement_behaviors import MovementBehavior
+        from src.game.combate.comportamientos.combat_behaviors import CombatBehavior
+        from src.game.combate.comportamientos.behavior_restrictions import BehaviorRestrictions
+
+        default_behaviors = datos_carta.get("comportamiento_default", {})
+        self.movement_behavior = default_behaviors.get("movimiento", MovementBehavior.PARADO.value)
+        self.combat_behavior = default_behaviors.get("combate", CombatBehavior.IGNORAR.value)
+
+        permitidos = datos_carta.get("comportamientos_permitidos", {})
+        movs = [MovementBehavior(m) for m in permitidos.get("movimiento", [])]
+        combs = [CombatBehavior(c) for c in permitidos.get("combate", [])]
+        self.behavior_restrictions = BehaviorRestrictions(movement=movs, combat=combs)
+
+        self.zona_base = None
+        self.ultima_posicion_enemigo = None
+
     @classmethod
     def crear_basica(cls, id, nombre="Carta", tier=1):
         return cls({
@@ -414,16 +430,23 @@ class CartaBase:
         self.eventos_activos.clear()
 
     def asignar_comportamiento(self, tipo: str) -> str:
-        """Asigna un comportamiento para el inicio del combate"""
-        comportamientos_validos = [
-            "agresivo",
-            "defensivo",
-            "explorador",
-            "guardian",
-            "seguidor",
-        ]
-        if tipo not in comportamientos_validos:
-            return "❌ Comportamiento inválido"
+        """Mantiene compatibilidad con el antiguo sistema de un solo comportamiento."""
+        from src.game.combate.comportamientos.movement_behaviors import MovementBehavior
+        from src.game.combate.comportamientos.combat_behaviors import CombatBehavior
+
+        mapeo_mov = {
+            "explorador": MovementBehavior.EXPLORADOR,
+            "seguidor": MovementBehavior.SEGUIDOR,
+        }
+        mapeo_com = {
+            "agresivo": CombatBehavior.AGRESIVO,
+            "defensivo": CombatBehavior.DEFENSIVO,
+            "guardian": CombatBehavior.GUARDIAN,
+        }
+        if tipo in mapeo_mov:
+            self.movement_behavior = mapeo_mov[tipo].value
+        if tipo in mapeo_com:
+            self.combat_behavior = mapeo_com[tipo].value
         self.comportamiento_asignado = tipo
         log_evento(f"🔧 {self.nombre} configurado como '{tipo}'")
         return f"✅ Comportamiento '{tipo}' asignado"
@@ -464,7 +487,9 @@ class CartaBase:
             },
             'habilidades': [str(hab) for hab in self.habilidades],
             'stats_combate': self.stats_combate.copy(),
-            'coordenada': str(self.coordenada) if self.coordenada else None
+            'coordenada': str(self.coordenada) if self.coordenada else None,
+            'movement_behavior': getattr(self, 'movement_behavior', None),
+            'combat_behavior': getattr(self, 'combat_behavior', None),
         })
         return info
 
