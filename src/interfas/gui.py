@@ -539,11 +539,27 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
     def actualizar_panel_enfrentamiento(self):
         if not hasattr(self, "listbox_enfrentamiento"):
             return
+        # Conservar la carta seleccionada actual si sigue siendo válida
+        selected_coord = None
+        if (
+            self.carta_seleccionada
+            and self.carta_seleccionada.esta_viva()
+            and self.motor
+            and self.motor.mapa_global
+        ):
+            selected_coord = self.motor.mapa_global.tablero.obtener_coordenada_de(
+                self.carta_seleccionada
+            )
+
         self.listbox_enfrentamiento.delete(0, tk.END)
         self._panel_coords = []
-        self.actualizar_estado_carta_global(None)
+
         if not (self.motor and self.motor.mapa_global and self.jugador_actual):
+            self.carta_seleccionada = None
+            self.actualizar_estado_carta_global(None)
             return
+
+        index_to_select = None
         for coord, carta in self.motor.mapa_global.tablero.celdas.items():
             if (
                 carta is not None
@@ -554,7 +570,16 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                     tk.END, f"{carta.nombre} - Pos: ({coord.q}, {coord.r})"
                 )
                 self._panel_coords.append(coord)
+                if selected_coord and coord == selected_coord:
+                    index_to_select = len(self._panel_coords) - 1
+                    self.carta_seleccionada = carta
 
+        if index_to_select is not None:
+            self.listbox_enfrentamiento.selection_set(index_to_select)
+        else:
+            self.carta_seleccionada = None
+
+        self.actualizar_estado_carta_global(self.carta_seleccionada)
         self.actualizar_panel_ordenes()
 
     def dibujar_tablero_hexagonal(self):
