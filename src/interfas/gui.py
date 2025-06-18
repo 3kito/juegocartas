@@ -461,11 +461,15 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                 self.notebook.tab(i, state="normal")
             self.canvas_tablero.bind("<Button-1>", self.on_canvas_click)
             self.notebook.tab(4, state="disabled")
+            # Asegurar que la pestaña de estado siempre esté accesible
+            self.notebook.tab(0, state="normal")
         else:
             for i in range(1, 4):
                 self.notebook.tab(i, state="disabled")
             self.canvas_tablero.unbind("<Button-1>")
             self.notebook.tab(4, state="normal")
+            # Asegurar que la pestaña de estado siempre esté accesible
+            self.notebook.tab(0, state="normal")
         if not self.motor.modo_testeo and self.frame_mover_test.winfo_ismapped() == 1:
             self.frame_mover_test.pack_forget()
 
