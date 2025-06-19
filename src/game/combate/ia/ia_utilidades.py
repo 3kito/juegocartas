@@ -86,7 +86,7 @@ def mover_carta_con_pathfinding(
         log_evento(f"❌ No se encontró coordenada de {carta.nombre}", "DEBUG")
         if on_finish:
             on_finish()
-        return False
+        return False, "sin_origen"
 
     # Al iniciar un movimiento cancelamos eventos de ataque previos
     if motor is not None:
@@ -107,7 +107,7 @@ def mover_carta_con_pathfinding(
         log_evento("⚠️ Ruta no encontrada", "DEBUG")
         if on_finish:
             on_finish()
-        return False
+        return False, "sin_ruta"
 
     log_evento(
         f"🗺️ Ruta encontrada: {len(ruta)} pasos",
@@ -126,7 +126,7 @@ def mover_carta_con_pathfinding(
                 on_step()
         if on_finish:
             on_finish()
-        return True
+        return True, "ok"
 
     delay = max(0.1, 1.0 / max(0.01, getattr(carta, "velocidad_movimiento", 1.0)))
     def _programar_paso(indice: int):
@@ -157,7 +157,7 @@ def mover_carta_con_pathfinding(
             pass
 
     _programar_paso(0)
-    return True
+    return True, "ok"
 
 
 def atacar_si_en_rango(carta_atacante, carta_objetivo):

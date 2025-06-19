@@ -41,10 +41,8 @@ def guardar_json(datos, ruta_archivo):
 
 def log_evento(mensaje, nivel="INFO"):
     """Registra un evento en consola y opcionalmente en archivo"""
-    if nivel == "TRACE" or (
-        nivel == "DEBUG" and any(x in mensaje for x in ["motor", "Tick", "Procesando"])
-    ):
-        # Suprimir trazas y depuración excesiva del motor
+    # Suprimir por completo logs de nivel TRACE o DEBUG para evitar ruido en consola
+    if nivel in {"TRACE", "DEBUG"}:
         return
 
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
