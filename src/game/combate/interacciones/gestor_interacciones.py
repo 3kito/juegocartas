@@ -56,32 +56,42 @@ class GestorInteracciones:
                 f"🔍 Revisando carta {carta.nombre} - tiene_orden_manual: {carta.tiene_orden_manual()}",
                 "TRACE",
             )
-            if (
-                carta.puede_actuar
-                and (
-                    not self.controlador
-                    or getattr(carta.duenio, "color_fase_actual", None)
+
+            if not carta.puede_actuar:
+                continue
+
+            es_turno_carta = True
+            if self.controlador:
+                es_turno_carta = (
+                    getattr(carta.duenio, "color_fase_actual", None)
                     == self.controlador.obtener_turno_activo()
                 )
-            ):
-                if carta.tiene_orden_manual() or carta.tiene_orden_simulada():
+
+            if carta.tiene_orden_manual():
+                if not es_turno_carta:
                     log_evento(
-                        f"📝 ORDEN DETECTADA en {carta.nombre}: {carta.orden_actual}",
+                        f"⏭️ {carta.nombre} intenta ejecutar orden manual fuera de su turno",
                         "TRACE",
                     )
-                    log_evento(
-                        f"↪️ Ejecutando _procesar_orden_manual para {carta.nombre}",
-                        "TRACE",
-                    )
-                    self._procesar_orden_manual(carta)
-                else:
-                    nuevas = generar_interacciones_para(carta, self.tablero)
-                    self.interacciones_pendientes.extend(nuevas)
-            elif carta.puede_actuar:
+                    continue
                 log_evento(
-                    f"⏭️ {carta.nombre} intenta actuar fuera de su turno",
+                    f"📝 ORDEN DETECTADA en {carta.nombre}: {carta.orden_actual}",
                     "TRACE",
                 )
+                log_evento(
+                    f"↪️ Ejecutando _procesar_orden_manual para {carta.nombre}",
+                    "TRACE",
+                )
+                self._procesar_orden_manual(carta)
+            elif carta.tiene_orden_simulada():
+                log_evento(
+                    f"🤖 ORDEN SIMULADA en {carta.nombre}: {carta.orden_actual}",
+                    "TRACE",
+                )
+                self._procesar_orden_manual(carta)
+            else:
+                nuevas = generar_interacciones_para(carta, self.tablero)
+                self.interacciones_pendientes.extend(nuevas)
 
         if not self.interacciones_pendientes:
             return True
