@@ -1,6 +1,7 @@
 # ia_utilidades.py
 from src.utils.helpers import log_evento
 
+
 def obtener_info_entorno(carta, tablero):
     """
     Recolecta información relevante del entorno para facilitar la toma de decisiones.
@@ -16,7 +17,9 @@ def obtener_info_entorno(carta, tablero):
     aliados = []
 
     if coord:
-        for otra_coord, otra_carta in tablero.obtener_cartas_en_rango(coord, carta.rango_ataque_actual):
+        for otra_coord, otra_carta in tablero.obtener_cartas_en_rango(
+            coord, carta.rango_ataque_actual
+        ):
             if otra_carta:
                 if carta.es_aliado_de(otra_carta):
                     aliados.append(otra_carta)
@@ -26,7 +29,7 @@ def obtener_info_entorno(carta, tablero):
     return {
         "coordenada_actual": coord,
         "enemigos_en_rango": enemigos,
-        "aliados": aliados
+        "aliados": aliados,
     }
 
 
@@ -99,9 +102,7 @@ def mover_carta_con_pathfinding(
     log_evento(
         f"🚶 INICIANDO pathfinding {carta.nombre}: {origen} → {destino}", "DEBUG"
     )
-    log_evento(
-        f"🧭 Buscando ruta para {carta.nombre}: {origen} → {destino}", "DEBUG"
-    )
+    log_evento(f"🧭 Buscando ruta para {carta.nombre}: {origen} → {destino}", "DEBUG")
     ruta = _buscar_ruta(mapa, origen, destino)
     if not ruta:
         log_evento("⚠️ Ruta no encontrada", "DEBUG")
@@ -129,6 +130,7 @@ def mover_carta_con_pathfinding(
         return True, "ok"
 
     delay = max(0.1, 1.0 / max(0.01, getattr(carta, "velocidad_movimiento", 1.0)))
+
     def _programar_paso(indice: int):
         if indice >= len(ruta):
             carta.eventos_activos.pop("movimiento", None)
@@ -168,9 +170,15 @@ def atacar_si_en_rango(carta_atacante, carta_objetivo):
     """Realiza un ataque simple si el objetivo está en rango"""
     if carta_atacante.coordenada is None or carta_objetivo.coordenada is None:
         return False
-    if carta_atacante.coordenada.distancia(carta_objetivo.coordenada) > carta_atacante.rango_ataque_actual:
+    if (
+        carta_atacante.coordenada.distancia(carta_objetivo.coordenada)
+        > carta_atacante.rango_ataque_actual
+    ):
         return False
-    from src.game.combate.interacciones.interaccion_modelo import Interaccion, TipoInteraccion
+    from src.game.combate.interacciones.interaccion_modelo import (
+        Interaccion,
+        TipoInteraccion,
+    )
     from src.game.combate.calcular_dano.calculadora_dano import calcular_dano
 
     inter = Interaccion(
@@ -194,7 +202,9 @@ def atacar_si_en_rango(carta_atacante, carta_objetivo):
     return True
 
 
-def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None, on_finish=None):
+def iniciar_ataque_continuo(
+    atacante, objetivo, mapa, motor, on_step=None, on_finish=None
+):
     """Ejecuta ataques automáticos mientras el objetivo esté vivo y visible.
 
     ``on_step`` es una función opcional que se llamará tras cada acción para
@@ -228,13 +238,14 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None, on_fi
 
         distancia = atacante.coordenada.distancia(objetivo.coordenada)
         if distancia > atacante.rango_ataque_actual:
-            log_evento(
-                f"📍 Acercando {atacante.nombre} hacia {objetivo.nombre}",
-                "DEBUG",
-            )
-            mover_carta_con_pathfinding(
-                atacante, objetivo.coordenada, mapa, motor, on_step=on_step
-            )
+            if not atacante.tiene_evento_activo("movimiento"):
+                log_evento(
+                    f"📍 Acercando {atacante.nombre} hacia {objetivo.nombre}",
+                    "DEBUG",
+                )
+                mover_carta_con_pathfinding(
+                    atacante, objetivo.coordenada, mapa, motor, on_step=on_step
+                )
             evt = motor.programar_evento(_ciclo, atacante.velocidad_ataque)
             try:
                 atacante.registrar_evento_activo("ataque", evt)
@@ -266,5 +277,3 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None, on_fi
         atacante.registrar_evento_activo("ataque", evt_inicio)
     except AttributeError:
         pass
-
-
