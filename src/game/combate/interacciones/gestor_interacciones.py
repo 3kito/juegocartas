@@ -144,8 +144,14 @@ class GestorInteracciones:
             "TRACE",
         )
 
-        if orden["progreso"] == "pendiente":
-            orden["progreso"] = "ejecutando"
+        # Ejecutar la orden una única vez para que los eventos programados
+        # (movimiento o ataque) puedan respetar su propio timing. En iteraciones
+        # posteriores simplemente se espera a que finalicen.
+        if orden["progreso"] != "pendiente":
+            # Ya se ha iniciado la ejecución previamente
+            return
+
+        orden["progreso"] = "ejecutando"
 
         if self.motor:
             try:
