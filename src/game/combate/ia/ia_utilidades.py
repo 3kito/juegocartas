@@ -150,7 +150,11 @@ def mover_carta_con_pathfinding(
             f"⏰ Programando evento movimiento con delay {delay:.2f}s",
             "DEBUG",
         )
-        evt_id = motor.programar_evento(_ejecutar, delay if indice > 0 else 0.0)
+        # Programar cada paso respetando siempre la velocidad de movimiento
+        # Anteriormente el primer paso se ejecutaba sin demora, lo que hacía
+        # que en comportamientos automáticos la velocidad configurada no se
+        # respetara visualmente.
+        evt_id = motor.programar_evento(_ejecutar, delay)
         try:
             carta.registrar_evento_activo("movimiento", evt_id)
         except AttributeError:
