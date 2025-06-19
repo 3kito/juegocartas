@@ -84,6 +84,8 @@ def mover_carta_con_pathfinding(
     origen = mapa.obtener_coordenada_de(carta)
     if origen is None:
         log_evento(f"❌ No se encontró coordenada de {carta.nombre}", "DEBUG")
+        if on_finish:
+            on_finish()
         return False
 
     # Al iniciar un movimiento cancelamos eventos de ataque previos
@@ -103,6 +105,8 @@ def mover_carta_con_pathfinding(
     ruta = _buscar_ruta(mapa, origen, destino)
     if not ruta:
         log_evento("⚠️ Ruta no encontrada", "DEBUG")
+        if on_finish:
+            on_finish()
         return False
 
     log_evento(
@@ -120,6 +124,8 @@ def mover_carta_con_pathfinding(
             origen = paso
             if on_step:
                 on_step()
+        if on_finish:
+            on_finish()
         return True
 
     delay = max(0.1, 1.0 / max(0.01, getattr(carta, "velocidad_movimiento", 1.0)))
@@ -184,7 +190,7 @@ def atacar_si_en_rango(carta_atacante, carta_objetivo):
     return True
 
 
-def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None):
+def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None, on_finish=None):
     """Ejecuta ataques automáticos mientras el objetivo esté vivo y visible.
 
     ``on_step`` es una función opcional que se llamará tras cada acción para
@@ -203,6 +209,8 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None):
                 atacante.cancelar_evento_activo("ataque", motor)
             except AttributeError:
                 pass
+            if on_finish:
+                on_finish()
             return
 
         if atacante.coordenada is None or objetivo.coordenada is None:
@@ -210,6 +218,8 @@ def iniciar_ataque_continuo(atacante, objetivo, mapa, motor, on_step=None):
                 atacante.cancelar_evento_activo("ataque", motor)
             except AttributeError:
                 pass
+            if on_finish:
+                on_finish()
             return
 
         distancia = atacante.coordenada.distancia(objetivo.coordenada)

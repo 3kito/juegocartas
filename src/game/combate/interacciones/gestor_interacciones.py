@@ -31,13 +31,13 @@ class GestorInteracciones:
 
     def procesar_tick(self, delta_time: float) -> bool:
         # 🔁 Generar interacciones u órdenes manuales
-        log_evento("🔄 GestorInteracciones.procesar_tick() ejecutándose", "DEBUG")
+        log_evento("🔄 GestorInteracciones.procesar_tick() ejecutándose", "TRACE")
         if not self.tablero:
             return True
 
         log_evento(
             f"📊 Revisando {len([c for c in self.tablero.celdas.values() if c])} cartas en tablero",
-            "DEBUG",
+            "TRACE",
         )
 
         cartas_activas = {
@@ -48,7 +48,7 @@ class GestorInteracciones:
 
         log_evento(
             f"🚩 Tick de interacciones con {len(cartas_activas)} cartas",
-            "DEBUG",
+            "TRACE",
         )
 
         for carta in cartas_activas.values():
@@ -67,11 +67,11 @@ class GestorInteracciones:
                 if carta.tiene_orden_manual() or carta.tiene_orden_simulada():
                     log_evento(
                         f"📝 ORDEN DETECTADA en {carta.nombre}: {carta.orden_actual}",
-                        "DEBUG",
+                        "TRACE",
                     )
                     log_evento(
                         f"↪️ Ejecutando _procesar_orden_manual para {carta.nombre}",
-                        "DEBUG",
+                        "TRACE",
                     )
                     self._procesar_orden_manual(carta)
                 else:
@@ -80,7 +80,7 @@ class GestorInteracciones:
             elif carta.puede_actuar:
                 log_evento(
                     f"⏭️ {carta.nombre} intenta actuar fuera de su turno",
-                    "DEBUG",
+                    "TRACE",
                 )
 
         if not self.interacciones_pendientes:
@@ -141,7 +141,7 @@ class GestorInteracciones:
         pref = "🎮" if origen == "Manual" else "🤖"
         log_evento(
             f"{pref} [{origen}] Procesando orden para {carta.nombre}: tipo={orden.get('tipo')}, progreso={orden.get('progreso')}",
-            "DEBUG",
+            "TRACE",
         )
 
         if orden["progreso"] == "pendiente":
@@ -156,7 +156,7 @@ class GestorInteracciones:
         if orden["tipo"] == "mover":
             destino = orden.get("objetivo")
             if destino is None:
-                orden["progreso"] = "completada"
+                self._finalizar_orden(carta)
             else:
                 log_evento(
                     f"🧭 Orden de movimiento a {destino} para {carta.nombre}",
@@ -171,20 +171,19 @@ class GestorInteracciones:
                     self.tablero,
                     motor=self.motor,
                     on_step=self.on_step,
-                    on_finish=lambda: self._reanudar_comportamiento(carta),
+                    on_finish=lambda: self._finalizar_orden(carta),
                 )
                 log_evento(
                     f"⏳ Movimiento programado ({'ok' if exito else 'fallo'})",
                     "DEBUG",
                 )
-                # La orden se marca completada inmediatamente; el movimiento
-                # continuará mediante eventos del motor
-                orden["progreso"] = "completada"
+                if not exito:
+                    self._finalizar_orden(carta)
 
         elif orden["tipo"] == "atacar":
             objetivo = orden.get("objetivo")
             if objetivo is None or not objetivo.esta_viva():
-                orden["progreso"] = "completada"
+                self._finalizar_orden(carta)
             else:
                 log_evento(
                     f"🎯 Orden de ataque contra {objetivo.nombre} para {carta.nombre}",
@@ -196,8 +195,8 @@ class GestorInteracciones:
                     self.tablero,
                     self.motor,
                     on_step=self.on_step,
+                    on_finish=lambda: self._finalizar_orden(carta),
                 )
-                orden["progreso"] = "completada"
 
         elif orden["tipo"] == "cambiar_comportamiento":
             datos = orden.get("datos_adicionales", {})
@@ -215,18 +214,8 @@ class GestorInteracciones:
                     "DEBUG",
                 )
                 carta.combat_behavior = nuevo_com
-            orden["progreso"] = "completada"
+            self._finalizar_orden(carta)
 
-        if orden["progreso"] == "completada":
-            log_evento(
-                f"🎯 [Completar] Orden '{orden.get('tipo')}' para {carta.nombre}",
-                "DEBUG",
-            )
-            simulada = orden.get("simulada")
-            carta.limpiar_orden_manual()
-            log_evento("⚡ [Reanudar] Evaluando siguiente orden", "DEBUG")
-            nuevas = generar_interacciones_para(carta, self.tablero)
-            self.interacciones_pendientes.extend(nuevas)
 
 
     def obtener_estadisticas(self):
@@ -242,6 +231,19 @@ class GestorInteracciones:
 
     def obtener_id_componente(self) -> str:
         return f"interacciones_{id(self)}"
+
+    def _finalizar_orden(self, carta):
+        """Marca la orden como completada y limpia el estado."""
+        orden = getattr(carta, "orden_actual", None)
+        if not orden:
+            return
+        orden["progreso"] = "completada"
+        log_evento(
+            f"🎯 [Completar] Orden '{orden.get('tipo')}' para {carta.nombre}",
+            "DEBUG",
+        )
+        carta.limpiar_orden_manual()
+        self._reanudar_comportamiento(carta)
 
     def _reanudar_comportamiento(self, carta):
         """Genera nuevas interacciones automáticas tras finalizar una orden."""
