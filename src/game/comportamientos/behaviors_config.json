@@ -1,0 +1,33 @@
+{
+  "movements": {
+    "parado": {
+      "steps": []
+    },
+    "explorador": {
+      "steps": [
+        {"action": "mover_aleatorio"}
+      ]
+    },
+    "huir": {
+      "steps": [
+        {"condition": "enemigo_en_rango", "action": "mover_lejos"}
+      ]
+    }
+  },
+  "combats": {
+    "ignorar": {
+      "steps": []
+    },
+    "agresivo": {
+      "steps": [
+        {"condition": "enemigo_en_rango", "action": "atacar_objetivo"},
+        {"condition": "enemigo_visible", "action": "mover_hacia_enemigo"}
+      ]
+    },
+    "defensivo": {
+      "steps": [
+        {"condition": "ha_recibido_dano", "action": "atacar_objetivo"}
+      ]
+    }
+  }
+}
