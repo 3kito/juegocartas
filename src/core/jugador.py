@@ -3,7 +3,7 @@ Clase Jugador - Representa a un jugador en el auto-battler
 """
 
 from src.utils.helpers import log_evento, validar_rango
-from src.game.tablero.tablero_hexagonal import TableroHexagonal
+from src.game.board.hex_board import HexBoard
 from src.game.combate.configuracion_tiempo_real import configurador_tiempo_real
 
 
@@ -27,7 +27,7 @@ class Jugador:
         # Tablero hexagonal individual (NUEVO)
         if radio_tablero is None:
             radio_tablero = configurador_tiempo_real.mapas.radio_mapa_individual
-        self.tablero = TableroHexagonal(radio=radio_tablero)
+        self.tablero = HexBoard(radio=radio_tablero)
 
         # Inventario y cartas (ACTUALIZADO)
         self.cartas_banco = []  # Cartas guardadas (fuera del tablero)

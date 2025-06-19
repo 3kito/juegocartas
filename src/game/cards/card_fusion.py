@@ -6,7 +6,7 @@ from collections import defaultdict
 from src.utils.helpers import log_evento
 
 
-def aplicar_fusiones(tablero, banco: list) -> list[str]:
+def apply_fusions(tablero, banco: list) -> list[str]:
     """Aplica fusiones de cartas entre tablero y banco de forma controlada."""
     eventos = []
     iteraciones = 0

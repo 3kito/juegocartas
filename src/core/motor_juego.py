@@ -3,7 +3,7 @@ import random
 
 from src.core.jugador import Jugador
 from src.data.config.game_config import GameConfig
-from src.game.cartas.manager_cartas import manager_cartas
+from src.game.cards.card_manager import card_manager
 from src.game.combate.interacciones.gestor_interacciones import GestorInteracciones
 from src.game.combate.mapa.mapa_global import MapaGlobal
 from src.game.combate.motor.motor_tiempo_real import MotorTiempoReal
@@ -51,8 +51,8 @@ class MotorJuego:
         log_evento("🎮 Iniciando juego...")
 
         # AGREGAR: Cargar base de datos de cartas
-        if not manager_cartas.cartas_cargadas:
-            manager_cartas.cargar_cartas()
+        if not card_manager.cartas_cargadas:
+            card_manager.cargar_cartas()
 
         self._entregar_cartas_iniciales()
 
@@ -87,9 +87,9 @@ class MotorJuego:
             mapa.ubicar_jugador_en_zona(jugador, color)
 
         # Aplicar comportamientos asignados a las cartas
-        from src.game.cartas.carta_base import CartaBase
+        from src.game.cards.base_card import BaseCard
         for carta in mapa.tablero.celdas.values():
-            if isinstance(carta, CartaBase) and getattr(carta, "comportamiento_asignado", None):
+            if isinstance(carta, BaseCard) and getattr(carta, "comportamiento_asignado", None):
                 carta.modo_control = carta.comportamiento_asignado
                 log_evento(
                     f"🎯 {carta.nombre} inicia como '{carta.modo_control}'",
@@ -220,7 +220,7 @@ class MotorJuego:
         tier = random.choice([1, 2])
         log_evento(f"🎁 Entregando carta inicial de tier {tier} a todos los jugadores")
         for jugador in self.jugadores_vivos:
-            carta = manager_cartas.obtener_carta_aleatoria_tier(tier)
+            carta = card_manager.obtener_carta_aleatoria_tier(tier)
             if carta:
                 jugador.agregar_carta_al_banco(carta)
             else:

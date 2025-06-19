@@ -7,11 +7,11 @@ from typing import List, Dict, Optional, Any
 
 from src.data.config.game_config import GameConfig
 
-from src.game.cartas.carta_base import CartaBase
+from src.game.cards.base_card import BaseCard
 from src.utils.helpers import cargar_json, log_evento
 
 
-class ManagerCartas:
+class CardManager:
     """Gestiona la carga, creación y distribución de cartas con sistema de copias múltiples"""
 
     def __init__(self, config: GameConfig | None = None):
@@ -24,7 +24,7 @@ class ManagerCartas:
         # NUEVO: Sistema de copias múltiples (configurable)
 
         # NUEVO: Pool mejorado con instancias únicas
-        self.pool_instancias: Dict[int, List[CartaBase]] = {}  # carta_id: [instancia1, instancia2, ...]
+        self.pool_instancias: Dict[int, List[BaseCard]] = {}  # carta_id: [instancia1, instancia2, ...]
         self.pool_disponibles: Dict[int, int] = {}  # carta_id: cantidad_disponible
 
         # Pool global de cartas disponibles (LEGACY - mantenido por compatibilidad)
@@ -32,7 +32,7 @@ class ManagerCartas:
 
         # Configuración
         self.config = config or GameConfig()
-        log_evento(f"ManagerCartas inicializado (id={id(self)})", "DEBUG")
+        log_evento(f"CardManager inicializado (id={id(self)})", "DEBUG")
         self.copias_por_tier = {
             1: self.config.copias_por_tier.get(1, 8),
             2: self.config.copias_por_tier.get(2, 5),
@@ -149,7 +149,7 @@ class ManagerCartas:
                 carta_data_copia['numero_copia'] = copia
 
                 try:
-                    instancia = CartaBase(carta_data_copia)
+                    instancia = BaseCard(carta_data_copia)
                     instancia._en_uso = False  # Marcar como disponible
                     instancias.append(instancia)
                 except Exception as e:
@@ -169,7 +169,7 @@ class ManagerCartas:
             cantidad = self.copias_por_tier.get(tier, 1)
             self.pool_global[carta_id] = cantidad
 
-    def obtener_carta_por_id(self, carta_id: int) -> Optional[CartaBase]:
+    def obtener_carta_por_id(self, carta_id: int) -> Optional[BaseCard]:
         """Retorna una instancia nueva de carta por su ID (legacy method)"""
         if not self.cartas_cargadas:
             log_evento("⚠️ Las cartas no han sido cargadas aún", "WARNING")
@@ -181,13 +181,13 @@ class ManagerCartas:
 
         try:
             carta_data = self.datos_cartas[carta_id]
-            carta = CartaBase(carta_data)
+            carta = BaseCard(carta_data)
             return carta
         except Exception as e:
             log_evento(f"❌ Error creando carta {carta_id}: {e}", "ERROR")
             return None
 
-    def obtener_cartas_aleatorias_por_nivel(self, nivel_jugador: int, cantidad: int = 5) -> List[CartaBase]:
+    def obtener_cartas_aleatorias_por_nivel(self, nivel_jugador: int, cantidad: int = 5) -> List[BaseCard]:
         """Obtiene cartas aleatorias usando el sistema de instancias únicas"""
         if not self.cartas_cargadas:
             log_evento("⚠️ Cartas no cargadas, retornando lista vacía")
@@ -251,7 +251,7 @@ class ManagerCartas:
 
         return cartas_seleccionadas
 
-    def obtener_carta_aleatoria_tier(self, tier: int) -> Optional[CartaBase]:
+    def obtener_carta_aleatoria_tier(self, tier: int) -> Optional[BaseCard]:
         """Obtiene una carta aleatoria de un tier específico"""
         if not self.cartas_cargadas:
             return None
@@ -261,7 +261,7 @@ class ManagerCartas:
         carta_id = random.choice(ids)
         return self._tomar_instancia_del_pool(carta_id)
 
-    def _tomar_instancia_del_pool(self, carta_id: int) -> Optional[CartaBase]:
+    def _tomar_instancia_del_pool(self, carta_id: int) -> Optional[BaseCard]:
         """Toma una instancia específica del pool y la marca como usada"""
         if carta_id not in self.pool_instancias or self.pool_disponibles.get(carta_id, 0) <= 0:
             return None
@@ -280,7 +280,7 @@ class ManagerCartas:
 
         return None
 
-    def devolver_carta_al_pool(self, carta: CartaBase):
+    def devolver_carta_al_pool(self, carta: BaseCard):
         """Devuelve una carta al pool marcándola como disponible"""
         try:
             log_evento(
@@ -353,7 +353,7 @@ class ManagerCartas:
         """Retorna lista de IDs de cartas de un rol específico"""
         return self.cartas_por_rol.get(rol, []).copy()
 
-    def calcular_sinergias(self, cartas: List[CartaBase]) -> Dict[str, int]:
+    def calcular_sinergias(self, cartas: List[BaseCard]) -> Dict[str, int]:
         """Calcula las sinergias activas entre un grupo de cartas"""
         if not cartas:
             return {}
@@ -389,7 +389,7 @@ class ManagerCartas:
 
         return sinergias_activas
 
-    def aplicar_sinergias(self, cartas: List[CartaBase], sinergias: Dict[str, int]):
+    def aplicar_sinergias(self, cartas: List[BaseCard], sinergias: Dict[str, int]):
         """Aplica bonificaciones de sinergia a las cartas"""
         for carta in cartas:
             if not carta.esta_viva():
@@ -510,7 +510,7 @@ class ManagerCartas:
 
         return sorted(cartas_info, key=lambda x: (x['tier'], x['nombre']))
 
-    def obtener_cartas_en_uso(self) -> List[CartaBase]:
+    def obtener_cartas_en_uso(self) -> List[BaseCard]:
         """Retorna lista de todas las cartas actualmente en uso"""
         cartas_en_uso = []
         for instancias in self.pool_instancias.values():
@@ -543,12 +543,12 @@ class ManagerCartas:
             return True
 
     def __str__(self):
-        return f"ManagerCartas({len(self.datos_cartas)} tipos, {sum(len(inst) for inst in self.pool_instancias.values())} instancias)"
+        return f"CardManager({len(self.datos_cartas)} tipos, {sum(len(inst) for inst in self.pool_instancias.values())} instancias)"
 
     def __repr__(self):
         stats = self.obtener_estadisticas_pool()
-        return f"ManagerCartas(tipos={len(self.datos_cartas)}, instancias={stats['total_instancias_creadas']}, disponibles={stats['total_disponibles']})"
+        return f"CardManager(tipos={len(self.datos_cartas)}, instancias={stats['total_instancias_creadas']}, disponibles={stats['total_disponibles']})"
 
 
 # Instancia global del manager (singleton)
-manager_cartas = ManagerCartas()
+card_manager = CardManager()

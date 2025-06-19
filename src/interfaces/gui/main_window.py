@@ -890,8 +890,8 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
         if not sel or sel[0] >= len(self._panel_coords):
             return
         origen = self._panel_coords[sel[0]]
-        from src.game.tablero.coordenada import CoordenadaHexagonal
-        destino = CoordenadaHexagonal(q, r)
+        from src.game.board.hex_coordinate import HexCoordinate
+        destino = HexCoordinate(q, r)
         tablero = self.motor.mapa_global.tablero
         if tablero.mover_carta(origen, destino):
             self.actualizar_interfaz()

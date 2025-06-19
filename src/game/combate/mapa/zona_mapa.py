@@ -1,10 +1,10 @@
 from typing import Set, Optional
-from src.game.tablero.coordenada import CoordenadaHexagonal
+from src.game.board.hex_coordinate import HexCoordinate
 from src.utils.helpers import log_evento
 
 
 class ZonaMapa:
-    def __init__(self, color: str, coordenadas: set, pareja_id: int, centro: CoordenadaHexagonal):
+    def __init__(self, color: str, coordenadas: set, pareja_id: int, centro: HexCoordinate):
         self.color = color
         self.coordenadas = coordenadas
         self.pareja_id = pareja_id
@@ -17,15 +17,15 @@ class ZonaMapa:
                     return True
         return False
 
-    def obtener_coordenada_libre(self, tablero) -> Optional[CoordenadaHexagonal]:
+    def obtener_coordenada_libre(self, tablero) -> Optional[HexCoordinate]:
         for coord in self.coordenadas:
             if tablero.esta_vacia(coord):
                 return coord
         return None
 
-    def convertir_a_global(self, coord_local: CoordenadaHexagonal) -> CoordenadaHexagonal:
+    def convertir_a_global(self, coord_local: HexCoordinate) -> HexCoordinate:
         """Convierte una coordenada local (tablero individual) a coord. global en esta zona."""
-        coord_global = CoordenadaHexagonal(
+        coord_global = HexCoordinate(
             self.centro.q + coord_local.q, self.centro.r + coord_local.r
         )
         log_evento(

@@ -1,6 +1,6 @@
 from typing import Dict, Optional
-from src.game.tablero.coordenada import CoordenadaHexagonal
-from src.game.tablero.tablero_hexagonal import TableroHexagonal
+from src.game.board.hex_coordinate import HexCoordinate
+from src.game.board.hex_board import HexBoard
 from src.game.combate.mapa.zona_mapa import ZonaMapa
 from src.game.combate.mapa.generador_mapa import GeneradorMapa
 from src.game.combate.configuracion_tiempo_real import configurador_tiempo_real
@@ -16,8 +16,8 @@ class MapaGlobal:
         if cantidad_parejas is None:
             cantidad_parejas = configurador_tiempo_real.mapas.cantidad_parejas
 
-        self.tablero = TableroHexagonal(radio=radio)
-        self.celdas: Dict[CoordenadaHexagonal, Optional[object]] = self.tablero.celdas
+        self.tablero = HexBoard(radio=radio)
+        self.celdas: Dict[HexCoordinate, Optional[object]] = self.tablero.celdas
         self.zonas_rojas: list[ZonaMapa] = []
         self.zonas_azules: list[ZonaMapa] = []
         self._generar_zonas(celdas_por_zona, cantidad_parejas)
@@ -28,7 +28,7 @@ class MapaGlobal:
         self.zonas_rojas = generador.zonas_rojas
         self.zonas_azules = generador.zonas_azules
 
-    def obtener_color_en(self, coord: CoordenadaHexagonal) -> Optional[str]:
+    def obtener_color_en(self, coord: HexCoordinate) -> Optional[str]:
         for zona in self.zonas_rojas:
             if coord in zona.coordenadas:
                 return "rojo"

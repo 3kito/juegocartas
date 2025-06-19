@@ -3,8 +3,8 @@ TiendaIndividual - Sistema de tienda privada por jugador durante la fases de pre
 """
 
 from typing import List, Optional
-from src.game.cartas.manager_cartas import manager_cartas
-from src.game.cartas.fusion_cartas import aplicar_fusiones
+from src.game.cards.card_manager import card_manager
+from src.game.cards.card_fusion import apply_fusions
 from src.utils.helpers import log_evento
 
 
@@ -19,9 +19,9 @@ class TiendaIndividual:
         """Genera nuevas cartas según el nivel del jugador"""
         # Devolver cartas actuales al pool
         for carta in self.cartas_disponibles:
-            manager_cartas.devolver_carta_al_pool(carta)
+            card_manager.devolver_carta_al_pool(carta)
 
-        self.cartas_disponibles = manager_cartas.obtener_cartas_aleatorias_por_nivel(
+        self.cartas_disponibles = card_manager.obtener_cartas_aleatorias_por_nivel(
             nivel_jugador=self.jugador.nivel,
             cantidad=self.cantidad_cartas
         )
@@ -53,7 +53,7 @@ class TiendaIndividual:
         self.jugador.agregar_carta_al_banco(carta)
         self.cartas_disponibles.pop(indice)
 
-        eventos = aplicar_fusiones(self.jugador.tablero, self.jugador.cartas_banco)
+        eventos = apply_fusions(self.jugador.tablero, self.jugador.cartas_banco)
         for ev in eventos:
             log_evento(f"🔧 {ev}")
 
@@ -69,7 +69,7 @@ class TiendaIndividual:
 
         # Devolver al pool las cartas que no fueron compradas
         for carta in self.cartas_disponibles:
-            manager_cartas.devolver_carta_al_pool(carta)
+            card_manager.devolver_carta_al_pool(carta)
 
         # Vaciar la tienda
         self.cartas_disponibles.clear()
@@ -81,7 +81,7 @@ class TiendaIndividual:
     def rellenar_tienda(self):
         """Genera nuevas cartas para llenar los espacios faltantes"""
         faltantes = self.cantidad_cartas - len(self.cartas_disponibles)
-        nuevas = manager_cartas.obtener_cartas_aleatorias_por_nivel(
+        nuevas = card_manager.obtener_cartas_aleatorias_por_nivel(
             nivel_jugador=self.jugador.nivel,
             cantidad=faltantes
         )
