@@ -94,7 +94,7 @@ class InterfazMapaGlobal(ttk.Frame):
 
         for coord, carta in self.mapa.tablero.celdas.items():
             if carta is not None and getattr(carta, "duenio", None) == jugador_actual:
-                visibles.update(coord.obtener_area(carta.rango_vision))
+                visibles.update(carta.calcular_celdas_visibles(coord))
 
         return visibles
 

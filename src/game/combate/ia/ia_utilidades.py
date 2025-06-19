@@ -46,8 +46,7 @@ def calcular_vision_jugador(jugador, mapa_global):
     # Visibilidad desde cartas propias en el mapa global
     for coord, carta in mapa_global.tablero.celdas.items():
         if carta is not None and getattr(carta, "duenio", None) == jugador:
-            area = coord.obtener_area(carta.rango_vision)
-            celdas_visibles.update(area)
+            celdas_visibles.update(carta.calcular_celdas_visibles(coord))
 
     return celdas_visibles
 

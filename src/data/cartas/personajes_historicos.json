@@ -15,8 +15,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 3,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -34,7 +33,37 @@
         "trigger": "al_recibir_dano"
       }
     ],
-    "descripcion": "Físico y matemático inglés, padre de la mecánica clásica"
+    "descripcion": "Físico y matemático inglés, padre de la mecánica clásica",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 2,
@@ -52,8 +81,7 @@
       "rango_movimiento": 3,
       "rango_ataque": 2,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -71,7 +99,37 @@
         "trigger": "permanente"
       }
     ],
-    "descripcion": "Genio renacentista: artista, inventor, científico e ingeniero"
+    "descripcion": "Genio renacentista: artista, inventor, científico e ingeniero",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 3,
@@ -89,8 +147,7 @@
       "rango_movimiento": 1,
       "rango_ataque": 3,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -110,7 +167,37 @@
         "area": "adyacentes"
       }
     ],
-    "descripcion": "Física y química polaca, pionera en radioactividad"
+    "descripcion": "Física y química polaca, pionera en radioactividad",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 4,
@@ -128,8 +215,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 4,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -149,7 +235,37 @@
         "cantidad": 15
       }
     ],
-    "descripcion": "Inventor serbio-estadounidense, genio de la electricidad"
+    "descripcion": "Inventor serbio-estadounidense, genio de la electricidad",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 5,
@@ -167,8 +283,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 1,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -187,7 +302,37 @@
         "area": "adyacentes"
       }
     ],
-    "descripcion": "Emperador francés y genio militar que conquistó gran parte de Europa"
+    "descripcion": "Emperador francés y genio militar que conquistó gran parte de Europa",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 6,
@@ -205,8 +350,7 @@
       "rango_movimiento": 1,
       "rango_ataque": 1,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -224,7 +368,37 @@
         "trigger": "al_ser_atacado"
       }
     ],
-    "descripcion": "Líder independentista indio, promotor de la no violencia"
+    "descripcion": "Líder independentista indio, promotor de la no violencia",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 7,
@@ -242,8 +416,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 2,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -262,7 +435,37 @@
         "trigger": "enemigo_eliminado_por_aliado"
       }
     ],
-    "descripcion": "Última faraona de Egipto, famosa por su inteligencia y carisma"
+    "descripcion": "Última faraona de Egipto, famosa por su inteligencia y carisma",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 8,
@@ -280,8 +483,7 @@
       "rango_movimiento": 1,
       "rango_ataque": 2,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -299,7 +501,37 @@
         "terreno": "rio"
       }
     ],
-    "descripcion": "Matemático, físico e ingeniero griego de la antigüedad"
+    "descripcion": "Matemático, físico e ingeniero griego de la antigüedad",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 9,
@@ -317,8 +549,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 1,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -338,7 +569,37 @@
         "solo_una_vez": true
       }
     ],
-    "descripcion": "Heroína francesa que liberó Orleans durante la Guerra de los Cien Años"
+    "descripcion": "Heroína francesa que liberó Orleans durante la Guerra de los Cien Años",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 10,
@@ -356,8 +617,7 @@
       "rango_movimiento": 1,
       "rango_ataque": 2,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -377,7 +637,37 @@
         "multiplicador": 1.5
       }
     ],
-    "descripcion": "Filósofo griego, discípulo de Platón y maestro de Alejandro Magno"
+    "descripcion": "Filósofo griego, discípulo de Platón y maestro de Alejandro Magno",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 11,
@@ -395,8 +685,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 3,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -415,7 +704,37 @@
         "area": "adyacentes"
       }
     ],
-    "descripcion": "Astrónomo y físico italiano, pionero del método científico"
+    "descripcion": "Astrónomo y físico italiano, pionero del método científico",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 12,
@@ -433,8 +752,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 3,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -452,7 +770,37 @@
         "trigger": "permanente"
       }
     ],
-    "descripcion": "Considerada la primera programadora de la historia"
+    "descripcion": "Considerada la primera programadora de la historia",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 13,
@@ -470,8 +818,7 @@
       "rango_movimiento": 1,
       "rango_ataque": 2,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -490,7 +837,37 @@
         "trigger": "inicio_ronda"
       }
     ],
-    "descripcion": "Filósofo griego, fundador de la Academia de Atenas"
+    "descripcion": "Filósofo griego, fundador de la Academia de Atenas",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 14,
@@ -508,8 +885,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 2,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -528,7 +904,37 @@
         "trigger": "victoria_combate"
       }
     ],
-    "descripcion": "Autor del arte de la guerra, estratega militar chino"
+    "descripcion": "Autor del arte de la guerra, estratega militar chino",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 15,
@@ -546,8 +952,7 @@
       "rango_movimiento": 3,
       "rango_ataque": 1,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -565,7 +970,37 @@
         "trigger": "enemigo_eliminado"
       }
     ],
-    "descripcion": "Fundador del imperio Mongol, famoso conquistador"
+    "descripcion": "Fundador del imperio Mongol, famoso conquistador",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 16,
@@ -583,8 +1018,7 @@
       "rango_movimiento": 3,
       "rango_ataque": 1,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -603,7 +1037,37 @@
         "area": "cercanos"
       }
     ],
-    "descripcion": "Rey de Macedonia que creó uno de los mayores imperios"
+    "descripcion": "Rey de Macedonia que creó uno de los mayores imperios",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 17,
@@ -621,8 +1085,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 3,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -641,7 +1104,37 @@
         "trigger": "habilidad_usada"
       }
     ],
-    "descripcion": "Físico teórico alemán creador de la relatividad"
+    "descripcion": "Físico teórico alemán creador de la relatividad",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 18,
@@ -659,8 +1152,7 @@
       "rango_movimiento": 1,
       "rango_ataque": 2,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -679,7 +1171,37 @@
         "trigger": "al_recibir_dano"
       }
     ],
-    "descripcion": "Autor de Don Quijote, uno de los grandes escritores españoles"
+    "descripcion": "Autor de Don Quijote, uno de los grandes escritores españoles",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 19,
@@ -697,8 +1219,7 @@
       "rango_movimiento": 3,
       "rango_ataque": 1,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -716,7 +1237,37 @@
         "trigger": "permanente"
       }
     ],
-    "descripcion": "Famoso explorador veneciano y mercader"
+    "descripcion": "Famoso explorador veneciano y mercader",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   },
   {
     "id": 20,
@@ -734,8 +1285,7 @@
       "rango_movimiento": 2,
       "rango_ataque": 2,
       "velocidad_movimiento": 0.5,
-      "velocidad_ataque": 1.5,
-      "rango_vision": 1
+      "velocidad_ataque": 1.5
     },
     "habilidades": [
       {
@@ -754,6 +1304,36 @@
         "trigger": "permanente"
       }
     ],
-    "descripcion": "Científica clave en el descubrimiento de la estructura del ADN"
+    "descripcion": "Científica clave en el descubrimiento de la estructura del ADN",
+    "vision_pattern": [
+      {
+        "q": -1,
+        "r": 0
+      },
+      {
+        "q": -1,
+        "r": 1
+      },
+      {
+        "q": 0,
+        "r": -1
+      },
+      {
+        "q": 0,
+        "r": 0
+      },
+      {
+        "q": 0,
+        "r": 1
+      },
+      {
+        "q": 1,
+        "r": -1
+      },
+      {
+        "q": 1,
+        "r": 0
+      }
+    ]
   }
 ]
