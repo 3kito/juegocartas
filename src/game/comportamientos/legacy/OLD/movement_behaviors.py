@@ -1,5 +1,9 @@
 from enum import Enum
 from typing import Optional
+import random
+import time
+
+from src.game.combate.ia.ia_utilidades import _buscar_ruta
 
 from .behavior_component import BehaviorComponent
 from src.utils.helpers import log_evento
@@ -46,6 +50,8 @@ class MovementProcessor(BehaviorComponent):
             enemigos = info_entorno.get("enemigos_en_rango", [])
             aliados = info_entorno.get("aliados", [])
             origen = tablero.obtener_coordenada_de(carta)
+            if getattr(carta, "cooldown_fallo", 0) > time.time():
+                return None
 
             if self.tipo == MovementBehavior.HUIR and enemigos:
                 if origen and enemigos[0].coordenada:
@@ -59,9 +65,13 @@ class MovementProcessor(BehaviorComponent):
                     destino = aliado.coordenada
             elif self.tipo in {MovementBehavior.EXPLORADOR, MovementBehavior.CAZADOR}:
                 if origen:
-                    for vec in origen.vecinos():
-                        if tablero.esta_vacia(vec):
-                            destino = vec
+                    posibles = [c for c in tablero.coordenadas_libres() if c not in getattr(carta, "destinos_fallidos", set())]
+                    random.shuffle(posibles)
+                    for cand in posibles:
+                        if cand == origen:
+                            continue
+                        if _buscar_ruta(tablero, origen, cand):
+                            destino = cand
                             break
             elif self.tipo == MovementBehavior.MERODEADOR:
                 base = getattr(carta, "zona_base", None)

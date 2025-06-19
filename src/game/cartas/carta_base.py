@@ -146,6 +146,9 @@ class CartaBase:
 
         self.zona_base = None
         self.ultima_posicion_enemigo = None
+        # Seguimiento de destinos fallidos para evitar bucles
+        self.destinos_fallidos: set = set()
+        self.cooldown_fallo: float = 0.0
 
     @classmethod
     def crear_basica(cls, id, nombre="Carta", tier=1):

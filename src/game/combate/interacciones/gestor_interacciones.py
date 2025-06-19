@@ -165,7 +165,7 @@ class GestorInteracciones:
                 log_evento(
                     f"📌 Ejecutando pathfinding de {carta.nombre}", "DEBUG"
                 )
-                exito = mover_carta_con_pathfinding(
+                exito, razon = mover_carta_con_pathfinding(
                     carta,
                     destino,
                     self.tablero,
@@ -178,7 +178,10 @@ class GestorInteracciones:
                     "DEBUG",
                 )
                 if not exito:
-                    self._finalizar_orden(carta)
+                    carta.destinos_fallidos.add(destino)
+                    import time
+                    carta.cooldown_fallo = time.time() + 1.0
+                    self._cancelar_orden(carta)
 
         elif orden["tipo"] == "atacar":
             objetivo = orden.get("objetivo")
@@ -244,6 +247,18 @@ class GestorInteracciones:
         )
         carta.limpiar_orden_manual()
         self._reanudar_comportamiento(carta)
+
+    def _cancelar_orden(self, carta):
+        """Cancela la orden actual sin reanudar comportamiento inmediato."""
+        orden = getattr(carta, "orden_actual", None)
+        if not orden:
+            return
+        orden["progreso"] = "cancelada"
+        log_evento(
+            f"🚫 [Cancelar] Orden '{orden.get('tipo')}' para {carta.nombre}",
+            "DEBUG",
+        )
+        carta.limpiar_orden_manual()
 
     def _reanudar_comportamiento(self, carta):
         """Genera nuevas interacciones automáticas tras finalizar una orden."""
