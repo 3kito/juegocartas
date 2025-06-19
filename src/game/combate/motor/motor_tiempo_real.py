@@ -291,7 +291,7 @@ class MotorTiempoReal:
 
         log_evento(
             f"⚙️ Procesando {len(componentes)} componentes: {[id_comp for id_comp, _ in componentes]}",
-            "DEBUG",
+            "TRACE",
         )
 
         for id_componente, componente in componentes:

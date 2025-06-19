@@ -26,10 +26,14 @@ class MovementProcessor(BehaviorComponent):
             carta.tiene_orden_manual()
             or carta.tiene_orden_simulada()
             or carta.tiene_evento_activo("movimiento")
+            or (
+                carta.orden_actual is not None
+                and carta.orden_actual.get("progreso") == "ejecutando"
+            )
         ):
             log_evento(
                 f"⏳ {carta.nombre} omite nueva orden de movimiento (en curso)",
-                "DEBUG",
+                "TRACE",
             )
             return None
 
