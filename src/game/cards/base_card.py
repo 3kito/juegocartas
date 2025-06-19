@@ -8,47 +8,116 @@ from src.game.combate.interacciones.interaccion_modelo import TipoInteraccion, I
 from src.utils.helpers import log_evento
 
 class Ability:
-    """Representa una habilidad de carta"""
+    """Representa una habilidad de carta con lógica de uso avanzada"""
 
     def __init__(self, datos_habilidad: Dict[str, Any]):
-        self.nombre = datos_habilidad.get('nombre', 'Habilidad Sin Nombre')
-        self.tipo = datos_habilidad.get('tipo', 'pasiva')  # 'activa' o 'pasiva'
-        self.descripcion = datos_habilidad.get('descripcion', '')
+        self.nombre = datos_habilidad.get("nombre", "Habilidad Sin Nombre")
+        self.tipo = datos_habilidad.get("tipo", "pasiva")  # "activa" o "pasiva"
+        self.descripcion = datos_habilidad.get("descripcion", "")
 
-        # Propiedades para habilidades activas
-        self.costo_mana = datos_habilidad.get('costo_mana', 0)
-        self.cooldown = datos_habilidad.get('cooldown', 0)
+        # Propiedades generales
+        self.costo_mana = datos_habilidad.get("costo_mana", 0)
+        self.rango = datos_habilidad.get("rango", 1)
+        self.duracion = datos_habilidad.get("duracion", 0)
+
+        # Propiedades para cooldowns
+        self.cooldown = datos_habilidad.get("cooldown", 0)
+        self.cooldown_tipo = datos_habilidad.get("cooldown_tipo", "temporal")
+        self.max_usos = datos_habilidad.get("max_usos")
         self.cooldown_actual = 0
-        self.rango = datos_habilidad.get('rango', 1)
-        self.duracion = datos_habilidad.get('duracion', 0)
+        self.usos_restantes = self.max_usos
+        self.turno_ultimo_uso = -1
 
+        # Targeting y efectos
+        self.targeting = datos_habilidad.get("targeting", {"tipo": "single"})
+        self.efectos = datos_habilidad.get("efectos", [])
+        self.metadata = datos_habilidad.get("metadata", {})
+
+        # Categorización para IA
+        self.tipo_ia = datos_habilidad.get("tipo_ia", "combate")
 
         # Propiedades para habilidades pasivas
-        self.trigger = datos_habilidad.get('trigger', 'permanente')
-        self.area = datos_habilidad.get('area', 'single')
+        self.trigger = datos_habilidad.get("trigger", "permanente")
+        self.area = datos_habilidad.get("area", "single")
 
-        # Propiedades especiales
-        self.propiedades = {k: v for k, v in datos_habilidad.items()
-                            if k not in ['nombre', 'tipo', 'descripcion', 'costo_mana',
-                                         'cooldown', 'rango', 'duracion', 'trigger', 'area']}
+        # Guardar cualquier dato adicional
+        self.propiedades = {
+            k: v
+            for k, v in datos_habilidad.items()
+            if k
+            not in {
+                "nombre",
+                "tipo",
+                "descripcion",
+                "costo_mana",
+                "cooldown",
+                "cooldown_tipo",
+                "max_usos",
+                "rango",
+                "duracion",
+                "trigger",
+                "area",
+                "targeting",
+                "efectos",
+                "metadata",
+                "tipo_ia",
+            }
+        }
 
-    def can_use(self) -> bool:
+    # ------------------------------------------------------------------
+    # Gestión de cooldown y uso
+    def can_use(self, turno_actual: int | None = None) -> bool:
         """Verifica si la habilidad puede ser usada"""
-        if self.tipo == 'activa':
+        if self.tipo != "activa":
+            return False
+
+        if self.cooldown_tipo == "temporal":
             return self.cooldown_actual <= 0
-        return True
+        if self.cooldown_tipo == "por_usos":
+            return self.usos_restantes is None or self.usos_restantes > 0
+        if self.cooldown_tipo == "por_turno":
+            if turno_actual is None:
+                return True
+            return self.turno_ultimo_uso != turno_actual
 
+        return self.cooldown_actual <= 0
 
-    def use(self):
-        """Marca la habilidad como usada (inicia cooldown)"""
-        if self.tipo == 'activa':
+    def use(self, turno_actual: int | None = None):
+        """Marca la habilidad como usada y aplica cooldown"""
+        if self.tipo != "activa":
+            return
+
+        if self.cooldown_tipo == "temporal":
             self.cooldown_actual = self.cooldown
-            log_evento(f"Habilidad '{self.nombre}' usada (Cooldown: {self.cooldown})")
+        elif self.cooldown_tipo == "por_usos":
+            if self.usos_restantes is not None:
+                self.usos_restantes -= 1
+                if self.usos_restantes <= 0:
+                    self.cooldown_actual = self.cooldown
+        elif self.cooldown_tipo == "por_turno":
+            if turno_actual is not None:
+                self.turno_ultimo_uso = turno_actual
+        else:
+            self.cooldown_actual = self.cooldown
 
-    def reduce_cooldown(self):
-        """Reduce el cooldown en 1"""
+        log_evento(
+            f"Habilidad '{self.nombre}' usada (tipo cd: {self.cooldown_tipo})"
+        )
+
+    def reducir_cooldown(self):
+        """Reduce el cooldown activo en 1"""
         if self.cooldown_actual > 0:
             self.cooldown_actual -= 1
+            if (
+                self.cooldown_tipo == "por_usos"
+                and self.cooldown_actual <= 0
+                and self.max_usos is not None
+            ):
+                self.usos_restantes = self.max_usos
+
+    def nuevo_turno(self):
+        """Llamado al inicio del turno del propietario"""
+        self.reducir_cooldown()
 
     def __str__(self):
         return f"{self.nombre} ({self.tipo})"
@@ -111,12 +180,16 @@ class BaseCard:
         self.rango_ataque_actual = self.rango_ataque_base
 
         # Sistema de mana
-        self.mana_maxima = 100
-        self.mana_actual = 0
+        self.mana_maxima = stats_data.get('mana_maxima', 100)
+        self.mana_actual = stats_data.get('mana_inicial', 0)
+        self.regeneracion_mana = stats_data.get('regeneracion_mana', 10)
 
         # Habilidades
         self.habilidades: List[Ability] = []
         self._cargar_habilidades(datos_carta.get('habilidades', []))
+
+        # Contador de turnos para control de habilidades
+        self.turno_actual = 0
 
         # Estado de la carta
         self.viva = True
@@ -293,8 +366,10 @@ class BaseCard:
 
         if 0 <= indice_habilidad < len(self.habilidades):
             habilidad = self.habilidades[indice_habilidad]
-            return (habilidad.puede_usar() and
-                    self.mana_actual >= habilidad.costo_mana)
+            return (
+                habilidad.can_use(self.turno_actual)
+                and self.mana_actual >= habilidad.costo_mana
+            )
 
         return False
 
@@ -307,7 +382,7 @@ class BaseCard:
 
         # Gastar mana y usar habilidad
         self.gastar_mana(habilidad.costo_mana)
-        habilidad.usar()
+        habilidad.use(self.turno_actual)
 
         # Actualizar estadísticas
         self.stats_combate['habilidades_usadas'] += 1
@@ -396,12 +471,15 @@ class BaseCard:
         if not self.esta_viva():
             return
 
-        # Ganar mana por turno
-        self.ganar_mana(10)  # TODO: Hacer configurable
+        # Avanzar contador de turno
+        self.turno_actual += 1
 
-        # Reducir cooldowns
+        # Ganar mana por turno
+        self.ganar_mana(self.regeneracion_mana)
+
+        # Reducir cooldowns y reiniciar habilidades por turno
         for habilidad in self.habilidades:
-            habilidad.reducir_cooldown()
+            habilidad.nuevo_turno()
 
         # Permitir actuar
         self.puede_actuar = True
