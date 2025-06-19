@@ -85,7 +85,16 @@ class BaseCard:
         self.rango_ataque_base = stats_data.get('rango_ataque', 1)
         self.velocidad_movimiento = stats_data.get('velocidad_movimiento', 1.0)
         self.velocidad_ataque = stats_data.get('velocidad_ataque', 1.5)
-        self.rango_vision = stats_data.get('rango_vision', 2)
+        self.rango_vision = stats_data.get('rango_vision')
+
+        from src.game.board.hex_coordinate import HexCoordinate, patron_circular
+
+        vision_data = datos_carta.get('vision_pattern')
+        if vision_data:
+            self.vision_pattern = [HexCoordinate(v['q'], v['r']) for v in vision_data]
+        else:
+            radio = self.rango_vision if self.rango_vision is not None else 1
+            self.vision_pattern = patron_circular(radio)
 
         # Control interno de tiempos para acciones
         self.ultimo_ataque = 0.0
@@ -158,6 +167,19 @@ class BaseCard:
             "tier": tier,
             "stats": {"vida": 100, "dano_fisico": 10}
         })
+
+    def calcular_celdas_visibles(self, posicion_actual):
+        """Devuelve las celdas visibles aplicando el patrón de visión"""
+        if posicion_actual is None:
+            return []
+
+        celdas = []
+        for offset in self.vision_pattern:
+            destino = posicion_actual + offset
+            if self.tablero and not self.tablero.esta_dentro_del_tablero(destino):
+                continue
+            celdas.append(destino)
+        return celdas
 
     def _cargar_habilidades(self, habilidades_data: List[Dict[str, Any]]):
         """Carga las habilidades desde los datos JSON"""
