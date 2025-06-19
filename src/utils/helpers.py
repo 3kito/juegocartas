@@ -65,9 +65,9 @@ def log_evento(mensaje, nivel="INFO"):
     # Mostrar en consola
     print(mensaje_completo)
 
-    # Opcionalmente guardar en archivo de log
-    # (descomenta si quieres logs persistentes)
-    # _guardar_log(mensaje_completo)
+    # Guardar en archivo de log si se habilitó por variable de entorno
+    if os.environ.get("LOG_TO_FILE"):
+        _guardar_log(mensaje_completo)
 
 
 def _guardar_log(mensaje):
