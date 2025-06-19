@@ -124,7 +124,7 @@ class InterfazMapaGlobal(ttk.Frame):
 
     def _hex_round(self, q, r):
         """Redondea coordenadas axiales flotantes a enteras"""
-        from src.game.tablero.coordenada import CoordenadaHexagonal
+        from src.game.board.hex_coordinate import HexCoordinate
 
         x = q
         z = r
@@ -145,7 +145,7 @@ class InterfazMapaGlobal(ttk.Frame):
         else:
             rz = -rx - ry
 
-        return CoordenadaHexagonal(int(rx), int(rz))
+        return HexCoordinate(int(rx), int(rz))
 
     def pixel_to_hex(self, x, y):
         """Convierte coordenadas de pixel (con offset) a hexágono del mapa."""

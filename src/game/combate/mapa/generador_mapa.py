@@ -1,6 +1,6 @@
 from .zona_mapa import ZonaMapa
 from .utilidades_mapa import generar_hexagono_regular
-from src.game.tablero.coordenada import CoordenadaHexagonal
+from src.game.board.hex_coordinate import HexCoordinate
 from src.game.combate.configuracion_tiempo_real import configurador_tiempo_real
 import random
 
@@ -16,13 +16,13 @@ class GeneradorMapa:
         self.zonas_rojas = []
         self.zonas_azules = []
 
-    def _hex_cabe(self, centro: CoordenadaHexagonal) -> bool:
+    def _hex_cabe(self, centro: HexCoordinate) -> bool:
         for c in centro.obtener_area(self.radio_zona):
             if c not in self.tablero.celdas:
                 return False
         return True
 
-    def _centro_valido(self, centro: CoordenadaHexagonal, zonas_existentes: list[ZonaMapa], separacion: int) -> bool:
+    def _centro_valido(self, centro: HexCoordinate, zonas_existentes: list[ZonaMapa], separacion: int) -> bool:
         if not self._hex_cabe(centro):
             return False
         for zona in zonas_existentes:
@@ -30,7 +30,7 @@ class GeneradorMapa:
                 return False
         return True
 
-    def _obtener_centro_random(self, zonas_existentes: list[ZonaMapa], separacion: int) -> CoordenadaHexagonal | None:
+    def _obtener_centro_random(self, zonas_existentes: list[ZonaMapa], separacion: int) -> HexCoordinate | None:
         candidatos = list(self.tablero.celdas.keys())
         random.shuffle(candidatos)
         for cand in candidatos:

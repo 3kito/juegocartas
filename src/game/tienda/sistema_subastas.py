@@ -3,7 +3,7 @@ SistemaSubastas - Gestión de subastas públicas por ronda durante la fase de pr
 """
 
 from typing import List, Dict, Optional
-from src.game.cartas.manager_cartas import manager_cartas
+from src.game.cards.card_manager import card_manager
 from src.utils.helpers import log_evento
 from src.data.config.game_config import GameConfig
 
@@ -24,7 +24,7 @@ class SistemaSubastas:
         log_evento(f"🏛️ Generando subasta con {cantidad} cartas:")
 
         for i in range(cantidad):
-            cartas = manager_cartas.obtener_cartas_aleatorias_por_nivel(nivel_jugador=5, cantidad=1)
+            cartas = card_manager.obtener_cartas_aleatorias_por_nivel(nivel_jugador=5, cantidad=1)
             if cartas:
                 carta = cartas[0]
                 self.cartas_subastadas[carta.id] = {"carta": carta, "mejor_oferta": 0, "jugador": None}
@@ -65,7 +65,7 @@ class SistemaSubastas:
                 ganador.agregar_carta_al_banco(carta)
                 log_evento(f"🏆 {ganador.nombre} gana {carta.nombre} por {monto} oro")
             else:
-                manager_cartas.devolver_carta_al_pool(carta)
+                card_manager.devolver_carta_al_pool(carta)
                 log_evento(f"🔁 {carta.nombre} no fue vendida, vuelve al pool")
 
     def ver_estado_actual(self) -> List[str]:

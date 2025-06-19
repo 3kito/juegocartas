@@ -418,8 +418,8 @@ class MotorTiempoReal:
                 if getattr(carta, "vida_actual", 1) <= 0 or not getattr(carta, "viva", True):
                     mapa_global.tablero.quitar_carta(coord)
                     try:
-                        from src.game.cartas.manager_cartas import manager_cartas
-                        manager_cartas.devolver_carta_al_pool(carta)
+                        from src.game.cards.card_manager import card_manager
+                        card_manager.devolver_carta_al_pool(carta)
                     except Exception:
                         pass
                     try:

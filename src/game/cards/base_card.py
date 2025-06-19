@@ -7,7 +7,7 @@ from typing import List, Dict, Any
 from src.game.combate.interacciones.interaccion_modelo import TipoInteraccion, Interaccion
 from src.utils.helpers import log_evento
 
-class Habilidad:
+class Ability:
     """Representa una habilidad de carta"""
 
     def __init__(self, datos_habilidad: Dict[str, Any]):
@@ -32,20 +32,20 @@ class Habilidad:
                             if k not in ['nombre', 'tipo', 'descripcion', 'costo_mana',
                                          'cooldown', 'rango', 'duracion', 'trigger', 'area']}
 
-    def puede_usar(self) -> bool:
+    def can_use(self) -> bool:
         """Verifica si la habilidad puede ser usada"""
         if self.tipo == 'activa':
             return self.cooldown_actual <= 0
         return True
 
 
-    def usar(self):
+    def use(self):
         """Marca la habilidad como usada (inicia cooldown)"""
         if self.tipo == 'activa':
             self.cooldown_actual = self.cooldown
             log_evento(f"Habilidad '{self.nombre}' usada (Cooldown: {self.cooldown})")
 
-    def reducir_cooldown(self):
+    def reduce_cooldown(self):
         """Reduce el cooldown en 1"""
         if self.cooldown_actual > 0:
             self.cooldown_actual -= 1
@@ -57,7 +57,7 @@ class Habilidad:
         return f"Habilidad(nombre='{self.nombre}', tipo='{self.tipo}')"
 
 
-class CartaBase:
+class BaseCard:
     """Clase base para todas las cartas del juego"""
 
     def __init__(self, datos_carta: Dict[str, Any]):
@@ -106,7 +106,7 @@ class CartaBase:
         self.mana_actual = 0
 
         # Habilidades
-        self.habilidades: List[Habilidad] = []
+        self.habilidades: List[Ability] = []
         self._cargar_habilidades(datos_carta.get('habilidades', []))
 
         # Estado de la carta
@@ -162,7 +162,7 @@ class CartaBase:
     def _cargar_habilidades(self, habilidades_data: List[Dict[str, Any]]):
         """Carga las habilidades desde los datos JSON"""
         for hab_data in habilidades_data:
-            habilidad = Habilidad(hab_data)
+            habilidad = Ability(hab_data)
             self.habilidades.append(habilidad)
 
     # === MÉTODOS DE VIDA Y ESTADO ===
@@ -201,8 +201,8 @@ class CartaBase:
             if getattr(self, "tablero", None) and getattr(self, "coordenada", None):
                 try:
                     self.tablero.quitar_carta(self.coordenada)
-                    from src.game.cartas.manager_cartas import manager_cartas
-                    manager_cartas.devolver_carta_al_pool(self)
+                    from src.game.cards.card_manager import card_manager
+                    card_manager.devolver_carta_al_pool(self)
                 except Exception:
                     pass
 
@@ -490,7 +490,7 @@ class CartaBase:
         self.comportamiento_asignado = tipo
         log_evento(f"🔧 {self.nombre} configurado como '{tipo}'")
         return f"✅ Comportamiento '{tipo}' asignado"
-    def obtener_habilidades_disponibles(self) -> List[Habilidad]:
+    def obtener_habilidades_disponibles(self) -> List[Ability]:
         """Retorna lista de habilidades que pueden ser usadas"""
         return [hab for i, hab in enumerate(self.habilidades)
                 if self.puede_usar_habilidad(i)]
@@ -543,5 +543,5 @@ class CartaBase:
 
     def __repr__(self):
         """Representación para debugging"""
-        return f"CartaBase(id={self.id}, nombre='{self.nombre}', tier={self.tier})"
+        return f"BaseCard(id={self.id}, nombre='{self.nombre}', tier={self.tier})"
 

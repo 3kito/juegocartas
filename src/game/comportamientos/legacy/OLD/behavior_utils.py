@@ -1,9 +1,9 @@
 from typing import Optional
 
-from src.game.tablero.coordenada import CoordenadaHexagonal
+from src.game.board.hex_coordinate import HexCoordinate
 
 
-def calcular_zona_base(carta) -> Optional[CoordenadaHexagonal]:
+def calcular_zona_base(carta) -> Optional[HexCoordinate]:
     return getattr(carta.duenio, "zona_base", None)
 
 

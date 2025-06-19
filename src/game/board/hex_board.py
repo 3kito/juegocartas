@@ -1,13 +1,13 @@
 from typing import Dict, Optional, List
-from src.game.tablero.coordenada import CoordenadaHexagonal
+from src.game.board.hex_coordinate import HexCoordinate
 from src.utils.helpers import log_evento
 
 
-class TableroHexagonal:
+class HexBoard:
     def __init__(self, radio: int = 2):
         self.radio = radio
-        self.centro = CoordenadaHexagonal(0, 0)
-        self.celdas: Dict[CoordenadaHexagonal, Optional[any]] = {}
+        self.centro = HexCoordinate(0, 0)
+        self.celdas: Dict[HexCoordinate, Optional[any]] = {}
         self._generar_celdas()
 
     def _generar_celdas(self):
@@ -19,10 +19,10 @@ class TableroHexagonal:
 
         log_evento(f"Tablero generado: {len(self.celdas)} celdas")
 
-    def obtener_celda(self, coordenada: CoordenadaHexagonal):
+    def obtener_celda(self, coordenada: HexCoordinate):
         return self.celdas.get(coordenada)
 
-    def colocar_carta(self, coordenada: CoordenadaHexagonal, carta):
+    def colocar_carta(self, coordenada: HexCoordinate, carta):
         if coordenada in self.celdas:
             self.celdas[coordenada] = carta
             if hasattr(carta, "coordenada"):
@@ -48,7 +48,7 @@ class TableroHexagonal:
 
         return resultado
 
-    def obtener_coordenada_de(self, carta) -> Optional[CoordenadaHexagonal]:
+    def obtener_coordenada_de(self, carta) -> Optional[HexCoordinate]:
         for coord, obj in self.celdas.items():
             if obj is carta:
                 return coord
@@ -57,19 +57,19 @@ class TableroHexagonal:
     def obtener_cartas(self) -> List:
         return [carta for carta in self.celdas.values() if carta is not None]
 
-    def obtener_carta_en(self, coordenada: CoordenadaHexagonal):
+    def obtener_carta_en(self, coordenada: HexCoordinate):
         return self.celdas.get(coordenada)
 
-    def coordenadas_ocupadas(self) -> List[CoordenadaHexagonal]:
+    def coordenadas_ocupadas(self) -> List[HexCoordinate]:
         return [coord for coord, carta in self.celdas.items() if carta is not None]
 
-    def coordenadas_libres(self) -> List[CoordenadaHexagonal]:
+    def coordenadas_libres(self) -> List[HexCoordinate]:
         return [coord for coord, carta in self.celdas.items() if carta is None]
 
-    def esta_vacia(self, coordenada: CoordenadaHexagonal) -> bool:
+    def esta_vacia(self, coordenada: HexCoordinate) -> bool:
         return self.celdas.get(coordenada) is None
 
-    def esta_dentro_del_tablero(self, coord: CoordenadaHexagonal) -> bool:
+    def esta_dentro_del_tablero(self, coord: HexCoordinate) -> bool:
         return coord in self.celdas
 
     def limpiar_tablero(self):
@@ -96,11 +96,11 @@ class TableroHexagonal:
         """Cuenta el número total de cartas en el tablero"""
         return len([carta for carta in self.celdas.values() if carta is not None])
 
-    def obtener_coordenadas_disponibles(self) -> List[CoordenadaHexagonal]:
+    def obtener_coordenadas_disponibles(self) -> List[HexCoordinate]:
         """Alias para coordenadas_libres() - mantiene compatibilidad con jugador.py"""
         return self.coordenadas_libres()
 
-    def mover_carta(self, desde: CoordenadaHexagonal, hacia: CoordenadaHexagonal) -> bool:
+    def mover_carta(self, desde: HexCoordinate, hacia: HexCoordinate) -> bool:
         """Mueve una carta de una coordenada a otra"""
         # Verificar que ambas coordenadas existen en el tablero
         if desde not in self.celdas or hacia not in self.celdas:
@@ -150,7 +150,7 @@ class TableroHexagonal:
             'centro': str(self.centro)
         }
 
-    def intercambiar_cartas(self, coord1: CoordenadaHexagonal, coord2: CoordenadaHexagonal) -> bool:
+    def intercambiar_cartas(self, coord1: HexCoordinate, coord2: HexCoordinate) -> bool:
         """Intercambia las cartas en dos posiciones (bonus method)"""
         if coord1 not in self.celdas or coord2 not in self.celdas:
             log_evento(f"❌ Coordenadas inválidas para intercambiar: {coord1} ↔ {coord2}")
@@ -173,14 +173,14 @@ class TableroHexagonal:
                 resultado.append((coord, carta))
         return resultado
 
-    def buscar_carta(self, carta_objetivo) -> Optional[CoordenadaHexagonal]:
+    def buscar_carta(self, carta_objetivo) -> Optional[HexCoordinate]:
         """Busca una carta específica y retorna su coordenada"""
         for coord, carta in self.celdas.items():
             if carta is carta_objetivo:
                 return coord
         return None
 
-    def obtener_densidad_area(self, centro: CoordenadaHexagonal, radio: int) -> float:
+    def obtener_densidad_area(self, centro: HexCoordinate, radio: int) -> float:
         """Calcula la densidad de cartas en un área específica"""
         celdas_area = centro.obtener_area(radio)
         celdas_validas = [c for c in celdas_area if c in self.celdas]
