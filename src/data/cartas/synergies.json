@@ -1,28 +1,27 @@
 {
-  "cientificos": {
-    "2": {"dano_magico": 5},
-    "3": {"dano_magico": 10},
-    "5": {"dano_magico": 20}
-  },
   "militares": {
-    "2": {"dano_fisico": 5},
-    "3": {"dano_fisico": 10},
-    "5": {"defensa_fisica": 15}
+    "2": {"dano_fisico": 10, "defensa_fisica": 5},
+    "3": {"dano_fisico": 20, "defensa_fisica": 10},
+    "5": {"dano_fisico": 35, "defensa_fisica": 20}
+  },
+  "cientificos": {
+    "2": {"dano_magico": 15, "mana_maxima": 10},
+    "3": {"dano_magico": 25, "mana_maxima": 20},
+    "5": {"dano_magico": 40, "mana_maxima": 35}
+  },
+  "lideres": {
+    "2": {"vida": 15, "regeneracion_mana": 5},
+    "3": {"vida": 30, "regeneracion_mana": 10},
+    "5": {"vida": 50, "regeneracion_mana": 18}
   },
   "artistas": {
-    "2": {"velocidad_ataque": 0.2},
-    "3": {"velocidad_ataque": 0.5}
+    "2": {"velocidad_ataque": 0.2, "defensa_magica": 5},
+    "3": {"velocidad_ataque": 0.4, "defensa_magica": 15},
+    "5": {"velocidad_ataque": 0.8, "defensa_magica": 25}
   },
-  "filosofos": {
-    "2": {"mana_maxima": 10},
-    "3": {"mana_maxima": 20}
-  },
-  "gobernantes": {
-    "2": {"vida": 10},
-    "3": {"vida": 20}
-  },
-  "heroes": {
-    "2": {"defensa_magica": 5},
-    "3": {"defensa_magica": 10}
+  "exploradores": {
+    "2": {"rango_movimiento": 1, "velocidad_movimiento": 0.1},
+    "3": {"rango_movimiento": 2, "velocidad_movimiento": 0.2},
+    "5": {"rango_movimiento": 3, "velocidad_movimiento": 0.4}
   }
 }

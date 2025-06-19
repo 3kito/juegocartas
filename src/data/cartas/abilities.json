@@ -1,92 +1,214 @@
 [
   {
-    "nombre": "Ley de Gravedad",
+    "nombre": "Cruce de los Andes",
     "tipo": "activa",
-    "descripcion": "Atrae a todos los enemigos 1 casilla hacia Newton",
+    "descripcion": "Mueve todos los aliados 2 casillas hacia el objetivo",
+    "costo_mana": 60,
+    "cooldown": 5,
+    "rango": 3,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Libertador",
+    "tipo": "activa",
+    "descripcion": "Otorga +15 ataque y +10 defensa a todos los aliados",
+    "costo_mana": 50,
+    "cooldown": 4,
+    "rango": "global",
+    "duracion": 3,
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Tiro Certero",
+    "tipo": "activa",
+    "descripcion": "Disparo con daño crítico que ignora defensa",
     "costo_mana": 40,
     "cooldown": 3,
-    "rango": 2
+    "rango": 8,
+    "tipo_ia": "combate"
   },
   {
-    "nombre": "Manzana de la Sabiduría",
-    "tipo": "pasiva",
-    "descripcion": "Al recibir daño, gana +5 daño mágico permanentemente",
-    "trigger": "al_recibir_dano"
-  },
-  {
-    "nombre": "Invención Genial",
+    "nombre": "Camuflaje",
     "tipo": "activa",
-    "descripcion": "Despliega una máquina de guerra que ataca automáticamente",
+    "descripcion": "Se vuelve invisible e inmune por 2 turnos",
+    "costo_mana": 50,
+    "cooldown": 6,
+    "duracion": 2,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Arte de la Guerra",
+    "tipo": "activa",
+    "descripcion": "Todos los aliados infligen +25% daño este turno",
     "costo_mana": 60,
     "cooldown": 4,
-    "duracion": 3
+    "rango": "global",
+    "duracion": 1,
+    "tipo_ia": "combate"
   },
   {
-    "nombre": "Polímata",
-    "tipo": "pasiva",
-    "descripcion": "Gana sinergias adicionales con TODAS las categorías",
-    "trigger": "permanente"
+    "nombre": "Estrategia Maestra",
+    "tipo": "activa",
+    "descripcion": "Revela posición de todos los enemigos",
+    "costo_mana": 30,
+    "cooldown": 3,
+    "rango": "global",
+    "tipo_ia": "utilidad"
   },
   {
     "nombre": "Radiación",
     "tipo": "activa",
     "descripcion": "Inflige daño continuo en área durante 3 turnos",
-    "costo_mana": 45,
-    "cooldown": 3,
+    "costo_mana": 50,
+    "cooldown": 4,
     "rango": 2,
-    "area": "circular"
+    "area": "circular",
+    "duracion": 3,
+    "tipo_ia": "combate"
   },
   {
     "nombre": "Elemento Radiactivo",
     "tipo": "pasiva",
-    "descripcion": "Los enemigos adyacentes pierden -2 vida por turno",
+    "descripcion": "Enemigos adyacentes pierden -3 vida por turno",
     "trigger": "cada_turno",
-    "area": "adyacentes"
+    "area": "adyacentes",
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Máquina de Guerra",
+    "tipo": "activa",
+    "descripcion": "Despliega una máquina aliada temporal",
+    "costo_mana": 80,
+    "cooldown": 6,
+    "duracion": 4,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Genialidad",
+    "tipo": "activa",
+    "descripcion": "Copia la última habilidad enemiga usada",
+    "costo_mana": 60,
+    "cooldown": 5,
+    "rango": 3,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Nuevo Mundo",
+    "tipo": "activa",
+    "descripcion": "Teletransporta a una posición visible",
+    "costo_mana": 40,
+    "cooldown": 4,
+    "rango": 6,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Navegante",
+    "tipo": "pasiva",
+    "descripcion": "Gana +2 oro por cada casilla recorrida",
+    "trigger": "movimiento",
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Visión Divina",
+    "tipo": "activa",
+    "descripcion": "Aliados se vuelven inmunes a efectos negativos",
+    "costo_mana": 60,
+    "cooldown": 6,
+    "rango": "global",
+    "duracion": 3,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Mártir Sagrada",
+    "tipo": "pasiva",
+    "descripcion": "Al morir, resucita con 1 vida e inmunidad 2 turnos",
+    "trigger": "al_morir",
+    "solo_una_vez": true,
+    "tipo_ia": "utilidad"
   },
   {
     "nombre": "Descarga Eléctrica",
     "tipo": "activa",
-    "descripcion": "Rayo que salta entre enemigos, daño reducido por salto",
-    "costo_mana": 35,
-    "cooldown": 2,
-    "max_saltos": 3
+    "descripcion": "Rayo que salta entre enemigos",
+    "costo_mana": 45,
+    "cooldown": 3,
+    "max_saltos": 3,
+    "tipo_ia": "combate"
   },
   {
     "nombre": "Bobina Tesla",
+    "tipo": "activa",
+    "descripcion": "Crea campo eléctrico que daña enemigos",
+    "costo_mana": 60,
+    "cooldown": 5,
+    "rango": 2,
+    "duracion": 4,
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Ruta de la Seda",
+    "tipo": "activa",
+    "descripcion": "Gana oro por cada casilla recorrida este turno",
+    "costo_mana": 25,
+    "cooldown": 3,
+    "duracion": 1,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Comerciante Experto",
     "tipo": "pasiva",
-    "descripcion": "Genera un arma eléctrica al recolectar 15 experiencia",
-    "trigger": "mision",
-    "objetivo": "experiencia_recolectada",
-    "cantidad": 15
+    "descripcion": "Reduce costos de tienda en 1 oro",
+    "trigger": "permanente",
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Dos Espadas",
+    "tipo": "activa",
+    "descripcion": "Realiza dos ataques consecutivos",
+    "costo_mana": 35,
+    "cooldown": 3,
+    "rango": 1,
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Maestría del Combate",
+    "tipo": "pasiva",
+    "descripcion": "+5 daño permanente por enemigo eliminado",
+    "trigger": "enemigo_eliminado",
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Ley de Gravedad",
+    "tipo": "activa",
+    "descripcion": "Atrae a todos los enemigos 1 casilla hacia Newton",
+    "costo_mana": 40,
+    "cooldown": 3,
+    "rango": 2,
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Manzana de la Sabiduría",
+    "tipo": "pasiva",
+    "descripcion": "Al recibir daño, gana +5 daño mágico permanentemente",
+    "trigger": "al_recibir_dano",
+    "tipo_ia": "combate"
   },
   {
     "nombre": "Carga Imperial",
     "tipo": "activa",
-    "descripcion": "Todos los aliados avanzan 1 casilla y atacan simultáneamente",
+    "descripcion": "Todos los aliados avanzan 1 casilla y atacan",
     "costo_mana": 50,
     "cooldown": 4,
-    "rango": "global"
+    "rango": "global",
+    "tipo_ia": "combate"
   },
   {
     "nombre": "Estratega Supremo",
     "tipo": "pasiva",
-    "descripcion": "Otorga +10 daño y +5 defensa a todos los aliados adyacentes",
+    "descripcion": "Otorga +10 daño y +5 defensa a aliados adyacentes",
     "trigger": "permanente",
-    "area": "adyacentes"
-  },
-  {
-    "nombre": "Resistencia Pacífica",
-    "tipo": "activa",
-    "descripcion": "Se vuelve inmune al daño y cura a todos los aliados",
-    "costo_mana": 60,
-    "cooldown": 6,
-    "duracion": 2
-  },
-  {
-    "nombre": "No Violencia",
-    "tipo": "pasiva",
-    "descripcion": "Los enemigos que lo atacan reciben el mismo daño que infligen",
-    "trigger": "al_ser_atacado"
+    "area": "adyacentes",
+    "tipo_ia": "combate"
   },
   {
     "nombre": "Seducción Real",
@@ -95,58 +217,136 @@
     "costo_mana": 50,
     "cooldown": 4,
     "rango": 2,
-    "duracion": 2
+    "duracion": 2,
+    "tipo_ia": "combate"
   },
   {
     "nombre": "Faraona Divina",
     "tipo": "pasiva",
     "descripcion": "Gana +1 oro por cada enemigo eliminado por aliados",
-    "trigger": "enemigo_eliminado_por_aliado"
+    "trigger": "enemigo_eliminado_por_aliado",
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Resistencia Pacífica",
+    "tipo": "activa",
+    "descripcion": "Se vuelve inmune al daño y cura a todos los aliados",
+    "costo_mana": 60,
+    "cooldown": 6,
+    "duracion": 2,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "No Violencia",
+    "tipo": "pasiva",
+    "descripcion": "Los enemigos que lo atacan reciben el mismo daño",
+    "trigger": "al_ser_atacado",
+    "tipo_ia": "combate"
   },
   {
     "nombre": "Eureka",
     "tipo": "activa",
     "descripcion": "Gana oro igual al daño infligido en su próximo ataque",
     "costo_mana": 25,
-    "cooldown": 3
+    "cooldown": 3,
+    "tipo_ia": "utilidad"
   },
   {
     "nombre": "Principio de Arquímedes",
     "tipo": "pasiva",
-    "descripcion": "En terreno río, gana +10 defensa y +1 rango de ataque",
+    "descripcion": "En terreno río, gana +10 defensa y +1 rango ataque",
     "trigger": "terreno_especifico",
-    "terreno": "rio"
+    "terreno": "rio",
+    "tipo_ia": "utilidad"
   },
   {
-    "nombre": "Visión Divina",
+    "nombre": "Noche Estrellada",
     "tipo": "activa",
-    "descripcion": "Todos los aliados se vuelven inmunes a efectos negativos",
-    "costo_mana": 50,
+    "descripcion": "Crea área de inspiración que aumenta stats aliados",
+    "costo_mana": 45,
+    "cooldown": 5,
+    "rango": 2,
+    "duracion": 3,
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Genio Incomprendido",
+    "tipo": "pasiva",
+    "descripcion": "Gana +3 daño mágico por cada aliado que muere",
+    "trigger": "aliado_muere",
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Cruce de los Alpes",
+    "tipo": "activa",
+    "descripcion": "Mueve todos los aliados a través de obstáculos",
+    "costo_mana": 55,
     "cooldown": 5,
     "rango": "global",
-    "duracion": 3
+    "tipo_ia": "utilidad"
   },
   {
-    "nombre": "Mártir Sagrada",
-    "tipo": "pasiva",
-    "descripcion": "Al morir, resucita con 1 vida e inmunidad durante 2 turnos",
-    "trigger": "al_morir",
-    "solo_una_vez": true
-  },
-  {
-    "nombre": "Lógica Aristotélica",
+    "nombre": "Táctica de Pinza",
     "tipo": "activa",
-    "descripcion": "Anula la próxima habilidad enemiga y copia su efecto",
+    "descripcion": "Los aliados rodean automáticamente al enemigo objetivo",
     "costo_mana": 40,
     "cooldown": 4,
-    "rango": 3
+    "rango": 3,
+    "tipo_ia": "combate"
   },
   {
-    "nombre": "Maestro de Alejandro",
+    "nombre": "Relatividad",
+    "tipo": "activa",
+    "descripcion": "Ralentiza el tiempo para todos los enemigos",
+    "costo_mana": 70,
+    "cooldown": 6,
+    "rango": "global",
+    "duracion": 3,
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "E=mc²",
+    "tipo": "activa",
+    "descripcion": "Convierte masa en energía explosiva",
+    "costo_mana": 80,
+    "cooldown": 7,
+    "rango": 3,
+    "area": "circular",
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Tiro Perfecto",
+    "tipo": "activa",
+    "descripcion": "Disparo que nunca falla y rebota entre enemigos",
+    "costo_mana": 35,
+    "cooldown": 3,
+    "rango": 6,
+    "max_rebotes": 2,
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Robar a los Ricos",
     "tipo": "pasiva",
-    "descripcion": "Los aliados adyacentes ganan experiencia +50% más rápido",
-    "trigger": "experiencia_ganada",
+    "descripcion": "Gana oro al eliminar enemigos de tier alto",
+    "trigger": "enemigo_eliminado",
+    "tipo_ia": "utilidad"
+  },
+  {
+    "nombre": "Rebelión de Esclavos",
+    "tipo": "activa",
+    "descripcion": "Convierte enemigos débiles en aliados temporales",
+    "costo_mana": 50,
+    "cooldown": 5,
+    "rango": 2,
+    "duracion": 3,
+    "tipo_ia": "combate"
+  },
+  {
+    "nombre": "Gladiador Invencible",
+    "tipo": "pasiva",
+    "descripcion": "Gana +2 defensa por cada enemigo adyacente",
+    "trigger": "permanente",
     "area": "adyacentes",
-    "multiplicador": 1.5
+    "tipo_ia": "combate"
   }
 ]
