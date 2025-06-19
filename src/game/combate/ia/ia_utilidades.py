@@ -154,7 +154,7 @@ def mover_carta_con_pathfinding(
         # Anteriormente el primer paso se ejecutaba sin demora, lo que hacía
         # que en comportamientos automáticos la velocidad configurada no se
         # respetara visualmente.
-        evt_id = motor.programar_evento(_ejecutar, delay)
+        evt_id = motor.programar_evento(_ejecutar, delay if indice > 0 else 0.0)
         try:
             carta.registrar_evento_activo("movimiento", evt_id)
         except AttributeError:
