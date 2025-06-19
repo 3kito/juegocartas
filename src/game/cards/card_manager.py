@@ -41,7 +41,19 @@ class CardManager:
         self.max_cartas_por_tier = self.config.max_cartas_por_tier
         self.cartas_activas = set(self.config.cartas_activas)
 
+        # Archivos de datos
         self.archivo_cartas = "src/data/cartas/personajes_historicos.json"
+        self.archivo_cartas_modular = "src/data/cartas/personajes_modular.json"
+        self.archivo_abilities = "src/data/cartas/abilities.json"
+        self.archivo_vision_patterns = "src/data/cartas/vision_patterns.json"
+        self.archivo_role_stats = "src/data/cartas/role_stats.json"
+        self.archivo_synergies = "src/data/cartas/synergies.json"
+
+        # Cachés de datos adicionales
+        self.abilities: Dict[str, Dict[str, Any]] = {}
+        self.vision_patterns: Dict[str, List[Dict[str, int]]] = {}
+        self.role_stats: Dict[str, Dict[str, Any]] = {}
+        self.synergies: Dict[str, Any] = {}
 
         # Estado de carga
         self.cartas_cargadas = False
@@ -49,7 +61,16 @@ class CardManager:
     def cargar_cartas(self) -> bool:
         """Carga todas las cartas desde el archivo JSON y crea instancias múltiples"""
         try:
-            datos = cargar_json(self.archivo_cartas)
+            # Cargar bibliotecas auxiliares
+            self.vision_patterns = cargar_json(self.archivo_vision_patterns) or {}
+            abil_list = cargar_json(self.archivo_abilities) or []
+            self.abilities = {a.get("nombre"): a for a in abil_list}
+            self.role_stats = cargar_json(self.archivo_role_stats) or {}
+            self.synergies = cargar_json(self.archivo_synergies) or {}
+
+            datos = cargar_json(self.archivo_cartas) or []
+            datos_mod = cargar_json(self.archivo_cartas_modular) or []
+            datos.extend(datos_mod)
             if not datos:
                 log_evento("❌ No se pudieron cargar los datos de cartas", "ERROR")
                 return False
@@ -82,6 +103,32 @@ class CardManager:
                 if carta_id is None:
                     log_evento(f"⚠️ Carta sin ID encontrada: {carta_data.get('nombre', 'Sin nombre')}", "WARNING")
                     continue
+
+                # Resolver stats heredados por rol
+                rol = carta_data.get('rol')
+                base_stats = self.role_stats.get(rol, {})
+                stats = carta_data.get('stats', {})
+                nuevos_stats = base_stats.copy()
+                nuevos_stats.update(stats)
+                carta_data['stats'] = nuevos_stats
+
+                # Resolver habilidades referenciadas por nombre
+                habs = []
+                for h in carta_data.get('habilidades', []):
+                    if isinstance(h, str):
+                        if h in self.abilities:
+                            habs.append(self.abilities[h])
+                        else:
+                            habs.append({'nombre': h})
+                    else:
+                        habs.append(h)
+                carta_data['habilidades'] = habs
+
+                # Resolver patron de vision
+                if 'vision' in carta_data and isinstance(carta_data['vision'], str):
+                    patron = self.vision_patterns.get(carta_data['vision'])
+                    if patron:
+                        carta_data['vision_pattern'] = patron
 
                 # Guardar datos de la carta
                 self.datos_cartas[carta_id] = carta_data
