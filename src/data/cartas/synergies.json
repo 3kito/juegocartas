@@ -1,0 +1,28 @@
+{
+  "cientificos": {
+    "2": {"dano_magico": 5},
+    "3": {"dano_magico": 10},
+    "5": {"dano_magico": 20}
+  },
+  "militares": {
+    "2": {"dano_fisico": 5},
+    "3": {"dano_fisico": 10},
+    "5": {"defensa_fisica": 15}
+  },
+  "artistas": {
+    "2": {"velocidad_ataque": 0.2},
+    "3": {"velocidad_ataque": 0.5}
+  },
+  "filosofos": {
+    "2": {"mana_maxima": 10},
+    "3": {"mana_maxima": 20}
+  },
+  "gobernantes": {
+    "2": {"vida": 10},
+    "3": {"vida": 20}
+  },
+  "heroes": {
+    "2": {"defensa_magica": 5},
+    "3": {"defensa_magica": 10}
+  }
+}
