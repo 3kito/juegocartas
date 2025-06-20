@@ -3,7 +3,7 @@ from typing import Optional
 
 from .behavior_component import BehaviorComponent
 from src.game.combate.interacciones.interaccion_modelo import Interaccion, TipoInteraccion
-from src.game.combate.ia.ia_utilidades import atacar_si_en_rango, mover_carta_con_pathfinding
+from src.game.combate.ia.ia_utilidades import atacar_si_en_rango
 
 
 class CombatBehavior(Enum):
@@ -39,7 +39,16 @@ class CombatProcessor(BehaviorComponent):
             if enemigos:
                 objetivo = enemigos[0]
                 if not atacar_si_en_rango(carta, objetivo):
-                    mover_carta_con_pathfinding(carta, objetivo.coordenada, tablero)
+                    if not (
+                        carta.tiene_orden_manual()
+                        or carta.tiene_orden_simulada()
+                        or carta.tiene_evento_activo("movimiento")
+                        or (
+                            carta.orden_actual is not None
+                            and carta.orden_actual.get("progreso") == "ejecutando"
+                        )
+                    ):
+                        carta.marcar_orden_simulada("mover", objetivo.coordenada)
                 resultado.append(
                     Interaccion(
                         fuente_id=carta.id,

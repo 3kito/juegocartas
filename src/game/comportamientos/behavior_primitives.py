@@ -19,27 +19,44 @@ def condicion_ha_recibido_dano(carta, tablero, info_entorno):
 
 # Actions return list of Interaccion or None
 
+def _puede_generar_movimiento(carta) -> bool:
+    """Evita encadenar movimientos ignorando la velocidad."""
+    return not (
+        carta.tiene_orden_manual()
+        or carta.tiene_orden_simulada()
+        or carta.tiene_evento_activo("movimiento")
+        or (
+            carta.orden_actual is not None
+            and carta.orden_actual.get("progreso") == "ejecutando"
+        )
+    )
+
+
 def accion_mover_aleatorio(carta, tablero, info_entorno):
+    if not _puede_generar_movimiento(carta):
+        return []
     libres = tablero.coordenadas_libres()
     if not libres or carta.coordenada is None:
         return []
     destino = random.choice(libres)
-    from src.game.combate.ia.ia_utilidades import mover_carta_con_pathfinding
-    mover_carta_con_pathfinding(carta, destino, tablero)
+    carta.marcar_orden_simulada("mover", destino)
     return []
 
 
 def accion_mover_hacia_enemigo(carta, tablero, info_entorno):
+    if not _puede_generar_movimiento(carta):
+        return []
     enemigos = info_entorno.get("enemigos_en_rango") or info_entorno.get("enemigos", [])
     if not enemigos:
         return []
     objetivo = enemigos[0]
-    from src.game.combate.ia.ia_utilidades import mover_carta_con_pathfinding
-    mover_carta_con_pathfinding(carta, objetivo.coordenada, tablero)
+    carta.marcar_orden_simulada("mover", objetivo.coordenada)
     return []
 
 
 def accion_mover_lejos(carta, tablero, info_entorno):
+    if not _puede_generar_movimiento(carta):
+        return []
     enemigos = info_entorno.get("enemigos_en_rango")
     if not enemigos or carta.coordenada is None:
         return []
@@ -47,8 +64,7 @@ def accion_mover_lejos(carta, tablero, info_entorno):
     opciones = [c for c in origen.vecinos() if tablero.esta_dentro_del_tablero(c) and tablero.esta_vacia(c)]
     opciones.sort(key=lambda c: c.distancia(enemigos[0].coordenada), reverse=True)
     if opciones:
-        from src.game.combate.ia.ia_utilidades import mover_carta_con_pathfinding
-        mover_carta_con_pathfinding(carta, opciones[0], tablero)
+        carta.marcar_orden_simulada("mover", opciones[0])
     return []
 
 
