@@ -168,8 +168,14 @@ visibles del jugador actual, evitando revelar unidades ocultas.
 
 ## Limpieza de estructura (2024)
 
-Tras la última reorganización se eliminaron módulos de compatibilidad que solo
-reexportaban código heredado y varios *placeholders* de la interfaz. El código
-legacy se movió a `src/game/comportamientos/legacy/OLD/` para referencia
-histórica. El número de archivos del repositorio se redujo de 119 a 109.
+Tras la última reorganización se eliminaron módulos de compatibilidad que solo reexportaban código heredado y varios *placeholders* de la interfaz. El código legacy se integró en `src/game/comportamientos/legacy/` y se eliminó la carpeta OLD. El número de archivos del repositorio se redujo de 119 a 109.
 
+
+## API para integraci\u00f3n con Godot
+
+Se incluye un servidor basado en **FastAPI** en `godot_integration/api/server.py`. Por defecto expone dos endpoints:
+
+- `/status` retorna un estado simple.
+- `/board` devuelve el estado actual del tablero en formato JSON.
+
+Esto facilita que un cliente en Godot pueda consultar el estado del juego o mostrar el tablero.
