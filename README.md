@@ -173,9 +173,12 @@ Tras la última reorganización se eliminaron módulos de compatibilidad que sol
 
 ## API para integraci\u00f3n con Godot
 
-Se incluye un servidor basado en **FastAPI** en `godot_integration/api/server.py`. Por defecto expone dos endpoints:
+Se incluye un servidor basado en **FastAPI** en `godot_integration/api/server.py`. Los principales endpoints son:
 
 - `/status` retorna un estado simple.
-- `/board` devuelve el estado actual del tablero en formato JSON.
+- `/board` devuelve el estado actual del tablero.
+- `/board/place` coloca una carta en una coordenada.
+- `/board/move` mueve una carta entre coordenadas.
+- `/board/remove` elimina la carta en una coordenada.
 
-Esto facilita que un cliente en Godot pueda consultar el estado del juego o mostrar el tablero.
+Adicionalmente se expone un WebSocket en `/ws` que notifica cambios en el tablero en tiempo real. Esto facilita que un cliente en Godot pueda consultar el estado del juego y recibir actualizaciones inmediatas.
