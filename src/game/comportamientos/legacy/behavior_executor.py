@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import List, Any
 
-from ...behavior_adapter import BehaviorExecutor as _Adapter
+from ..behavior_adapter import BehaviorExecutor as _Adapter
 
 _executor = _Adapter()
 
