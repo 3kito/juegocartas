@@ -1,27 +1,66 @@
-{
-  "militares": {
-    "2": {"dano_fisico": 10, "defensa_fisica": 5},
-    "3": {"dano_fisico": 20, "defensa_fisica": 10},
-    "5": {"dano_fisico": 35, "defensa_fisica": 20}
+[
+  {
+    "id": "militares",
+    "nombre": "Militares",
+    "tipo": "categoria",
+    "valor": "militares",
+    "niveles": {
+      "2": {"dano_fisico": 10, "defensa_fisica": 5},
+      "3": {"dano_fisico": 20, "defensa_fisica": 10},
+      "5": {"dano_fisico": 35, "defensa_fisica": 20}
+    }
   },
-  "cientificos": {
-    "2": {"dano_magico": 15, "mana_maxima": 10},
-    "3": {"dano_magico": 25, "mana_maxima": 20},
-    "5": {"dano_magico": 40, "mana_maxima": 35}
+  {
+    "id": "cientificos",
+    "nombre": "Cientificos",
+    "tipo": "categoria",
+    "valor": "cientificos",
+    "niveles": {
+      "2": {"dano_magico": 15, "mana_maxima": 10},
+      "3": {"dano_magico": 25, "mana_maxima": 20},
+      "5": {"dano_magico": 40, "mana_maxima": 35}
+    }
   },
-  "lideres": {
-    "2": {"vida": 15, "regeneracion_mana": 5},
-    "3": {"vida": 30, "regeneracion_mana": 10},
-    "5": {"vida": 50, "regeneracion_mana": 18}
+  {
+    "id": "lideres",
+    "nombre": "Lideres",
+    "tipo": "categoria",
+    "valor": "lideres",
+    "niveles": {
+      "2": {"vida": 15, "regeneracion_mana": 5},
+      "3": {"vida": 30, "regeneracion_mana": 10},
+      "5": {"vida": 50, "regeneracion_mana": 18}
+    }
   },
-  "artistas": {
-    "2": {"velocidad_ataque": 0.2, "defensa_magica": 5},
-    "3": {"velocidad_ataque": 0.4, "defensa_magica": 15},
-    "5": {"velocidad_ataque": 0.8, "defensa_magica": 25}
+  {
+    "id": "artistas",
+    "nombre": "Artistas",
+    "tipo": "categoria",
+    "valor": "artistas",
+    "niveles": {
+      "2": {"velocidad_ataque": 0.2, "defensa_magica": 5},
+      "3": {"velocidad_ataque": 0.4, "defensa_magica": 15},
+      "5": {"velocidad_ataque": 0.8, "defensa_magica": 25}
+    }
   },
-  "exploradores": {
-    "2": {"rango_movimiento": 1, "velocidad_movimiento": 0.1},
-    "3": {"rango_movimiento": 2, "velocidad_movimiento": 0.2},
-    "5": {"rango_movimiento": 3, "velocidad_movimiento": 0.4}
+  {
+    "id": "exploradores",
+    "nombre": "Exploradores",
+    "tipo": "categoria",
+    "valor": "exploradores",
+    "niveles": {
+      "2": {"rango_movimiento": 1, "velocidad_movimiento": 0.1},
+      "3": {"rango_movimiento": 2, "velocidad_movimiento": 0.2},
+      "5": {"rango_movimiento": 3, "velocidad_movimiento": 0.4}
+    }
+  },
+  {
+    "id": "mil_cient",
+    "nombre": "Estrategas Mixtos",
+    "condiciones": [
+      {"campo": "categoria", "valor": "militares", "min": 2},
+      {"campo": "categoria", "valor": "cientificos", "min": 1}
+    ],
+    "efectos": {"dano_magico": 15}
   }
-}
+]

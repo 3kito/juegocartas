@@ -4,8 +4,12 @@ Clase base para todas las cartas del juego
 
 from typing import List, Dict, Any
 
-from src.game.combate.interacciones.interaccion_modelo import TipoInteraccion, Interaccion
+from src.game.combate.interacciones.interaccion_modelo import (
+    TipoInteraccion,
+    Interaccion,
+)
 from src.utils.helpers import log_evento
+from .ability_engine import ability_engine
 
 class Ability:
     """Representa una habilidad de carta con lógica de uso avanzada"""
@@ -384,6 +388,12 @@ class BaseCard:
         self.gastar_mana(habilidad.costo_mana)
         habilidad.use(self.turno_actual)
 
+        # Ejecutar efectos mediante el motor de habilidades
+        try:
+            ability_engine.ejecutar_habilidad(self, habilidad)
+        except Exception as e:
+            log_evento(f"❌ Error ejecutando habilidad {habilidad.nombre}: {e}", "ERROR")
+
         # Actualizar estadísticas
         self.stats_combate['habilidades_usadas'] += 1
 
@@ -594,6 +604,19 @@ class BaseCard:
         """Retorna lista de habilidades que pueden ser usadas"""
         return [hab for i, hab in enumerate(self.habilidades)
                 if self.puede_usar_habilidad(i)]
+
+    def obtener_habilidades_detalladas(self) -> List[Dict[str, Any]]:
+        """Retorna información detallada de las habilidades para UI"""
+        detalles = []
+        for i, hab in enumerate(self.habilidades):
+            detalles.append({
+                "indice": i,
+                "nombre": hab.nombre,
+                "descripcion": hab.descripcion,
+                "costo_mana": hab.costo_mana,
+                "cooldown_restante": hab.cooldown_actual,
+            })
+        return detalles
 
     def obtener_info_basica(self) -> Dict[str, Any]:
         """Retorna información básica de la carta"""

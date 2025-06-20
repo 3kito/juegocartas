@@ -400,75 +400,96 @@ class CardManager:
         """Retorna lista de IDs de cartas de un rol específico"""
         return self.cartas_por_rol.get(rol, []).copy()
 
-    def calcular_sinergias(self, cartas: List[BaseCard]) -> Dict[str, int]:
-        """Calcula las sinergias activas entre un grupo de cartas"""
-        if not cartas:
+    def calcular_sinergias(self, cartas: List[BaseCard]) -> Dict[str, Any]:
+        """Calcula sinergias de forma dinámica desde la configuración"""
+        if not cartas or not self.synergies:
             return {}
 
-        # Contar por categoría
-        categorias = {}
-        roles = {}
-
-        for carta in cartas:
-            if carta.esta_viva():
-                # Contar categorías
-                if carta.categoria not in categorias:
-                    categorias[carta.categoria] = 0
-                categorias[carta.categoria] += 1
-
-                # Contar roles
-                if carta.rol not in roles:
-                    roles[carta.rol] = 0
-                roles[carta.rol] += 1
-
-        # Calcular bonificaciones de sinergia
-        sinergias_activas = {}
-
-        # Sinergias por categoría (necesita al menos 2 de la misma)
-        for categoria, cantidad in categorias.items():
-            if cantidad >= 2:
-                sinergias_activas[f"categoria_{categoria}"] = cantidad
-
-        # Sinergias por rol (necesita al menos 2 del mismo)
-        for rol, cantidad in roles.items():
-            if cantidad >= 2:
-                sinergias_activas[f"rol_{rol}"] = cantidad
-
-        return sinergias_activas
-
-    def aplicar_sinergias(self, cartas: List[BaseCard], sinergias: Dict[str, int]):
-        """Aplica bonificaciones de sinergia a las cartas"""
+        conteos = {"categoria": {}, "rol": {}}
         for carta in cartas:
             if not carta.esta_viva():
                 continue
+            conteos["categoria"][carta.categoria] = (
+                conteos["categoria"].get(carta.categoria, 0) + 1
+            )
+            conteos["rol"][carta.rol] = conteos["rol"].get(carta.rol, 0) + 1
 
-            # Bonificaciones por categoría
-            clave_categoria = f"categoria_{carta.categoria}"
-            if clave_categoria in sinergias:
-                nivel_sinergia = sinergias[clave_categoria]
-                # Bonificación: +5 vida y +2 daño por cada carta adicional de la categoría
-                bonus_vida = (nivel_sinergia - 1) * 5
-                bonus_dano = (nivel_sinergia - 1) * 2
+        activas: Dict[str, Any] = {}
+        for cfg in self.synergies:
+            if "tipo" in cfg and "valor" in cfg:
+                campo = cfg["tipo"]
+                valor = cfg["valor"]
+                count = conteos.get(campo, {}).get(valor, 0)
+                nivel = 0
+                efectos = None
+                for lvl in sorted(int(n) for n in cfg.get("niveles", {}).keys()):
+                    if count >= lvl:
+                        nivel = lvl
+                        efectos = cfg["niveles"][str(lvl)]
+                if nivel > 0 and efectos:
+                    activas[cfg["id"]] = {
+                        "nombre": cfg.get("nombre", cfg["id"]),
+                        "nivel": nivel,
+                        "efectos": efectos,
+                        "config": cfg,
+                    }
+                continue
 
-                carta.vida_maxima += bonus_vida
-                carta.vida_actual += bonus_vida
-                carta.aplicar_modificador_stat('dano_fisico', bonus_dano, False)
-                carta.aplicar_modificador_stat('dano_magico', bonus_dano, False)
+            condiciones = cfg.get("condiciones", [])
+            cumple = True
+            for cond in condiciones:
+                campo = cond.get("campo")
+                valor = cond.get("valor")
+                minimo = cond.get("min", 1)
+                if conteos.get(campo, {}).get(valor, 0) < minimo:
+                    cumple = False
+                    break
+            if not cumple:
+                continue
+            efectos = cfg.get("efectos")
+            if efectos:
+                activas[cfg["id"]] = {
+                    "nombre": cfg.get("nombre", cfg["id"]),
+                    "nivel": 1,
+                    "efectos": efectos,
+                    "config": cfg,
+                }
 
-            # Bonificaciones por rol
-            clave_rol = f"rol_{carta.rol}"
-            if clave_rol in sinergias:
-                nivel_sinergia = sinergias[clave_rol]
-                # Bonificación específica por rol
-                if carta.rol == 'lider':
-                    # Líderes dan bonificación a todos los aliados
-                    bonus_defensa = nivel_sinergia * 3
-                    carta.aplicar_modificador_stat('defensa_fisica', bonus_defensa, False)
-                elif carta.rol == 'especialista':
-                    # Especialistas ganan daño mágico extra
-                    bonus_magico = nivel_sinergia * 8
-                    carta.aplicar_modificador_stat('dano_magico', bonus_magico, False)
-                # ... más bonificaciones por rol según necesidad
+        return activas
+
+    def aplicar_sinergias(self, cartas: List[BaseCard], sinergias: Dict[str, Any]):
+        """Aplica bonificaciones de sinergia a las cartas"""
+        if not sinergias:
+            return
+        for carta in cartas:
+            if not carta.esta_viva():
+                continue
+            for data in sinergias.values():
+                cfg = data.get("config", {})
+                efectos = data.get("efectos", {})
+                objetivo = cfg.get("aplicar_a")
+
+                aplicar = False
+                if not objetivo or objetivo == "todos":
+                    aplicar = True
+                elif objetivo == "categoria" and cfg.get("valor") == carta.categoria:
+                    aplicar = True
+                elif objetivo and objetivo.startswith("categoria:") and carta.categoria == objetivo.split(":", 1)[1]:
+                    aplicar = True
+                elif objetivo == "rol" and cfg.get("valor") == carta.rol:
+                    aplicar = True
+                elif objetivo and objetivo.startswith("rol:") and carta.rol == objetivo.split(":", 1)[1]:
+                    aplicar = True
+
+                if not aplicar:
+                    continue
+
+                for stat, val in efectos.items():
+                    if stat == "vida":
+                        carta.vida_maxima += val
+                        carta.vida_actual += val
+                    else:
+                        carta.aplicar_modificador_stat(stat, val, False)
 
     def obtener_estadisticas_pool(self) -> Dict[str, Any]:
         """Retorna estadísticas completas del pool de instancias"""

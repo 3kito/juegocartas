@@ -11,6 +11,7 @@ from src.core.motor_juego import MotorJuego
 from src.game.combate.mapa.mapa_global import MapaGlobal
 from src.utils.hex_utils import pixel_to_hex, hex_to_pixel
 from src.interfaces.gui.game_panels.testing_panel import PanelTesteo
+from src.game.cards.card_manager import card_manager
 
 
 class AutoBattlerGUI:
@@ -128,6 +129,12 @@ class AutoBattlerGUI:
         self.lbl_costo_experiencia.pack(side="left", padx=5)
         self.lbl_exp_disponible = ttk.Label(exp_frame, text="Exp: 0")
         self.lbl_exp_disponible.pack(side="left", padx=5)
+
+        # Panel de sinergias activas
+        self.frame_sinergias = ttk.LabelFrame(frame, text="Sinergias Activas")
+        self.frame_sinergias.pack(fill="x", padx=10, pady=5)
+        self.lbl_sinergias = ttk.Label(self.frame_sinergias, text="Ninguna")
+        self.lbl_sinergias.pack(anchor="w")
 
         # (Botón mover al tablero eliminado)
 
@@ -318,6 +325,10 @@ class AutoBattlerGUI:
             command=self.cambiar_comportamiento_carta,
         )
         self.btn_orden_comportamiento.pack(fill="x")
+        self.btn_usar_habilidad = ttk.Button(
+            orden_btns, text="Usar Habilidad", command=self.usar_habilidad
+        )
+        self.btn_usar_habilidad.pack(fill="x")
         self.lbl_estado_orden = ttk.Label(self.frame_ordenes, text="Estado: -")
         self.lbl_estado_orden.pack(anchor="w")
         self.lbl_turno_req = ttk.Label(self.frame_ordenes, text="Turno requerido: -")
@@ -497,6 +508,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.listbox_banco.insert(tk.END, texto)
             if hasattr(self, 'listbox_banco_tablero'):
                 self.listbox_banco_tablero.insert(tk.END, texto)
+        self.actualizar_sinergias()
 
     def actualizar_tienda(self):
         self.listbox_tienda.delete(0, tk.END)
@@ -550,6 +562,26 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             self.listbox_tablero.insert(
                 tk.END, f"{carta.nombre} en {coord} (M:{mov} C:{com})"
             )
+
+        self.actualizar_sinergias()
+
+    def actualizar_sinergias(self):
+        if not hasattr(self, "lbl_sinergias"):
+            return
+        if not self.jugador_actual:
+            self.lbl_sinergias.config(text="Ninguna")
+            return
+        cartas_banco = [c for c in self.jugador_actual.cartas_banco if c is not None]
+        cartas_tablero = [c for _, c in self.jugador_actual.obtener_cartas_tablero() if c is not None]
+        todas = cartas_banco + cartas_tablero
+        sinergias = card_manager.calcular_sinergias(todas)
+        textos = []
+        for datos in sinergias.values():
+            nombre = datos.get("nombre", "-")
+            nivel = datos.get("nivel", 1)
+            efectos = ", ".join(f"{k}: {v:+}" for k, v in datos.get("efectos", {}).items())
+            textos.append(f"🔥 {nombre} ({nivel}): {efectos}")
+        self.lbl_sinergias.config(text="\n".join(textos) if textos else "Ninguna")
 
     def actualizar_panel_enfrentamiento(self):
         if not hasattr(self, "listbox_enfrentamiento"):
@@ -1057,6 +1089,9 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                 f"Mov: {getattr(carta, 'movement_behavior', '-') }\n"
                 f"Comb: {getattr(carta, 'combat_behavior', '-') }"
             )
+            if carta.habilidades:
+                for h in carta.obtener_habilidades_detalladas():
+                    info += f"\n- {h['nombre']} (CD {h['cooldown_restante']})"
             self.lbl_estado_carta.config(text=info)
         else:
             self.lbl_estado_carta.config(text="Selecciona una carta")
@@ -1076,6 +1111,9 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                 )
             else:
                 info += "\nComportamiento: desconocido"
+            if carta.habilidades:
+                for h in carta.obtener_habilidades_detalladas():
+                    info += f"\n- {h['nombre']} (CD {h['cooldown_restante']})"
             self.lbl_estado_carta_global.config(text=info)
         else:
             self.lbl_estado_carta_global.config(text="Selecciona una carta")
@@ -1095,6 +1133,7 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
                 getattr(self, "btn_orden_mover", None),
                 getattr(self, "btn_orden_atacar", None),
                 getattr(self, "btn_orden_comportamiento", None),
+                getattr(self, "btn_usar_habilidad", None),
             ):
                 if btn:
                     btn.state(["disabled"])
@@ -1114,12 +1153,47 @@ Tokens Reroll: {self.jugador_actual.tokens_reroll}"""
             getattr(self, "btn_orden_mover", None),
             getattr(self, "btn_orden_atacar", None),
             getattr(self, "btn_orden_comportamiento", None),
+            getattr(self, "btn_usar_habilidad", None),
         ):
             if btn:
                 btn.state(["!disabled"])
 
     def usar_habilidad(self):
-        messagebox.showinfo("Info", "Uso de habilidades en desarrollo")
+        carta = self.carta_seleccionada
+        if not carta:
+            return
+        habilidades = carta.obtener_habilidades_detalladas()
+        if not habilidades:
+            messagebox.showinfo("Info", "La carta no tiene habilidades")
+            return
+
+        top = tk.Toplevel(self.root)
+        top.title("Usar Habilidad")
+        lb = tk.Listbox(top)
+        for h in habilidades:
+            estado = ""
+            if h["cooldown_restante"] > 0:
+                estado = f" (CD {h['cooldown_restante']})"
+            elif carta.mana_actual < h["costo_mana"]:
+                estado = " (Sin mana)"
+            lb.insert(tk.END, f"[{h['indice']}] {h['nombre']}{estado}")
+        lb.pack(fill="both", expand=True)
+
+        def confirmar():
+            sel = lb.curselection()
+            if not sel:
+                return
+            idx = sel[0]
+            if carta.usar_habilidad(idx):
+                messagebox.showinfo("Habilidad", f"{carta.habilidades[idx].nombre} usada")
+            else:
+                messagebox.showerror("Habilidad", "No se pudo usar la habilidad")
+            top.destroy()
+            self.actualizar_estado_carta_global(carta)
+            self.actualizar_panel_ordenes()
+
+        ttk.Button(top, text="OK", command=confirmar).pack()
+        self.root.wait_window(top)
 
     def mostrar_panel_testeo(self):
         if not self.panel_testeo:
