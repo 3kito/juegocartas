@@ -28,3 +28,42 @@ def test_ability_por_turno():
     abil.use(1)
     assert not abil.can_use(1)
     assert abil.can_use(2)
+
+
+def test_pasiva_cada_turno():
+    from src.game.cards.base_card import BaseCard
+    datos = {
+        'id': 1,
+        'stats': {'vida': 10},
+        'habilidades': [
+            {
+                'nombre': 'Regeneracion',
+                'tipo': 'pasiva',
+                'trigger': 'cada_turno',
+                'efectos': [{'tipo': 'curacion', 'cantidad': 2}]
+            }
+        ]
+    }
+    carta = BaseCard(datos)
+    carta.vida_actual = 5
+    carta.iniciar_turno()
+    assert carta.vida_actual == 7
+
+
+def test_pasiva_al_recibir_dano():
+    from src.game.cards.base_card import BaseCard
+    datos = {
+        'id': 2,
+        'stats': {'vida': 10, 'mana_maxima': 20, 'mana_inicial': 0},
+        'habilidades': [
+            {
+                'nombre': 'Concentracion',
+                'tipo': 'pasiva',
+                'trigger': 'al_recibir_dano',
+                'efectos': [{'tipo': 'mana', 'cantidad': 5}]
+            }
+        ]
+    }
+    carta = BaseCard(datos)
+    carta.recibir_dano(3)
+    assert carta.mana_actual == 5

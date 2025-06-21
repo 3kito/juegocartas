@@ -263,6 +263,11 @@ class BaseCard:
         for hab_data in habilidades_data:
             habilidad = Ability(hab_data)
             self.habilidades.append(habilidad)
+            if habilidad.tipo == "pasiva" and habilidad.trigger == "permanente":
+                try:
+                    ability_engine.ejecutar_habilidad(self, habilidad)
+                except Exception:
+                    pass
 
     # === MÉTODOS DE VIDA Y ESTADO ===
 
@@ -290,6 +295,11 @@ class BaseCard:
         dano_aplicado = min(dano_reducido, self.vida_actual)
         self.vida_actual -= dano_aplicado
 
+        try:
+            ability_engine.procesar_trigger(self, "al_recibir_dano")
+        except Exception:
+            pass
+
         # Verificar muerte
         if self.vida_actual <= 0:
             self.vida_actual = 0
@@ -308,6 +318,11 @@ class BaseCard:
             try:
                 from src.utils.eventos import disparar
                 disparar("carta_muerta", carta=self)
+            except Exception:
+                pass
+
+            try:
+                ability_engine.procesar_trigger(self, "al_morir")
             except Exception:
                 pass
 
@@ -490,6 +505,12 @@ class BaseCard:
         # Reducir cooldowns y reiniciar habilidades por turno
         for habilidad in self.habilidades:
             habilidad.nuevo_turno()
+
+        # Triggers pasivos de inicio de turno
+        try:
+            ability_engine.procesar_trigger(self, "cada_turno")
+        except Exception:
+            pass
 
         # Permitir actuar
         self.puede_actuar = True
