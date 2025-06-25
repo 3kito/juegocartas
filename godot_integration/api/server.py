@@ -9,12 +9,14 @@ from src.game.cards.base_card import BaseCard
 from src.core.jugador import Jugador
 from src.core.motor_juego import MotorJuego
 from .websocket_manager import WebSocketManager
+from .room_manager import RoomManager
 
 app = FastAPI(title="AutoBattler API")
 
 board = HexBoard(radio=2)
 
 manager = WebSocketManager()
+room_manager = RoomManager()
 players: Dict[int, Jugador] = {}
 motor: MotorJuego | None = None
 
@@ -31,6 +33,7 @@ class CardPayload(BaseModel):
 
 
 clients: Set[WebSocket] = set()
+room_clients: Dict[str, Set[WebSocket]] = {}
 
 
 def serialize_player_board(jugador: Jugador) -> List[dict]:
@@ -68,23 +71,26 @@ def get_game_state(player_id: int) -> dict:
     }
 
 
-def serialize_board() -> List[dict]:
+def serialize_board(target_board: HexBoard | None = None) -> List[dict]:
+    tb = target_board or board
     return [
         {"q": coord.q, "r": coord.r, "card": getattr(card, "nombre", None)}
-        for coord, card in board.obtener_cartas_con_posiciones()
+        for coord, card in tb.obtener_cartas_con_posiciones()
     ]
 
 
-async def notify_board():
+async def notify_board(target_board: HexBoard | None = None, room_clients: Set[WebSocket] | None = None):
+    tb = target_board or board
     payload = {
-        "cartas": serialize_board(),
-        "stats": board.obtener_estadisticas(),
+        "cartas": serialize_board(tb),
+        "stats": tb.obtener_estadisticas(),
     }
-    for ws in list(clients):
+    sockets = room_clients or clients
+    for ws in list(sockets):
         try:
             await ws.send_json(payload)
         except WebSocketDisconnect:
-            clients.discard(ws)
+            sockets.discard(ws)
 
 
 async def handle_player_action(player: Jugador, data: dict):
@@ -101,6 +107,22 @@ async def handle_player_action(player: Jugador, data: dict):
 @app.get("/status")
 def get_status():
     return {"status": "ok"}
+
+
+class RoomJoin(BaseModel):
+    player_id: int
+
+
+@app.post("/rooms/{room_id}/join")
+def join_room(room_id: str, payload: RoomJoin):
+    room = room_manager.join_room(room_id, payload.player_id)
+    return {"room_id": room_id, "players": room.players}
+
+
+@app.get("/rooms/{room_id}/board")
+def get_room_board(room_id: str):
+    room = room_manager.get_room(room_id)
+    return {"cartas": serialize_board(room.board), "stats": room.board.obtener_estadisticas()}
 
 
 @app.get("/board")
@@ -143,6 +165,58 @@ async def remove_card(coord: Coordinate, background_tasks: BackgroundTasks):
     return {"status": "removed"}
 
 
+@app.post("/rooms/{room_id}/board/place")
+async def place_card_room(
+    room_id: str,
+    payload: CardPayload,
+    coord: Coordinate,
+    background_tasks: BackgroundTasks,
+):
+    room = room_manager.get_room(room_id)
+    card = BaseCard(
+        {
+            "id": payload.id or 0,
+            "nombre": payload.nombre,
+            "stats": payload.stats,
+        }
+    )
+    room.board.colocar_carta(HexCoordinate(coord.q, coord.r), card)
+    background_tasks.add_task(
+        notify_board(room.board, room_clients.get(room_id, set()))
+    )
+    return {"status": "placed"}
+
+
+@app.post("/rooms/{room_id}/board/move")
+async def move_card_room(
+    room_id: str,
+    origin: Coordinate,
+    dest: Coordinate,
+    background_tasks: BackgroundTasks,
+):
+    room = room_manager.get_room(room_id)
+    room.board.mover_carta(
+        HexCoordinate(origin.q, origin.r),
+        HexCoordinate(dest.q, dest.r),
+    )
+    background_tasks.add_task(
+        notify_board(room.board, room_clients.get(room_id, set()))
+    )
+    return {"status": "moved"}
+
+
+@app.post("/rooms/{room_id}/board/remove")
+async def remove_card_room(
+    room_id: str, coord: Coordinate, background_tasks: BackgroundTasks
+):
+    room = room_manager.get_room(room_id)
+    room.board.quitar_carta(HexCoordinate(coord.q, coord.r))
+    background_tasks.add_task(
+        notify_board(room.board, room_clients.get(room_id, set()))
+    )
+    return {"status": "removed"}
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
@@ -158,6 +232,25 @@ async def websocket_endpoint(ws: WebSocket):
             await ws.receive_text()
     except WebSocketDisconnect:
         clients.discard(ws)
+
+
+@app.websocket("/ws/rooms/{room_id}")
+async def websocket_room(ws: WebSocket, room_id: str):
+    room = room_manager.get_room(room_id)
+    group = room_clients.setdefault(room_id, set())
+    await ws.accept()
+    group.add(ws)
+    try:
+        await ws.send_json(
+            {
+                "cartas": serialize_board(room.board),
+                "stats": room.board.obtener_estadisticas(),
+            }
+        )
+        while True:
+            await ws.receive_text()
+    except WebSocketDisconnect:
+        group.discard(ws)
 
 
 @app.websocket("/ws/game/{player_id}")
