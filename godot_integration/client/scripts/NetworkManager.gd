@@ -1,7 +1,8 @@
 extends Node
 class_name NetworkManager
 
-var url: String = "ws://localhost:8000/ws"
+var room_id: String = "default"
+var url: String = "ws://localhost:8000/ws/rooms/%s" % room_id
 var _client := WebSocketClient.new()
 var _reconnect_timer: Timer
 var game_data: GameData
@@ -24,6 +25,7 @@ func _process(delta: float) -> void:
         _client.poll()
 
 func _connect() -> void:
+    url = "ws://localhost:8000/ws/rooms/%s" % room_id
     print("[Network] Connecting to %s" % url)
     var err = _client.connect_to_url(url)
     if err != OK:
@@ -71,4 +73,10 @@ func _schedule_reconnect() -> void:
     _reconnect_timer.start()
 
 func _on_reconnect_timeout() -> void:
+    _connect()
+
+func set_room(id: String) -> void:
+    room_id = id
+    if _client.get_connection_status() != WebSocketClient.CONNECTION_DISCONNECTED:
+        _client.disconnect_from_host()
     _connect()
